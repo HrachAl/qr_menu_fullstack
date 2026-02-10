@@ -1,0 +1,378 @@
+[
+  {
+    "item_id": 1,
+    "description": "A creamy paradise! Twins Creamy Smashburger with grilled crispy Angus beef, cheese, iceberg lettuce, onion rings, pickles, and our famous relish-mayo sauce.",
+    "short_description": "Creamy Angus beef smashburger",
+    "price": "2500",
+    "composition": [
+      "grilled crispy Angus beef",
+      "cheese",
+      "iceberg lettuce",
+      "onion rings",
+      "pickles",
+      "relish-mayo sauce"
+    ],
+    "name": "CREAMY SMASH",
+    "type": "smashburgers",
+    "image": "Creamy_Smash.png"
+  },
+  {
+    "item_id": 2,
+    "description": "Simple perfection! Traditional Smashburger: Premium grilled Angus beef patty, served in our signature milky potato buns, topped with ketchup and mustard.",
+    "short_description": "Traditional Angus beef smashburger",
+    "price": "2400",
+    "composition": [
+      "grilled Angus beef patty",
+      "cheese",
+      "diced onion",
+      "pickles",
+      "ketchup",
+      "mustard",
+      "milky potato buns"
+    ],
+    "name": "ORIGINAL CHEESEBURGER",
+    "type": "smashburgers",
+    "image": "Original_Cheeseburger.png"
+  },
+  {
+    "item_id": 3,
+    "description": "Our absolute favorite! Classic Smashburger with crispy Angus beef, cheese, curly lettuce, tomato, pickles, onion rings, and Twins special sauce.",
+    "short_description": "Classic Angus beef smashburger",
+    "price": "2700",
+    "composition": [
+      "crispy Angus beef",
+      "cheese",
+      "curly lettuce",
+      "tomato",
+      "pickles",
+      "onion",
+      "Twins special sauce"
+    ],
+    "name": "ROYALE CHEESE",
+    "type": "smashburgers",
+    "image": "Royale_Cheese.png"
+  },
+  {
+    "item_id": 4,
+    "description": "Spicy and piquant. Angus smashed beef, cheese, iceberg lettuce, double jalapeno sauce, onion rings, chili flakes, and diced jalapeño.",
+    "short_description": "Spicy jalapeno Angus smashburger",
+    "price": "2600",
+    "composition": [
+      "Angus smashed beef",
+      "cheese",
+      "iceberg lettuce",
+      "double jalapeño sauce",
+      "onion",
+      "chili flakes",
+      "diced jalapeño"
+    ],
+    "name": "SPICY JALAPENO",
+    "type": "smashburgers",
+    "image": "Spicy_Jalapeno.png"
+  },
+  {
+    "item_id": 5,
+    "description": "For chicken lovers. Classic Smashburger with fried crispy chicken fillet, melted cheese, curly lettuce, tomato, pickles, onion rings, and Twins special sauce.",
+    "short_description": "Crispy chicken fillet smashburger",
+    "price": "2500",
+    "composition": [
+      "fried crispy chicken fillet",
+      "cheese",
+      "curly lettuce",
+      "tomato",
+      "pickles",
+      "onion",
+      "Twins special sauce"
+    ],
+    "name": "CRISPY CHICKEN ROYALE",
+    "type": "smashburgers",
+    "image": "Crispy_Chicken_Royale.png"
+  },
+  {
+    "item_id": 6,
+    "description": "Crispy double crinkle fries",
+    "short_description": "Double crispy crinkle fries",
+    "price": "1300",
+    "composition": [
+      "potato"
+    ],
+    "name": "DOUBLE FRIES",
+    "type": "fries",
+    "image": "Crinkle_Fries_Double"
+  },
+  {
+    "item_id": 7,
+    "description": "Crispy small crinkle fries",
+    "short_description": "Small crispy crinkle fries",
+    "price": "800",
+    "composition": [
+      "potato"
+    ],
+    "name": "SMALL FRIES",
+    "type": "fries",
+    "image": "Crinkle_Fries_Small.png"
+  },
+  {
+    "item_id": 8,
+    "description": "Hand-cut fries",
+    "short_description": "Hand-cut crispy potato fries",
+    "price": "900",
+    "composition": [
+      "potato"
+    ],
+    "name": "HAND-CUT FRIES",
+    "type": "fries",
+    "image": "HandCut_Fries_Double.png"
+  },
+  {
+    "item_id": 9,
+    "description": "Hand-cut fries Small",
+    "short_description": "Hand-cut potato fries Small",
+    "price": "600",
+    "composition": [
+      "potato"
+    ],
+    "name": "SMALL HAND-CUT FRIES",
+    "type": "fries",
+    "image": "HandCut_Fries_Small.png"
+  },
+  {
+    "item_id": 10,
+    "description": "Chicken breast with crispy coating and sauce",
+    "short_description": "Crispy chicken breast nuggets",
+    "price": "1300",
+    "composition": [
+      "chicken breast"
+    ],
+    "name": "CHICKEN NUGGETS",
+    "type": "nuggets",
+    "image": "Chicken_PopCorn_Nuggets.png"
+  },
+  {
+    "item_id": 11,
+    "description": "Greek salad prepared in Mediterranean style",
+    "short_description": "Mediterranean-style fresh Greek salad",
+    "price": "900",
+    "composition": [
+      "tomato",
+      "cucumber",
+      "mixed greens",
+      "olives",
+      "wild oregano"
+    ],
+    "name": "GREEK SALAD",
+    "type": "salad",
+    "image": "Caeser_Salad.png"
+  },
+  {
+    "item_id": 12,
+    "description": "Caesar salad with crispy chicken is a fresh, delicious dish, seasoned with spicy sauce and highlighted by croutons' texture.",
+    "short_description": "Fresh Caesar salad with chicken",
+    "price": "1100",
+    "composition": [
+      "crispy chicken",
+      "mixed greens",
+      "tomato",
+      "croutons",
+      "Caesar sauce"
+    ],
+    "name": "CAESAR SALAD",
+    "type": "salad",
+    "image": "Greek_Salad.png"
+  },
+  {
+    "item_id": 13,
+    "description": "Pure, refreshing still water",
+    "short_description": "Pure refreshing still water",
+    "price": "400",
+    "composition": [
+      "water"
+    ],
+    "name": "WATER",
+    "type": "beverage",
+    "image": "Water.png"
+  },
+  {
+    "item_id": 14,
+    "description": "Armenian natural mineral water, lightly carbonated",
+    "short_description": "Lightly carbonated Armenian mineral water",
+    "price": "400",
+    "composition": [
+      "mineral water"
+    ],
+    "name": "JERMUK",
+    "type": "beverage",
+    "image": "Jermuk.png"
+  },
+  {
+    "item_id": 15,
+    "description": "Carbonated, sweet-flavored refreshing drink",
+    "short_description": "Sweet carbonated Pepsi drink",
+    "price": "500",
+    "composition": [
+      "Pepsi"
+    ],
+    "name": "PEPSI",
+    "type": "beverage",
+    "image": "Pepsi.png"
+  },
+  {
+    "item_id": 16,
+    "description": "Delicious, orange-flavored carbonated drink",
+    "short_description": "Orange-flavored carbonated Mirinda",
+    "price": "500",
+    "composition": [
+      "Mirinda"
+    ],
+    "name": "MIRINDA",
+    "type": "beverage",
+    "image": "Mirinda.png"
+  },
+  {
+    "item_id": 17,
+    "description": "Light, Mexican beer with a refreshing taste",
+    "short_description": "Refreshing light Corona beer",
+    "price": "1600",
+    "composition": [
+      "Corona Extra"
+    ],
+    "name": "CORONA EXTRA",
+    "type": "beverage",
+    "image": "Corona_Extra.png"
+  },
+  {
+    "item_id": 18,
+    "description": "Rich-flavored coffee with delicate creamy foam",
+    "short_description": "Rich coffee with creamy foam",
+    "price": "1500",
+    "composition": [
+      "coffee",
+      "water",
+      "cream",
+      "cocoa"
+    ],
+    "name": "CAFE CREMA",
+    "type": "beverage",
+    "image": "Cafe_Crema.png"
+  },
+  {
+    "item_id": 19,
+    "description": "Refreshing drink with vibrant strawberry and raspberry flavors",
+    "short_description": "Strawberry-raspberry refreshing drink",
+    "price": "1600",
+    "composition": [
+      "strawberry",
+      "raspberry",
+      "water",
+      "cream"
+    ],
+    "name": "STRAWBERRY AND RASPBERRY",
+    "type": "beverage",
+    "image": "Strawberry_Raspberry.png"
+  },
+  {
+    "item_id": 20,
+    "description": "Sweet, milky drink with the unique flavor of Oreo cookies",
+    "short_description": "Oreo-flavored milky drink",
+    "price": "1400",
+    "composition": [
+      "milk",
+      "Oreo cookies",
+      "sugar",
+      "cream"
+    ],
+    "name": "OREO",
+    "type": "beverage",
+    "image": "Oreo.png"
+  },
+  {
+    "item_id": 21,
+    "description": "Sweet and spicy sauce with a harmonious blend of honey and mustard",
+    "short_description": "Honey-mustard sweet-spicy sauce",
+    "price": "200",
+    "composition": [
+      "mustard",
+      "honey",
+      "mayonnaise",
+      "vinegar"
+    ],
+    "name": "HONEY MUSTARD",
+    "type": "sauce",
+    "image": "Honey_Mustard.png"
+  },
+  {
+    "item_id": 22,
+    "description": "Delicious, garlicky sauce with a velvety texture",
+    "short_description": "Velvety garlic-flavored sauce",
+    "price": "200",
+    "composition": [
+      "garlic",
+      "mayonnaise",
+      "yogurt",
+      "lemon juice"
+    ],
+    "name": "GARLIC SAUCE",
+    "type": "sauce",
+    "image": "Garlic_Sauce.png"
+  },
+  {
+    "item_id": 23,
+    "description": "Rich cheddar sauce with a smoky paprika flavor",
+    "short_description": "Smoky cheddar paprika sauce",
+    "price": "300",
+    "composition": [
+      "cheddar cheese",
+      "paprika",
+      "milk",
+      "butter"
+    ],
+    "name": "`t CHEDDAR PAPRIKA",
+    "type": "sauce",
+    "image": "Cheddar_Paprika.png"
+  },
+  {
+    "item_id": 24,
+    "description": "Spicy and fresh sauce with a vibrant jalapeño flavor",
+    "short_description": "Fresh spicy jalapeño sauce",
+    "price": "200",
+    "composition": [
+      "jalapeno",
+      "vinegar",
+      "sugar",
+      "garlic"
+    ],
+    "name": "CHILI JALAPENO",
+    "type": "sauce",
+    "image": "Chili_Jalapeno.png"
+  },
+  {
+    "item_id": 25,
+    "description": "Smoky, sweet-and-sour barbecue sauce",
+    "short_description": "Smoky sweet-sour barbecue sauce",
+    "price": "200",
+    "composition": [
+      "tomato paste",
+      "brown sugar",
+      "vinegar",
+      "paprika"
+    ],
+    "name": "BBQ",
+    "type": "sauce",
+    "image": "BBQ.png"
+  },
+  {
+    "item_id": 26,
+    "description": "Sweet-and-sour sauce with vegetable chunks",
+    "short_description": "Vegetable sweet-sour relish sauce",
+    "price": "300",
+    "composition": [
+      "pickles",
+      "sugar",
+      "vinegar",
+      "mustard"
+    ],
+    "name": "RELISH",
+    "type": "sauce",
+    "image": "Relish.png"
+  }
+]

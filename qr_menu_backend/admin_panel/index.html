@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Endpoint Tester</title>
+    <link rel="stylesheet" href="/admin_panel/style.css">
+</head>
+<body>
+    <h1>Admin Panel - Endpoint Tester</h1>
+
+    <section>
+        <h2>Test /entry-log</h2>
+        <form id="entryLogForm">
+            <label>
+                Timestamp (ISO 8601):
+                <input type="datetime-local" id="entryLogTimestamp" required>
+                <button type="button" onclick="document.getElementById('entryLogTimestamp').value = new Date().toISOString().slice(0,16)">Set Current Time</button>
+            </label>
+            <button type="submit">Send Entry Log</button>
+        </form>
+        <div id="entryLogResponse" class="response"></div>
+    </section>
+
+    <section>
+        <h2>Test /button-requests</h2>
+        <form id="buttonRequestsForm">
+            <label>
+                Button Requests (JSON array, e.g. [{"id":1,"timestamp":"2025-04-20T09:00:00"}]):
+                <textarea id="buttonRequestsData" rows="3" required>[{"id":1,"timestamp":"2025-04-20T09:00:00"}]</textarea>
+            </label>
+            <button type="submit">Send Button Requests</button>
+        </form>
+        <div id="buttonRequestsResponse" class="response"></div>
+    </section>
+
+    <section>
+        <h2>Test /chat-history</h2>
+        <form id="chatHistoryForm">
+            <label>
+                Chat History (JSON array, e.g. [{"id":1,"timestamp":"2025-04-20T09:00:00","text":"Hello"}]):
+                <textarea id="chatHistoryData" rows="3" required>[{"id":1,"timestamp":"2025-04-20T09:00:00","text":"Hello"}]</textarea>
+            </label>
+            <button type="submit">Send Chat History</button>
+        </form>
+        <div id="chatHistoryResponse" class="response"></div>
+    </section>
+
+    <section>
+        <h2>Test WebSocket Chat</h2>
+        <div>
+            <input type="text" id="chatMessage" placeholder="Type your message">
+            <input type="datetime-local" id="chatTime">
+            <button type="button" onclick="document.getElementById('chatTime').value = new Date().toISOString().slice(0,16)">Set Current Time</button>
+            <select id="chatLanguage">
+                <option value="am">Armenian</option>
+                <option value="en">English</option>
+                <option value="ru">Russian</option>
+            </select>
+            <button id="sendChat">Send</button>
+            <button id="disconnectChat">Disconnect</button>
+        </div>
+        <div id="chatHistory" class="response"></div>
+    </section>
+
+    <section>
+        <h2>Test Recommendations by Time</h2>
+        <form id="recommendTimeForm">
+            <label>
+                Language:
+                <select id="recommendTimeLang">
+                    <option value="am">Armenian</option>
+                    <option value="en">English</option>
+                    <option value="ru">Russian</option>
+                </select>
+            </label>
+            <button type="submit">Get Recommendations</button>
+        </form>
+        <div id="recommendTimeResponse" class="response"></div>
+    </section>
+
+    <section>
+        <h2>Test Recommendations by Orders</h2>
+        <form id="recommendOrdersForm">
+            <label>
+                Button Requests (JSON array, e.g. [{"id":1,"timestamp":"2025-04-20T09:00:00"}]):
+                <textarea id="recommendOrdersData" rows="3" required>[{"id":1,"timestamp":"2025-04-20T09:00:00"}]</textarea>
+            </label>
+            <label>
+                Language:
+                <select id="recommendOrdersLang">
+                    <option value="am">Armenian</option>
+                    <option value="en">English</option>
+                    <option value="ru">Russian</option>
+                </select>
+            </label>
+            <button type="submit">Get Recommendations</button>
+        </form>
+        <div id="recommendOrdersResponse" class="response"></div>
+    </section>
+
+    <script src="/admin_panel/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,793 @@
+[
+  [
+    {
+      "item_id": 1,
+      "description": "Սերուցքայի՜ն դրախտ։ Թվինս սերուցքային Սմաշբուրգեր գրիլ արված Անգուսի խրթխրթան մսով, պանիրով, այսբերգ հազարով, սոխի օղակներով, թթու վարունգով և մեր հայտնի ռելիշ-մայո սոուսով։",
+      "short_description": "Անգուսի մսով սերուցքային սմաշբուրգեր",
+      "price": "2500",
+      "composition": ["գրիլ արված Անգուսի խրթխրթան միս", "պանիր", "այսբերգ հազար", "սոխի օղակներ", "թթու վարունգ", "ռելիշ-մայո սոուս"],
+      "name": "ՔՐԵՄԻ ՍՄԱՇ",
+      "type": "smashburgers",
+      "image": "Creamy_Smash.png"
+    },
+    {
+      "item_id": 2,
+      "description": "Պարզ կատարելություն! Ավանդական Սմաշբուրգեր. Պրեմիում դասի գրիլ արված կոտլետ Անգուսի մսից, մատուցվում է մեր ֆիրմային կարտոֆիլի կաթնային բլիթների մեջ՝ ծածկված կետչուպով և մանանեխով:",
+      "short_description": "Անգուսի մսով ավանդական սմաշբուրգեր",
+      "price": "2400",
+      "composition": ["գրիլ արված կոտլետ Անգուսի մսից", "պանիր", "կտրտած սոխ", "թթու վարուն", "կետչուպ", "մանանեխ", "կարտոֆիլի կաթնային բլիթներ"],
+      "name": "ՕՐԻԳԻՆԱԼ ՉԻԶԲՈՒՐԳԵՐ",
+      "type": "smashburgers",
+      "image": "Original_Cheeseburger.png"
+    },
+    {
+      "item_id": 3,
+      "description": "Մեր բացարձա՜կ ֆավորիտը։ Դասական Սմաշբուրգեր Անգուսի խրթխրթան մսով, պանրով, գանգու-drawer հազարով, լոլիկով, թթու վարունգով, սոխի օղակներով և Թվինս հատուկ սոուսով։",
+      "short_description": "Անգուսի մսով դասական սմաշբուրգեր",
+      "price": "2700",
+      "composition": ["Անգուսի խրթխրթան միս", "պանիր", "գանգուր հազարով", "լոլիկ", "թթու վարունգ", "սոխ", "թվինս հատուկ սոուս"],
+      "name": "ՌՈՅԱԼ ՉԻԶ",
+      "type": "smashburgers",
+      "image": "Royale_Cheese.png"
+    },
+    {
+      "item_id": 4,
+      "description": "Կծու և Պիկանտ։ Անգուսի ծեծած միս, պանիր, այսբերգ հազար, կրկնակի Հալպենյո սոուս, սոխի օղակներ, չիլիի փաթիլներ և կտրտած հալապենյո",
+      "short_description": "Հալապենյո սոուսով կծու սմաշբուրգեր",
+      "price": "2600",
+      "composition": ["Անգուսի ծեծած միս", "պանիր", "այսբերգ հազար", "կրկնակի Հալպենյո սոուս", "սոխ", "չիլիի փաթիլներ", "կտրտած հալապենյո"],
+      "name": "ՍՓԱՅՍԻ ՀԱԼԱՊԵՆՅՈ",
+      "type": "smashburgers",
+      "image": "Spicy_Jalapeno.png"
+    },
+    {
+      "item_id": 5,
+      "description": "Հավի մսի սիրահարների համար։ Դասական Սմաշբուրգեր տապակած խրթխրթան հավի ֆիլեով, հալեցրած պանրով, գանգուր հազարով, լոլիկով, թթու վարունգով, սոխի օղակներով և Թվինս հատուկ սոուսով",
+      "short_description": "Հավի ֆիլեով խրթխրթան սմաշբուրգեր",
+      "price": "2500",
+      "composition": ["տապակած խրթխրթան հավի ֆիլե", "պանիր", "գանգուր հազար", "լոլիկ", "թթու վարունգ", "սոխ", "թվինս հատուկ սոուս"],
+      "name": "ՔՐԻՓՍԻ ՉԻՔՆ ՌՈՅԱԼ",
+      "type": "smashburgers",
+      "image": "Crispy_Chicken_Royale.png"
+    },
+    {
+      "item_id": 6,
+      "description": "Խրթխրթան կարտոֆիլ ֆրի Կրկնակի",
+      "short_description": "Խրթխրթան կարտոֆիլ ֆրի Կրկնակի",
+      "price": "1300",
+      "composition": ["կարտոֆիլ"],
+      "name": "ֆրի կրկնակի",
+      "type": "fries",
+      "image": "Crinkle_Fries_Double"
+    },
+    {
+      "item_id": 7,
+      "description": "Խրթխրթան կարտոֆիլ ֆրի Փոքր",
+      "short_description": "Խրթխրթան կարտոֆիլ ֆրի Փոքր",
+      "price": "800",
+      "composition": ["կարտոֆիլ"],
+      "name": "ֆրի փոքր",
+      "type": "fries",
+      "image": "Crinkle_Fries_Small.png"
+    },
+    {
+      "item_id": 8,
+      "description": "Կարտոֆիլ ֆրի, ձեռքով կտրտած",
+      "short_description": "Ձեռքով կտրտած կարտոֆիլ ֆրի",
+      "price": "900",
+      "composition": ["կարտոֆիլ"],
+      "name": "ֆրի ձեռքով կտրտած",
+      "type": "fries",
+      "image": "HandCut_Fries_Double.png"
+    },
+    {
+      "item_id": 9,
+      "description": "Կարտոֆիլ ֆրի, ձեռքով կտրտած փոքր",
+      "short_description": "Ձեռքով կտրտած ֆրի Փոքր",
+      "price": "600",
+      "composition": ["կարտոֆիլ"],
+      "name": "ֆրի ձեռքով կտրտած փոքր",
+      "type": "fries",
+      "image": "HandCut_Fries_Small.png"
+    },
+    {
+      "item_id": 10,
+      "description": "Հավի կրծքամիս՝ խրթխրթան ընդեղենով և սոուսով",
+      "short_description": "Խրթխրթան հավի կրծքամսի նագեթներ",
+      "price": "1300",
+      "composition": ["հավի կրծքամիս"],
+      "name": "ՀԱՎԻ ՆԱԳԵԹՆԵՐ",
+      "type": "nuggets",
+      "image": "Chicken_PopCorn_Nuggets.png"
+    },
+    {
+      "item_id": 11,
+      "description": "Հունական աղցան պատրաստված միջերկրածովյան ոճով",
+      "short_description": "Միջերկրածովյան ոճի հունական աղցան",
+      "price": "900",
+      "composition": ["Լոլիկ", "վարունգ", "խառը կանաչի", "ձիթապտուղ", "վայրի սումբար"],
+      "name": "ՀՈՒՆԱԿԱՆ ԱՂՑԱՆ",
+      "type": "salad",
+      "image": "Caeser_Salad.png"
+    },
+    {
+      "item_id": 12,
+      "description": "Կեսար աղցանը խրթխրթան հավով թարմ, համեղ ուտեստ է՝ համեմված կծու սոուսով և պաքսիմատի ընդգծված հյուսվածքով։",
+      "short_description": "Հավովի մսով թարմ կեսար աղցան",
+      "price": "1100",
+      "composition": ["խրթխրթան հավ", "խառը կանաչի", "լոլիկ", "պաքսիմատ", "Կեսար սոուս"],
+      "name": "ԱՂՑԱՆ ԿԵՍԱՐ",
+      "type": "salad",
+      "image": "Greek_Salad.png"
+    },
+    {
+      "item_id": 13,
+      "description": "Մաքուր, թարմացնող ջուր՝ առանց գազի",
+      "short_description": "Ոչ գազավորված ջուր",
+      "price": "400",
+      "composition": ["ջուր"],
+      "name": "ՋՈՒՐ",
+      "type": "beverage",
+      "image": "Water.png"
+    },
+    {
+      "item_id": 14,
+      "description": "Հայկական բնական հանքային ջուր՝ թեթև գազավորված",
+      "short_description": "Հայկական թեթև գազավորված հանքային ջուր",
+      "price": "400",
+      "composition": ["հանքային ջուր"],
+      "name": "ՋԵՐՄՈՒԿ",
+      "type": "beverage",
+      "image": "Jermuk.png"
+    },
+    {
+      "item_id": 15,
+      "description": "Գազավորված, քաղցր համով զովացուցիչ ըմպելիք",
+      "short_description": "Քաղցր գազավորված պեպսի ըմպելիք",
+      "price": "500",
+      "composition": ["Pepsi"],
+      "name": "ՊԵՊՍԻ",
+      "type": "beverage",
+      "image": "Pepsi.png"
+    },
+    {
+      "item_id": 16,
+      "description": "Համեղ, նարնջի համով գազավորված ըմպելիք",
+      "short_description": "Նարնջի համով գազավորված միրինդա",
+      "price": "500",
+      "composition": ["Mirinda"],
+      "name": "ՄԻՌԻՆԴԱ",
+      "type": "beverage",
+      "image": "Mirinda.png"
+    },
+    {
+      "item_id": 17,
+      "description": "Թեթև, մեքսիկական գարեջուր՝ թարմացնող համով",
+      "short_description": "Թեթև թարմացնող կորոնա գարեջուր",
+      "price": "1600",
+      "composition": ["Corona Extra"],
+      "name": "ԿՈՐՈՆԱ ԷՔՍՏՐԱ",
+      "type": "beverage",
+      "image": "Corona_Extra.png"
+    },
+    {
+      "item_id": 18,
+      "description": "Հարուստ համով սուրճ՝ նուրբ կրեմային փրփուրով",
+      "short_description": "Կրեմային փրփուրով հարուստ սուրճ",
+      "price": "1500",
+      "composition": ["սուրճ", "ջուր", "կրեմ", "կակաո"],
+      "name": "ԿԱՖԵ ԿՐԵՄԱ",
+      "type": "beverage",
+      "image": "Cafe_Crema.png"
+    },
+    {
+      "item_id": 19,
+      "description": "Թարմացնող ըմպելիք՝ ելակի և ազնվամորու պայծառ համերով",
+      "short_description": "Ելակով և ազնվամորով թարմացնող ըմպելիք",
+      "price": "1600",
+      "composition": ["ելակ", "ազնվամորի", "ջուր", "կրեմ"],
+      "name": "ԵԼԱԿ ԵՎ ԱԶՆՎԱՄՈՐԻ",
+      "type": "beverage",
+      "image": "Strawberry_Raspberry.png"
+    },
+    {
+      "item_id": 20,
+      "description": "Քաղցր, կաթնային ըմպելիք՝ Oreo թխվածքի յուրահատուկ համով",
+      "short_description": "Oreo թխվածքով կաթնային ըմպելիք",
+      "price": "1400",
+      "composition": ["կաթ", "Oreo թխվածք", "շաքար", "կրեմ"],
+      "name": "ՕՐԵՕ",
+      "type": "beverage",
+      "image": "Oreo.png"
+    },
+    {
+      "item_id": 21,
+      "description": "Քաղցր և կծու սոուս՝ մեղրի և մանանեխի ներդաշնակ համով",
+      "short_description": "Մեղրով և մանանեխով կծու սոուս",
+      "price": "200",
+      "composition": ["մանանեխ", "մեղր", "մայոնեզ", "քացախ"],
+      "name": "ՀՈՆԵՅ ՄԱՍԹԱՐԴ",
+      "type": "sauce",
+      "image": "Honey_Mustard.png"
+    },
+    {
+      "item_id": 22,
+      "description": "Համեղ, սխտորային սոուս՝ թավշյա հյուսվածքով",
+      "short_description": "Սխտորով սոուս",
+      "price": "200",
+      "composition": ["սխտոր", "մայոնեզ", "յոգուրտ", "կիտրոնի հյութ"],
+      "name": "ՍԽՏՈՐԻ ՍՈՈՒՍ",
+      "type": "sauce",
+      "image": "Garlic_Sauce.png"
+    },
+    {
+      "item_id": 23,
+      "description": "Հարուստ չեդդերով սոուս՝ պապրիկայի ծխահամով",
+      "short_description": "Չեդդերով ծխահամ պապրիկայի սոուս",
+      "price": "300",
+      "composition": ["չեդդեր պանիր", "պապրիկա", "կաթ", "կարագ"],
+      "name": "ՉԵԴԴԵՐ ՊԱՊՐԻԿԱ",
+      "type": "sauce",
+      "image": "Cheddar_Paprika.png"
+    },
+    {
+      "item_id": 24,
+      "description": "Կծու և թարմ սոուս՝ ջալապենոյի վառ համով",
+      "short_description": "Ջալապենոյով կծու սոուս",
+      "price": "200",
+      "composition": ["ջալապենո", "քացախ", "շաքար", "սխտոր"],
+      "name": "ՉԻԼԻ ՋԱԼԱՊԵՆՈ",
+      "type": "sauce",
+      "image": "Chili_Jalapeno.png"
+    },
+    {
+      "item_id": 25,
+      "description": "Ծխահամ, քաղցր-թթու խորովածի սոուս",
+      "short_description": "Ծխահամ քաղցր-թթու խորովածի սոուս",
+      "price": "200",
+      "composition": ["լոլիկի մածուկ", "շագանակագույն շաքար", "քացախ", "պապրիկա"],
+      "name": "ԲԻ ԲԻ ՔՅՈՒ",
+      "type": "sauce",
+      "image": "BBQ.png"
+    },
+    {
+      "item_id": 26,
+      "description": "Թթու-քաղցր սոուս՝ բանջարեղենի կտորներով",
+      "short_description": "Բանջարեղենով թթու-քաղցր ռելիշ սոուս",
+      "price": "300",
+      "composition": ["թթու վարունգ", "շաքար", "քացախ", "մանանեխ"],
+      "name": "ՌԵԼԻՇ",
+      "type": "sauce",
+      "image": "Relish.png"
+    }
+  ],
+
+
+
+  [
+    {
+      "item_id": 1,
+      "description": "A creamy paradise! Twins Creamy Smashburger with grilled crispy Angus beef, cheese, iceberg lettuce, onion rings, pickles, and our famous relish-mayo sauce.",
+      "short_description": "Creamy Angus beef smashburger",
+      "price": "2500",
+      "composition": ["grilled crispy Angus beef", "cheese", "iceberg lettuce", "onion rings", "pickles", "relish-mayo sauce"],
+      "name": "CREAMY SMASH",
+      "type": "smashburgers",
+      "image": "Creamy_Smash.png"
+    },
+    {
+      "item_id": 2,
+      "description": "Simple perfection! Traditional Smashburger: Premium grilled Angus beef patty, served in our signature milky potato buns, topped with ketchup and mustard.",
+      "short_description": "Traditional Angus beef smashburger",
+      "price": "2400",
+      "composition": ["grilled Angus beef patty", "cheese", "diced onion", "pickles", "ketchup", "mustard", "milky potato buns"],
+      "name": "ORIGINAL CHEESEBURGER",
+      "type": "smashburgers",
+      "image": "Original_Cheeseburger.png"
+    },
+    {
+      "item_id": 3,
+      "description": "Our absolute favorite! Classic Smashburger with crispy Angus beef, cheese, curly lettuce, tomato, pickles, onion rings, and Twins special sauce.",
+      "short_description": "Classic Angus beef smashburger",
+      "price": "2700",
+      "composition": ["crispy Angus beef", "cheese", "curly lettuce", "tomato", "pickles", "onion", "Twins special sauce"],
+      "name": "ROYALE CHEESE",
+      "type": "smashburgers",
+      "image": "Royale_Cheese.png"
+    },
+    {
+      "item_id": 4,
+      "description": "Spicy and piquant. Angus smashed beef, cheese, iceberg lettuce, double jalapeno sauce, onion rings, chili flakes, and diced jalapeño.",
+      "short_description": "Spicy jalapeno Angus smashburger",
+      "price": "2600",
+      "composition": ["Angus smashed beef", "cheese", "iceberg lettuce", "double jalapeño sauce", "onion", "chili flakes", "diced jalapeño"],
+      "name": "SPICY JALAPENO",
+      "type": "smashburgers",
+      "image": "Spicy_Jalapeno.png"
+    },
+    {
+      "item_id": 5,
+      "description": "For chicken lovers. Classic Smashburger with fried crispy chicken fillet, melted cheese, curly lettuce, tomato, pickles, onion rings, and Twins special sauce.",
+      "short_description": "Crispy chicken fillet smashburger",
+      "price": "2500",
+      "composition": ["fried crispy chicken fillet", "cheese", "curly lettuce", "tomato", "pickles", "onion", "Twins special sauce"],
+      "name": "CRISPY CHICKEN ROYALE",
+      "type": "smashburgers",
+      "image": "Crispy_Chicken_Royale.png"
+    },
+    {
+      "item_id": 6,
+      "description": "Crispy double crinkle fries",
+      "short_description": "Double crispy crinkle fries",
+      "price": "1300",
+      "composition": ["potato"],
+      "name": "DOUBLE FRIES",
+      "type": "fries",
+      "image": "Crinkle_Fries_Double"
+    },
+    {
+      "item_id": 7,
+      "description": "Crispy small crinkle fries",
+      "short_description": "Small crispy crinkle fries",
+      "price": "800",
+      "composition": ["potato"],
+      "name": "SMALL FRIES",
+      "type": "fries",
+      "image": "Crinkle_Fries_Small.png"
+    },
+    {
+      "item_id": 8,
+      "description": "Hand-cut fries",
+      "short_description": "Hand-cut crispy potato fries",
+      "price": "900",
+      "composition": ["potato"],
+      "name": "HAND-CUT FRIES",
+      "type": "fries",
+      "image": "HandCut_Fries_Double.png"
+    },
+    {
+      "item_id": 9,
+      "description": "Hand-cut fries Small",
+      "short_description": "Hand-cut potato fries Small",
+      "price": "600",
+      "composition": ["potato"],
+      "name": "SMALL HAND-CUT FRIES",
+      "type": "fries",
+      "image": "HandCut_Fries_Small.png"
+    },
+    {
+      "item_id": 10,
+      "description": "Chicken breast with crispy coating and sauce",
+      "short_description": "Crispy chicken breast nuggets",
+      "price": "1300",
+      "composition": ["chicken breast"],
+      "name": "CHICKEN NUGGETS",
+      "type": "nuggets",
+      "image": "Chicken_PopCorn_Nuggets.png"
+    },
+    {
+      "item_id": 11,
+      "description": "Greek salad prepared in Mediterranean style",
+      "short_description": "Mediterranean-style fresh Greek salad",
+      "price": "900",
+      "composition": ["tomato", "cucumber", "mixed greens", "olives", "wild oregano"],
+      "name": "GREEK SALAD",
+      "type": "salad",
+      "image": "Caeser_Salad.png"
+    },
+    {
+      "item_id": 12,
+      "description": "Caesar salad with crispy chicken is a fresh, delicious dish, seasoned with spicy sauce and highlighted by croutons' texture.",
+      "short_description": "Fresh Caesar salad with chicken",
+      "price": "1100",
+      "composition": ["crispy chicken", "mixed greens", "tomato", "croutons", "Caesar sauce"],
+      "name": "CAESAR SALAD",
+      "type": "salad",
+      "image": "Greek_Salad.png"
+    },
+    {
+      "item_id": 13,
+      "description": "Pure, refreshing still water",
+      "short_description": "Pure refreshing still water",
+      "price": "400",
+      "composition": ["water"],
+      "name": "WATER",
+      "type": "beverage",
+      "image": "Water.png"
+    },
+    {
+      "item_id": 14,
+      "description": "Armenian natural mineral water, lightly carbonated",
+      "short_description": "Lightly carbonated Armenian mineral water",
+      "price": "400",
+      "composition": ["mineral water"],
+      "name": "JERMUK",
+      "type": "beverage",
+      "image": "Jermuk.png"
+    },
+    {
+      "item_id": 15,
+      "description": "Carbonated, sweet-flavored refreshing drink",
+      "short_description": "Sweet carbonated Pepsi drink",
+      "price": "500",
+      "composition": ["Pepsi"],
+      "name": "PEPSI",
+      "type": "beverage",
+      "image": "Pepsi.png"
+    },
+    {
+      "item_id": 16,
+      "description": "Delicious, orange-flavored carbonated drink",
+      "short_description": "Orange-flavored carbonated Mirinda",
+      "price": "500",
+      "composition": ["Mirinda"],
+      "name": "MIRINDA",
+      "type": "beverage",
+      "image": "Mirinda.png"
+    },
+    {
+      "item_id": 17,
+      "description": "Light, Mexican beer with a refreshing taste",
+      "short_description": "Refreshing light Corona beer",
+      "price": "1600",
+      "composition": ["Corona Extra"],
+      "name": "CORONA EXTRA",
+      "type": "beverage",
+      "image": "Corona_Extra.png"
+    },
+    {
+      "item_id": 18,
+      "description": "Rich-flavored coffee with delicate creamy foam",
+      "short_description": "Rich coffee with creamy foam",
+      "price": "1500",
+      "composition": ["coffee", "water", "cream", "cocoa"],
+      "name": "CAFE CREMA",
+      "type": "beverage",
+      "image": "Cafe_Crema.png"
+    },
+    {
+      "item_id": 19,
+      "description": "Refreshing drink with vibrant strawberry and raspberry flavors",
+      "short_description": "Strawberry-raspberry refreshing drink",
+      "price": "1600",
+      "composition": ["strawberry", "raspberry", "water", "cream"],
+      "name": "STRAWBERRY AND RASPBERRY",
+      "type": "beverage",
+      "image": "Strawberry_Raspberry.png"
+    },
+    {
+      "item_id": 20,
+      "description": "Sweet, milky drink with the unique flavor of Oreo cookies",
+      "short_description": "Oreo-flavored milky drink",
+      "price": "1400",
+      "composition": ["milk", "Oreo cookies", "sugar", "cream"],
+      "name": "OREO",
+      "type": "beverage",
+      "image": "Oreo.png"
+    },
+    {
+      "item_id": 21,
+      "description": "Sweet and spicy sauce with a harmonious blend of honey and mustard",
+      "short_description": "Honey-mustard sweet-spicy sauce",
+      "price": "200",
+      "composition": ["mustard", "honey", "mayonnaise", "vinegar"],
+      "name": "HONEY MUSTARD",
+      "type": "sauce",
+      "image": "Honey_Mustard.png"
+    },
+    {
+      "item_id": 22,
+      "description": "Delicious, garlicky sauce with a velvety texture",
+      "short_description": "Velvety garlic-flavored sauce",
+      "price": "200",
+      "composition": ["garlic", "mayonnaise", "yogurt", "lemon juice"],
+      "name": "GARLIC SAUCE",
+      "type": "sauce",
+      "image": "Garlic_Sauce.png"
+    },
+    {
+      "item_id": 23,
+      "description": "Rich cheddar sauce with a smoky paprika flavor",
+      "short_description": "Smoky cheddar paprika sauce",
+      "price": "300",
+      "composition": ["cheddar cheese", "paprika", "milk", "butter"],
+      "name": "`t CHEDDAR PAPRIKA",
+      "type": "sauce",
+      "image": "Cheddar_Paprika.png"
+    },
+    {
+      "item_id": 24,
+      "description": "Spicy and fresh sauce with a vibrant jalapeño flavor",
+      "short_description": "Fresh spicy jalapeño sauce",
+      "price": "200",
+      "composition": ["jalapeno", "vinegar", "sugar", "garlic"],
+      "name": "CHILI JALAPENO",
+      "type": "sauce",
+      "image": "Chili_Jalapeno.png"
+    },
+    {
+      "item_id": 25,
+      "description": "Smoky, sweet-and-sour barbecue sauce",
+      "short_description": "Smoky sweet-sour barbecue sauce",
+      "price": "200",
+      "composition": ["tomato paste", "brown sugar", "vinegar", "paprika"],
+      "name": "BBQ",
+      "type": "sauce",
+      "image": "BBQ.png"
+    },
+    {
+      "item_id": 26,
+      "description": "Sweet-and-sour sauce with vegetable chunks",
+      "short_description": "Vegetable sweet-sour relish sauce",
+      "price": "300",
+      "composition": ["pickles", "sugar", "vinegar", "mustard"],
+      "name": "RELISH",
+      "type": "sauce",
+      "image": "Relish.png"
+    }
+  ],
+
+
+  [
+    {
+      "item_id": 1,
+      "description": "Кремовый рай! Смашбургер Twins с кремовым вкусом, приготовленный на гриле из хрустящей говядины Ангус, с сыром, салатом айсберг, луковыми кольцами, маринованными огурцами и нашим знаменитым соусом релиш-майо.",
+      "short_description": "Кремовый смашбургер с говядиной Ангус",
+      "price": "2500",
+      "composition": ["хрустящая говядина Ангус на гриле", "сыр", "салат айсберг", "луковые кольца", "маринованные огурцы", "соус релиш-майо"],
+      "name": "КРЕМОВЫЙ СМАШ",
+      "type": "smashburgers",
+      "image": "Creamy_Smash.png"
+    },
+    {
+      "item_id": 2,
+      "description": "Простое совершенство! Традиционный смашбургер: котлета из премиальной говядины Ангус, приготовленная на гриле, подается в наших фирменных молочных картофельных булочках, с кетчупом и горчицей.",
+      "short_description": "Традиционный смашбургер с говядиной Ангус",
+      "price": "2400",
+      "composition": ["котлета из говядины Ангус на гриле", "сыр", "нарезанный лук", "маринованные огурцы", "кетчуп", "горчица", "молочные картофельные булочки"],
+      "name": "ОРИГИНАЛЬНЫЙ ЧИЗБУРГЕР",
+      "type": "smashburgers",
+      "image": "Original_Cheeseburger.png"
+    },
+    {
+      "item_id": 3,
+      "description": "Наш абсолютный фаворит! Классический смашбургер с хрустящей говядиной Ангус, сыром, кудрявым салатом, помидорами, маринованными огурцами, луковыми кольцами и специальным соусом Twins.",
+      "short_description": "Классический смашбургер с говядиной Ангус",
+      "price": "2700",
+      "composition": ["хрустящая говядина Ангус", "сыр", "кудрявый салат", "помидоры", "маринованные огурцы", "лук", "специальный соус Twins"],
+      "name": "РОЯЛ ЧИЗ",
+      "type": "smashburgers",
+      "image": "Royale_Cheese.png"
+    },
+    {
+      "item_id": 4,
+      "description": "Острый и пикантный. Размолотая говядина Ангус, сыр, салат айсберг, двойной соус халапеньо, луковые кольца, хлопья чили и нарезанный халапеньо.",
+      "short_description": "Острый смашбургер с халапеньо",
+      "price": "2600",
+      "composition": ["размолотая говядина Ангус", "сыр", "салат айсберг", "двойной соус халапеньо", "лук", "хлопья чили", "нарезанный халапеньо"],
+      "name": "ОСТРЫЙ ХАЛАПЕНЬО",
+      "type": "smashburgers",
+      "image": "Spicy_Jalapeno.png"
+    },
+    {
+      "item_id": 5,
+      "description": "Для любителей курицы. Классический смашбургер с жареным хрустящим куриным филе, плавленым сыром, кудрявым салатом, помидорами, маринованными огурцами, луковыми кольцами и специальным соусом Twins.",
+      "short_description": "Хрустящий смашбургер с куриным филе",
+      "price": "2500",
+      "composition": ["жареное хрустящее куриное филе", "сыр", "кудрявый салат", "помидоры", "маринованные огурцы", "лук", "специальный соус Twins"],
+      "name": "ХРУСТЯЩИЙ КУРИНЫЙ РОЯЛ",
+      "type": "smashburgers",
+      "image": "Crispy_Chicken_Royale.png"
+    },
+    {
+      "item_id": 6,
+      "description": "Хрустящий двойной картофель фри",
+      "short_description": "Двойной хрустящий картофель фри",
+      "price": "1300",
+      "composition": ["картофель"],
+      "name": "ДВОЙНОЙ ФРИ",
+      "type": "fries",
+      "image": "Crinkle_Fries_Double"
+    },
+    {
+      "item_id": 7,
+      "description": "Хрустящий маленький картофель фри",
+      "short_description": "Маленький хрустящий картофель фри",
+      "price": "800",
+      "composition": ["картофель"],
+      "name": "МАЛЕНЬКИЙ ФРИ",
+      "type": "fries",
+      "image": "Crinkle_Fries_Small.png"
+    },
+    {
+      "item_id": 8,
+      "description": "Картофель фри, нарезанный вручную",
+      "short_description": "Картофель фри ручной нарезки",
+      "price": "900",
+      "composition": ["картофель"],
+      "name": "ФРИ РУЧНОЙ НАРЕЗКИ",
+      "type": "fries",
+      "image": "HandCut_Fries_Double.png"
+    },
+    {
+      "item_id": 9,
+      "description": "Маленький картофель фри, нарезанный вручную",
+      "short_description": "Маленький фри ручной нарезки",
+      "price": "600",
+      "composition": ["картофель"],
+      "name": "МАЛЕНЬКИЙ ФРИ РУЧНОЙ НАРЕЗКИ",
+      "type": "fries",
+      "image": "HandCut_Fries_Small.png"
+    },
+    {
+      "item_id": 10,
+      "description": "Куриная грудка с хрустящей панировкой и соусом",
+      "short_description": "Хрустящие наггетсы из куриной грудки",
+      "price": "1300",
+      "composition": ["куриная грудка"],
+      "name": "КУРИНЫЕ НАГГЕТСЫ",
+      "type": "nuggets",
+      "image": "Chicken_PopCorn_Nuggets.png"
+    },
+    {
+      "item_id": 11,
+      "description": "Греческий салат, приготовленный в средиземноморском стиле",
+      "short_description": "Свежий греческий салат средиземноморский",
+      "price": "900",
+      "composition": ["помидоры", "огурцы", "смешанная зелень", "оливки", "дикий орегано"],
+      "name": "ГРЕЧЕСКИЙ САЛАТ",
+      "type": "salad",
+      "image": "Caeser_Salad.png"
+    },
+    {
+      "item_id": 12,
+      "description": "Салат Цезарь с хрустящей курицей — это свежее, вкусное блюдо, приправленное острым соусом и подчёркнутое текстурой сухариков.",
+      "short_description": "Свежий салат Цезарь с курицей",
+      "price": "1100",
+      "composition": ["хрустящая курица", "смешанная зелень", "помидоры", "сухарики", "соус Цезарь"],
+      "name": "САЛАТ ЦЕЗАРЬ",
+      "type": "salad",
+      "image": "Greek_Salad.png"
+    },
+    {
+      "item_id": 13,
+      "description": "Чистая, освежающая вода без газа",
+      "short_description": "Чистая освежающая негазированная вода",
+      "price": "400",
+      "composition": ["вода"],
+      "name": "ВОДА",
+      "type": "beverage",
+      "image": "Water.png"
+    },
+    {
+      "item_id": 14,
+      "description": "Армянская природная минеральная вода, слегка газированная",
+      "short_description": "Слабо газированная армянская минералка",
+      "price": "400",
+      "composition": ["минеральная вода"],
+      "name": "ДЖЕРМУК",
+      "type": "beverage",
+      "image": "Jermuk.png"
+    },
+    {
+      "item_id": 15,
+      "description": "Газированный, сладкий освежающий напиток",
+      "short_description": "Сладкий газированный напиток Пепси",
+      "price": "500",
+      "composition": ["Pepsi"],
+      "name": "ПЕПСИ",
+      "type": "beverage",
+      "image": "Pepsi.png"
+    },
+    {
+      "item_id": 16,
+      "description": "Вкусный газированный напиток с апельсиновым вкусом",
+      "short_description": "Апельсиновый газированный напиток Миринда",
+      "price": "500",
+      "composition": ["Mirinda"],
+      "name": "МИРИНДА",
+      "type": "beverage",
+      "image": "Mirinda.png"
+    },
+    {
+      "item_id": 17,
+      "description": "Лёгкое мексиканское пиво с освежающим вкусом",
+      "short_description": "Освежающее лёгкое пиво Корона",
+      "price": "1600",
+      "composition": ["Corona Extra"],
+      "name": "КОРОНА ЭКСТРА",
+      "type": "beverage",
+      "image": "Corona_Extra.png"
+    },
+    {
+      "item_id": 18,
+      "description": "Кофе с насыщенным вкусом и нежной кремовой пенкой",
+      "short_description": "Насыщенный кофе с кремовой пенкой",
+      "price": "1500",
+      "composition": ["кофе", "вода", "сливки", "какао"],
+      "name": "КАФЕ КРЕМА",
+      "type": "beverage",
+      "image": "Cafe_Crema.png"
+    },
+    {
+      "item_id": 19,
+      "description": "Освежающий напиток с яркими вкусами клубники и малины",
+      "short_description": "Клубнично-малиновый освежающий напиток",
+      "price": "1600",
+      "composition": ["клубника", "малина", "вода", "сливки"],
+      "name": "КЛУБНИКА И МАЛИНА",
+      "type": "beverage",
+      "image": "Strawberry_Raspberry.png"
+    },
+    {
+      "item_id": 20,
+      "description": "Сладкий молочный напиток с уникальным вкусом печенья Oreo",
+      "short_description": "Молочный напиток с вкусом Орео",
+      "price": "1400",
+      "composition": ["молоко", "печенье Oreo", "сахар", "сливки"],
+      "name": "ОРЕО",
+      "type": "beverage",
+      "image": "Oreo.png"
+    },
+    {
+      "item_id": 21,
+      "description": "Сладкий и острый соус с гармоничным сочетанием мёда и горчицы",
+      "short_description": "Медово-горчичный сладко-острый соус",
+      "price": "200",
+      "composition": ["горчица", "мёд", "майонез", "уксус"],
+      "name": "МЁД И ГОРЧИЦА",
+      "type": "sauce",
+      "image": "Honey_Mustard.png"
+    },
+    {
+      "item_id": 22,
+      "description": "Вкусный чесночный соус с бархатистой текстурой",
+      "short_description": "Чесночный соус с бархатистой текстурой",
+      "price": "200",
+      "composition": ["чеснок", "майонез", "йогурт", "лимонный сок"],
+      "name": "ЧЕСНОЧНЫЙ СОУС",
+      "type": "sauce",
+      "image": "Garlic_Sauce.png"
+    },
+    {
+      "item_id": 23,
+      "description": "Насыщенный соус с сыром чеддер и копчёным вкусом паприки",
+      "short_description": "Чеддер с копчёной паприкой",
+      "price": "300",
+      "composition": ["сыр чеддер", "паприка", "молоко", "сливочное масло"],
+      "name": "ЧЕДДЕР ПАПРИКА",
+      "type": "sauce",
+      "image": "Cheddar_Paprika.png"
+    },
+    {
+      "item_id": 24,
+      "description": "Острый и свежий соус с ярким вкусом халапеньо",
+      "short_description": "Острый соус с халапеньо",
+      "price": "200",
+      "composition": ["халапеньо", "уксус", "сахар", "чеснок"],
+      "name": "ЧИЛИ ХАЛАПЕНЬО",
+      "type": "sauce",
+      "image": "Chili_Jalapeno.png"
+    },
+    {
+      "item_id": 25,
+      "description": "Копчёный, кисло-сладкий соус для барбекю",
+      "short_description": "Копчёный кисло-сладкий соус барбекю",
+      "price": "200",
+      "composition": ["томатная паста", "коричневый сахар", "уксус", "паприка"],
+      "name": "БАРБЕКЮ",
+      "type": "sauce",
+      "image": "BBQ.png"
+    },
+    {
+      "item_id": 26,
+      "description": "Кисло-сладкий соус с кусочками овощей",
+      "short_description": "Кисло-сладкий овощной соус релиш",
+      "price": "300",
+      "composition": ["маринованные огурцы", "сахар", "уксус", "горчица"],
+      "name": "РЕЛИШ",
+      "type": "sauce",
+      "image": "Relish.png"
+    }
+  ]
+]
