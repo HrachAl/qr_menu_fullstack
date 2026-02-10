@@ -1,0 +1,1439 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+:root {
+  --pon-family:'Pontano Sans';
+  --mon-family: 'Montserrat';
+}
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+body {
+  background: var(--bg-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  transition: background 0.3s;
+}
+p, h1, h2, h3, h4, h5, button   {
+  font-family: var(--mon-family);
+}
+.App {
+  width: 500px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+main {
+  width: 100%;
+  height: 260px;
+  background: linear-gradient(90deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+ .mainRecTitle {
+  position: absolute;
+  top: 12px;
+  left: 16px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  letter-spacing: 0.2px;
+ }
+
+ .mainRecLoading {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+ }
+
+ .mainRecLoadingText {
+  font-size: 13px;
+  color: var(--text-secondary);
+ }
+
+main .swiper {
+  width: 100%;
+  height: 100%;
+}
+
+main .swiper .mainSlide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: .5rem;
+}
+main .swiper .mainSlide .slideTop {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .5rem;
+  width: 100%;
+  height: 47%;
+}
+main .swiper .mainSlide .slideLeft,
+main .swiper .mainSlide .slideRight {
+  width: 50%;
+  height: 100%;
+}
+
+main .swiper .mainSlide .slideLeft img {
+  width: 100%;
+  object-fit: contain;
+  height: 105%;
+}
+main .swiper .mainSlide .slideRight h3 {
+  font-size: 20px;
+  color: var(--text-heading);
+  margin-bottom: 15px;
+}
+main .swiper .mainSlide .slideRight p {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+main .swiper .mainSlide .slideBottom {
+  height: 50px;
+  width: 90%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+main .swiper .mainSlide .slideBottom .bottomBlock {
+  width: 50%;
+  height: 100%;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 1rem;
+}
+main .swiper .mainSlide .slideBottom .bottomBlock .block {
+  background: var(--bg-block);
+  color: var(--text-muted);
+  font-family: var(--mon-family);
+  padding: 3px 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  z-index: 10 ;
+  cursor: pointer;
+}
+main .swiper .mainSlide .slideBottom .bottomBlock .block.first {
+  flex-direction: column;
+}
+main .swiper .mainSlide .slideBottom .bottomBlock .block.second {
+  padding: 9px 12px;
+  gap: .5rem;
+}
+main .swiper .mainSlide .slideBottom .bottomBlock .block.third {
+  padding: 11px;
+}
+main .swiper .mainSlide .slideBottom .bottomBlock .block .blockText {
+  text-align: center;
+  font-weight: 300;
+  font-size: 8px;
+
+}
+main .swiper .mainSlide .slideBottom .bottomPrice {
+  width: 45%;
+  height: 100%;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  gap: .5rem;
+  color: var(--text-price);
+}
+main .swiper .mainSlide .slideBottom .bottomPrice .price {
+  font-size: 15px;
+  translate: 0 4px;
+}
+main .swiper .mainSlide .slideBottom .bottomPrice .price span {
+  font-size: 10px;
+  translate: 0 3px;
+}
+main .checkBox {
+  position: absolute;
+  width: 90%;
+  height: 4px;
+  bottom: 13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 3rem;
+  z-index: 90;
+  cursor: pointer;
+}
+main .checkBox .check {
+  width: 70px;
+  height: 100%;
+  background: var(--check-bg);
+}
+main .checkBox .check.active {
+  background: var(--check-active);
+}
+.mainLoad {
+  --d:22px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  color: var(--text-primary);
+  box-shadow: 
+    calc(1*var(--d))      calc(0*var(--d))     0 0,
+    calc(0.707*var(--d))  calc(0.707*var(--d)) 0 1px,
+    calc(0*var(--d))      calc(1*var(--d))     0 2px,
+    calc(-0.707*var(--d)) calc(0.707*var(--d)) 0 3px,
+    calc(-1*var(--d))     calc(0*var(--d))     0 4px,
+    calc(-0.707*var(--d)) calc(-0.707*var(--d))0 5px,
+    calc(0*var(--d))      calc(-1*var(--d))    0 6px;
+  animation: l27 1s infinite steps(8);
+}
+@keyframes l27 {
+  100% {transform: rotate(1turn)}
+}
+.container {
+  width: 500px;
+  top: 0;
+  left: auto;
+  z-index: 25;
+  background: linear-gradient(90deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  transition: .3s;
+}
+.container .buttons {
+  height: 40px;
+  display: flex;
+  align-items: center;
+}
+.container .buttons ul {
+  display: flex;
+  width: 100%;
+  align-items: end;
+  list-style: none;
+  gap: 3rem;
+  position: relative;
+  height: 100%;
+  padding: 0 5px;
+  overflow: auto;
+  white-space: nowrap;
+}
+.container .buttons ul::-webkit-scrollbar {
+  display: none;
+}
+.container .buttons  ul li {
+  background: transparent;
+  display: inline-block;
+  z-index: 1;
+  position: relative;
+}
+.container .buttons ul li a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  font-family: var(--pon-family);
+  background: transparent;
+  cursor: pointer;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.container .buttons ul .active {
+  position: absolute;
+  bottom: 0;
+  height: 100%;
+  cursor: pointer;
+  background: var(--active-tab-bg);
+  transition: .3s;
+  z-index: 0;
+  transition: all .3s ease;
+  border-radius: 0 0 2px 2px;
+}
+.menuList-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 3rem;
+  padding-top: 20px;
+  background: linear-gradient(90deg, var(--bg-menu-gradient-start), var(--bg-menu-gradient-end));
+}
+.menuList-container .bigestBox {
+  display: flex;
+  padding-left: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 100%;
+}
+.menuList-container .type-heading {
+  width: 100%;
+  padding-left: 20px;
+  margin-bottom: -10px;
+  color: var(--text-primary);
+  font-family: var(--pon-family);
+}
+.backMenu-box {
+  width: 100%;
+  display: flex;
+  row-gap: 1rem;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  padding: 0 20px 100px;
+}
+.menuList-container .menu-item {
+  padding: 7px 7px 0 7px;
+  width: 45%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: .5rem;
+  height: 210px ;
+  border-radius: 12px;
+  background: var(--bg-card);
+  transition: background 0.3s;
+}
+.menu-item .image {
+  width: 100%;
+  height: 55%;
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: var(--shadow-card);
+  background: var(--bg-image-card);
+  cursor: pointer;
+}
+.menu-item .image img {
+  height: 90%;
+}
+.menu-item .text {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  height: 37%;
+  gap: .5rem;
+}
+.menu-item .text .name {
+  color: var(--text-primary);
+  font-family: var(--mon-family);
+}
+.menu-item .text .name h4 {
+    font-size: 17px;
+}
+.menu-item .text .name p {
+  font-size: 11px;
+}
+.menuItem-priceBox {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-primary);
+}
+.menuItem-priceBox .menuItem-price {
+  font-size: 19px;
+  font-family: var(--pon-family);
+  font-weight: 700;
+}
+.menuItem-priceBox .menuItem-price span {
+  font-size: 10px;
+  margin-left: 2px;
+}
+.buy {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--accent);
+  width: 96px;
+  height: 35px;
+  border-radius: 12px;
+  gap: 15px;
+}
+.buy button {
+  border: none;
+  background: none;
+  outline: none;
+  color: var(--text-white);
+  font-size: 30px;
+  cursor: pointer;
+  font-weight: 500;
+}
+.buy .min {
+  translate: 0 -2.5px;
+}
+.buy p {
+  font-family: var(--pon-family);
+}
+.cart-box {
+  position: fixed;
+  width: 460px;
+  bottom: 5px;
+  background: var(--accent);
+  border-radius: 25px;
+  height: 55px;
+  z-index: 90;
+  left: 50%;
+  translate: -50% 0;
+  cursor: pointer;
+  transition: all .3s, background 0s, bottom 0s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.cartBack {
+  width: auto;
+  height: auto;
+  position: fixed;
+  bottom: 60px;
+  left: 50%;
+  translate: -50% 0;
+  font-size: 30px;
+  color: var(--text-white);
+  transition: .3s;
+  z-index: 89;
+  cursor: pointer;
+}
+.cartBack .cartClose {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  translate: -50% 0;
+  transform: rotate(180deg);
+  transition: .3s;
+}
+.cartBack.backActive {
+  width: 500px;
+  height: 100vh;
+  background: var(--bg-overlay);
+  bottom: 0;
+}
+.cartBack.backActive .cartClose {
+  transform: rotate(0deg);
+  bottom: 580px;
+}
+.cart-box .cartPrice {
+  height: 80%;
+  width: 91%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+  color: var(--text-white);
+}
+.cart-box .cartPrice .totalPrice h5 {
+  font-size: 10px;
+  font-weight: 400;
+  font-family: var(--mon-family);
+  margin-bottom: 3px;
+}
+.cart-box .cartPrice .totalPrice .total {
+  font-family: var(--pon-family);
+  display: flex;
+  align-items: end;
+  gap: .1rem;
+  font-size: 18px;
+}
+.cart-box .cartPrice .totalPrice .total span {
+  font-size: 10px;
+}
+.submit {
+  height: 100%;
+}
+.submit button {
+  width: 120px;
+  height: 100%;
+  border-radius: 25px;
+  border: none;
+  outline: none;
+  background: var(--bg-submit-btn);
+  color: var(--text-white);
+  font-family: var(--pon-family);
+  letter-spacing: 1px;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 50;
+  
+}
+.cart-content {
+  border-radius: 25px 25px 0 0;
+  position: fixed;
+  bottom: -593px;
+  left: 50%;
+  translate: -50% 0;
+  background: var(--bg-cart-content);
+  width: 500px;
+  height: 590px;
+  z-index: 99;
+  transition: .3s;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 10px 0;
+}
+.cart-content.contAct {
+  bottom: 0;
+}
+.cart-content .cartItems {
+  width: 92%;
+  height: 50%;
+  overflow: auto;
+  scrollbar-gutter: stable;
+  box-shadow: var(--shadow-cart);
+}
+.cart-content .cartItems::-webkit-scrollbar {
+  width: 5px;
+  height: 12px;
+}
+.cart-content .cartItems::-webkit-scrollbar-thumb {
+  background-color: var(--bg-scrollbar);
+}
+.cart-content .cartItems .cartItem {
+  width: 100%;
+  height: 90px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+}
+.cart-content .cartItems .cartItem .cartItemImg {
+  height: 80%;
+  width: 124px;
+  display: flex;
+  justify-content: center;
+}
+
+
+.cart-content .cartItems .cartItem .cartItemImg img {
+  height: 100%;
+  border-radius: 12px;
+}
+.cart-content .cartItems .cartItem .itemInfo {
+  height: 80%;
+  width: 47%;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+}
+.cart-content .cartItems .cartItem .itemInfo .itemName {
+  font-size: 15px;
+  color: var(--text-primary);
+  font-family: var(--pon-family);
+}
+.cart-content .cartItems .cartItem .itemInfo .itemComp {
+  font-size: 11px;
+  color: var(--text-primary);
+  font-family: var(--mon-family);
+}
+.cart-content .cartItems .cartItem .itemInfo .itemPrice {
+  font-family: var(--pon-family);
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--text-price);
+}
+.cart-content .cartItems .cartItem .itemInfo .itemPrice span {
+  font-size: 10px;
+  margin-left: 3px;
+}
+.cart-content .cartItems .cartItem .cartButton {
+  background: var(--accent-hover);
+  height: 25px;
+  border-radius: 12px;
+  width: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  gap: 1rem;
+}
+.cart-content .cartItems .cartItem .cartButton button {
+  border: none;
+  background: none;
+  color: var(--text-white);
+  font-size: 30px;
+  font-family: var(--pon-family);
+  cursor: pointer;
+}
+.cart-content .cartItems .cartItem .cartButton button.remCart {
+  translate: 0 -3.7px;
+}
+.cart-content .cartItems .cartItem .cartButton p {
+  font-size: 17px;
+  font-weight: 100;
+  font-family: var(--pon-family);
+}
+.cartConf {
+  width: 92%;
+  height: 45px;
+  background: var(--accent-hover);
+  border-radius: 25px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  color: var(--text-white);
+  cursor: pointer;
+}
+.cartConf .conPrice {
+  font-size: 15px;
+  font-family: var(--pon-family);
+  font-weight: bold;
+}
+.cartConf .conPrice span {
+  font-size: 10px;
+  margin-left: 1px;
+}
+.cartConf .confirm {
+  width: 50%;
+  font-size: 17px;
+  font-family: var(--pon-family);
+  letter-spacing: .5px;
+  font-weight: 300;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.cartConf .confTime {
+  font-family: var(--pon-family);
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.cartConf .confTime .time {
+  display: flex;
+  gap: .1rem;
+  font-size: 17px;
+}
+.cartConf .confTime .time span {
+  font-size: 13px;
+  translate: 0 4px;
+}
+.cartConf .confTime .min {
+  font-size: 10px;
+  font-weight: 300;
+}
+.cart-content .backItem {
+  width: 92%;
+  height: 37%;
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+.cart-content .backItem .rec {
+  color: var(--text-price);
+}
+.cart-content .backItem .backItemBox {
+  display: flex;
+  width: 100%;
+  gap: 1.7rem;
+  height: 160px;
+  overflow-x: auto;
+  align-items: center;
+}
+.cart-content .backItem .backItemBox .backItemScroll {
+  display: flex;
+  gap: 1.7rem;
+  height: 160px;
+  align-items: center;
+}
+.cart-content .backItem .backItemBox .backItem_item {
+  width: 129px;
+  height: 100%;
+  background: var(--bg-cart-item);
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  gap: 1.2rem;
+  padding: 5px 5px;
+  height: 100%;
+  background: var(--bg-cart-item);
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  gap: 1.2rem;
+  padding: 5px 5px;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_info {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 60%;
+  gap: 2px;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_info .backItem_image {
+  width: 100%;
+  display: flex;
+  background: var(--bg-image-card);
+  justify-content: center;
+  border-radius: 15px;
+  height: 80%;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_info .backItem_image img {
+  width: 100%;
+  object-fit: contain;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_info .backItem_name {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_info p {
+  color: var(--text-primary);
+  width: 98%;
+  font-size: 12px;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_sub {
+  height: 28%;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_sub .backItem_price {
+  color: var(--text-price);
+  font-size: 13px;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_sub .backItem_price span {
+  font-size: 10px;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_sub .backItem_add {
+  width: 100%;
+  border-radius: 15px;
+  background: var(--accent);
+  font-size: 13px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2px 0;
+  color: var(--text-white);
+  border: none;
+  margin-top: 4px;
+  gap: 1rem;
+  height: 20px;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_sub .backItem_add button {
+  background: none;
+  border: none;
+  color: var(--text-white);
+  font-size: 22px;
+}
+.cart-content .backItem .backItemBox .backItem_item .backItem_sub .backItem_add button.min {
+  translate: 0 -2px;
+}
+.backLoad {
+  margin-left: 50%;
+  --d:22px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  color: var(--text-primary);
+  box-shadow: 
+    calc(1*var(--d))      calc(0*var(--d))     0 0,
+    calc(0.707*var(--d))  calc(0.707*var(--d)) 0 1px,
+    calc(0*var(--d))      calc(1*var(--d))     0 2px,
+    calc(-0.707*var(--d)) calc(0.707*var(--d)) 0 3px,
+    calc(-1*var(--d))     calc(0*var(--d))     0 4px,
+    calc(-0.707*var(--d)) calc(-0.707*var(--d))0 5px,
+    calc(0*var(--d))      calc(-1*var(--d))    0 6px;
+  animation: l27 1s infinite steps(8);
+}
+@keyframes l27 {
+  100% {transform: rotate(1turn)}
+}
+.prod {
+  position: fixed;;
+  width: 500px;
+  height: 430px;
+  left: 50%;
+  translate: -50% 0;
+  background: var(--bg-product);
+  z-index: 99;
+  bottom: -430px;
+  transition: .1s;
+  border-radius: 25px 25px 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.prod.prodAct {
+  bottom: 0;
+}
+.prodBG {
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  width: 500px;
+  cursor: pointer;
+  z-index: 98;
+  background: var(--bg-overlay-light);
+}
+.prodBG p {
+  position: absolute;
+  width: 100%;
+  color: var(--text-white);
+  left: 0;
+  top: calc(100vh - 460px);
+  font-size: 30px;
+  text-align: center;
+}
+.prod .prodCont {
+  width: 90%;
+  height: 98%;
+}
+.prod .prodCont .prodImg {
+  width: 100%;
+  height: 60%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.prod .prodCont .prodImg img {
+  height: 100%;
+}
+.prod .prodCont .prodInf {
+  color: var(--text-primary);
+  height: 74px;
+  overflow: auto;
+}
+.prod .prodCont .prodInf h5 {
+  font-size: 18px;
+  font-family: var(--pon-family);
+}
+.prod .prodCont .prodInf p {
+  font-size: 13px;
+  font-family: var(--pon-family);
+  letter-spacing: .5px;
+}
+.prodBut {
+  width: 100%;
+  height: 75px;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+  gap: 0px;
+}
+.prodBut .prodCount {
+  width: 25%;
+  height: 60%;
+  background: var(--bg-block);
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+}
+.prodBut .prodCount button {
+  color: var(--text-white);
+  background: none;
+  border: none;
+  font-size: 25px;
+  font-family: var(--pon-family);
+  font-weight: 100;
+  cursor: pointer;
+}
+.prodBut .prodCount p {
+  color: var(--text-white);
+  font-family: var(--pon-family);
+  font-size: 18px;
+  font-weight: 100;
+} 
+.prodBut .prodCount button.min {
+  translate: 0 -3px;
+} 
+.prodBut .prodAdd {
+  width: 70%;
+  height: 80%;
+  display: flex;
+  justify-content: end;
+  align-items: end; 
+  gap: .1rem;
+  flex-direction: column;
+}
+.prodBut .prodAdd .prodPrice {
+  font-size: 13px;
+  color: var(--text-price);
+  font-family: var(--pon-family);
+}
+.prodBut .prodAdd .prodSub {
+  background: var(--accent-hover);
+  border: none;
+  border-radius: 15px;
+  width: 80%;
+  height: 70%;
+  color: var(--text-white);
+  font-family: var(--pon-family);
+  font-size: 17px;
+  cursor: pointer;
+}
+.buyHistoryOpen {
+  position: absolute;
+  z-index: 80;
+  top: 7px;
+  left: 92%;
+  color: var(--text-white);
+  font-size: 30px;
+  transition: 0.3s;
+  cursor: pointer;
+}
+.buyHistoryOpen .openCount {
+  position: absolute;
+  bottom: 60%;
+  left: 55%;
+  color: var(--accent-badge-text);
+  font-size: 12px;
+  border-radius: 50%;
+  background: var(--accent-badge);
+  padding: 1px 6px;
+}
+.buyHistoryBox {
+  position: fixed;
+  bottom: -470px;
+  left: 50%;
+  translate: -50% 0;
+  width: 500px;
+  height: 470px;
+  background: var(--bg-buy-history);
+  z-index: 110;
+  transition: .3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+.buyHistoryBox.buyHistoryShow {
+  bottom: 0;
+}
+.buyHistoryBg {
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+  z-index: 100;
+  background: var(--bg-overlay-light);
+  top: 0;
+  left: 0;
+  cursor: pointer;
+}
+.buyHistoryBg p {
+  position: absolute;
+  bottom: 510px;
+  left: 50%;
+  translate: -50% 0;
+  color: var(--text-white);
+  font-size: 40px;
+}
+.buyHistoryBox .buyHistoryButton {
+  height: 50px;
+  width: 90%;
+  border-radius: 25px;
+  background: var(--accent);
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+  align-items: center;
+}
+.buyHistoryBox .buyHistoryButton .buyHistoryTotal {
+  color: var(--text-white);
+}
+.buyHistoryBox .buyHistoryButton .buyHistoryTotal .first {
+  font-size: 13px;
+  font-weight: 300;
+}
+.buyHistoryBox .buyHistoryButton .buyHistoryTotal .second {
+  font-size: 15px;
+}
+.buyHistoryBox .buyHistoryButton .buyHistoryTotal .second span {
+  font-size: 10px;
+  margin-left: 2px;
+}
+.buyHistoryBox .buyHistoryButton button {
+  background: var(--bg-submit-btn);
+  border: none;
+  border-radius: 25px;
+  width: 125px;
+  color: var(--text-white);
+  height: 40px;
+  cursor: pointer;
+}
+.buyHistoryBox .buyItems {
+  width: 90%;
+  height: 75%;
+  display: flex;
+  flex-direction: column;
+  gap: .1rem;
+  overflow: auto;
+}
+.buyHistoryBox .buyItems .buyItem {
+  width: 100%;
+  height: 90px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: .4rem;
+  border-bottom: 1px solid var(--border-buy-item);
+  padding-bottom: 5px;
+}
+.buyHistoryBox .buyItems .buyItem .buyItemImage {
+  height: 100%;
+  background: var(--bg-image-card);
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  width: 147px;
+}
+.buyHistoryBox .buyItems .buyItem .buyItemImage img {
+  height: 100%;
+}
+.buyHistoryBox .buyItems .buyItem .buyItemInf {
+  width: 50%;
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  gap: .2rem;
+}
+.buyHistoryBox .buyItems .buyItem .buyItemInf h5 {
+  font-size: 15px;
+}
+.buyHistoryBox .buyItems .buyItem .buyItemInf .info {
+  font-size: 11.4px;
+  width: 95%;
+}
+.buyHistoryBox .buyItems .buyItem .buyItemInf .itemPrice {
+  font-size: 13px;
+}
+.buyHistoryBox .buyItems .buyItem .buyItemInf .itemPrice span {
+  font-size: 10px;
+}
+.buyHistoryBox .buyItems .buyItem .buyItemButton {
+  background: var(--accent);
+  color: var(--text-white);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .5rem;
+  width: 73px;
+  height: 30px;
+  border-radius: 15px;
+}
+.buyHistoryBox .buyItems .buyItem .buyItemButton .icon {
+  font-size: 30px;
+}
+.buyHistoryBox .buyItems .buyItem .buyItemButton .min {
+  translate: 0 -2px;
+}
+.langButton {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  color: var(--text-white);
+  font-size: 15px;
+  font-weight: 100;
+  height: 20px;
+  width: 25px;
+  overflow: hidden;
+  z-index: 50;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  transition: .3s;
+}
+.langButton .lang {
+  border-bottom: 1px solid var(--border-lang);
+  width: 20px;
+}
+.langButton .lang .box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  
+}
+.langButton .lang.arm {
+  width: 35px;
+}
+.dragContainer {
+  width: 50px;
+  height: 50px;
+  background: var(--accent);
+  cursor: pointer;
+  position: fixed;
+  z-index: 90;
+  border-radius: 50%;
+  transition: .1s;
+}
+.dragContainer img {
+  width: 100%;
+}
+.dragContainer.chatActive {
+  bottom: calc(15% + 515px) !important;
+  left: 50% !important;
+  translate: -50% 0;
+  transition: .3s;
+}
+.chatBox .Chat {
+  padding: 10px 5px 10px 5px;
+  margin-top: 20px;
+  height: 80%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 1rem;
+}
+.chatBox .Chat .ChatScrollBox {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.chatBox .Chat .message {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+}
+.chatBox .Chat .message.sent {
+  align-items: end;
+}
+.chatBox .Chat .message.sent .messageBox {
+  width: auto;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  background: var(--bg-chat-sent);
+  padding: 5px 15px 5px 12px;
+  border-radius: 10px 10px 0px 10px;
+}
+.chatBox .Chat .message.sent .messageBox p {
+  color: var(--text-white);
+}
+.chatBox .Chat .message .messageBox small {
+  font-size: 9px;
+  color: var(--text-white);
+  width: 100%;
+  text-align: end;
+  font-family: var(--pon-family);
+}
+.chatBox .Chat .message.received {
+  align-items: start;
+  margin-bottom: 5px;
+}
+.chatBox .Chat .message.received .messageBox {
+  width: auto;
+  max-width: 270px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  background: var(--bg-chat-received);
+  padding: 5px 15px 5px 10px;
+  border-radius: 10px 10px 10px 0px;
+}
+.chatBox .Chat .message.received .messageBox p {
+  color: var(--text-primary);
+}
+.botChat-recommendBox {
+  height: 200px;
+  display: flex;
+  position: relative;
+  background: var(--bg-chat-received);
+  padding-left: 15px;
+  overflow: auto;
+}
+.addAll {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  width: 200px;
+  background: var(--accent);
+  height: 30px;
+  border-radius: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.addAll button {
+  width: 95%;
+  height: 100%;
+  border: none;
+  cursor: pointer;
+  color: var(--text-white);
+  background: none;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.addAll button .priceAll {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.addAll button .priceAll .allTot {
+  font-family: var(--pon-family);
+  font-size: 9px;
+}
+.addAll button .priceAll p {
+  font-size: 12px;
+}
+.addAll button .priceAll p small {
+  font-size: 9px;
+}
+.addAll button .button {
+  color: var(--text-primary);
+  font-size: 12px;
+}
+.botChatRec-scroll {
+  width: auto;
+  height: 150px;
+  display: flex;
+  gap: 1rem;
+  background: transparent;
+  align-items: center;
+}
+.botChat-recommendBox .botChat-recommend {
+  width: 123px;
+  height: 80%;
+  background: var(--bg-chat-recommend);
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  padding: 5px 5px 0;
+  gap: 1rem;
+}
+.botChat-recommendBox .botChat-recommend .backRecomend_item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 53%;
+  gap: 2px;
+}
+.botChat-recommendBox .botChat-recommend .backRecomend_item .image {
+  width: 100%;
+  display: flex;
+  border-radius: 15px;
+  box-shadow: var(--shadow-card);
+  background: var(--bg-image-card);
+  justify-content: center;
+  height: 90%;
+}
+.botChat-recommendBox .botChat-recommend .backRecomend_item .image img {
+  width: 80%;
+  object-fit: contain;
+}
+.botChat-recommendBox .botChat-recommend .backRecomend_item .itemName {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.botChat-recommendBox .botChat-recommend .backRecomend_item .itemName p {
+  color: var(--text-primary);
+  width: 98%;
+  font-size: 12px;
+}
+.botChat-recommendBox .botChat-recommend .backRec_sub {
+  height: 28%;
+}
+.botChat-recommendBox .botChat-recommend .backRec_sub .backRec_price {
+  color: var(--text-price);
+  font-size: 13px;
+}
+.botChat-recommendBox .botChat-recommend .backRec_sub .backRec_price span {
+font-size: 10px;
+}
+.botChat-recommendBox .botChat-recommend .backRec_sub .backItem_add {
+  width: 100%;
+  border-radius: 25px;
+  background: var(--accent);
+  font-size: 11px;
+  margin-top: 1px;
+  color: var(--text-white);
+  border: none;
+  padding: 3px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.2rem;
+  height: 17px;
+  overflow: hidden;
+}
+.botChat-recommendBox .botChat-recommend .backRec_sub .backItem_add button {
+  border: none;
+  background: transparent;
+  outline: none;
+  color: var(--text-white);
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 600;
+}
+.botChat-recommendBox .botChat-recommend .backRec_sub .backItem_add button.min {
+  translate: 0px -2px;
+}
+.dragBg {
+  width: 100%;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: var(--bg-overlay-light);
+  z-index: 90;
+  cursor: pointer;
+}
+.chatBox{
+  position: fixed;
+  bottom: 15%;
+  left: 50%;
+  translate: -50% 0;
+  width: 450px;
+  height: 500px;
+  background: var(--bg-chat-box);
+  transition: .3s;
+  z-index: 90;
+  clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
+  opacity: 0;
+  border-radius: 25px;
+}
+.chatBox.activeChat {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  opacity: 1;
+}
+.chatBox .chatInput {
+  width:100%;
+  height: 70px;
+  position: absolute;
+  bottom: 5%;
+  display: flex;
+  justify-content: center;
+  align-items: end;
+}
+.chatBox .chatInput form {
+  width: 90%;
+  height: 70%;
+  display: flex;
+}
+.chatBox .chatInput form input {
+  background: transparent;
+  color: var(--text-primary);
+  border: .5px solid var(--border-input);
+  border-right: none;
+  padding-left: 20px;
+  width: 80%;
+  height: 100%;
+  border-radius: 15px 0 0 15px;
+  outline: none;
+}
+.chatBox .chatInput form button {
+  width: 15%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  outline: none;
+  border-radius: 0 15px 15px 0;
+  border: .5px solid var(--border-input);
+  height: 100%;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 20px;
+}
+.chatWait {
+  position: absolute;
+  bottom: 80px;
+  left: 25px;
+  width: 50px;
+  height: 15px;
+  background: var(--bg-chat-received);
+  border-radius: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+}
+.chatWait .circle {
+  border-radius: 50%;
+  width: 5px;
+  height: 5px;
+  background: var(--text-primary);
+
+}
+.chatWait .circle.first {
+  animation: wait 2s -.5s infinite;
+}
+.chatWait .circle.second {
+  animation: wait 2s 0s infinite;
+}
+.chatWait .circle.third {
+  animation: wait 2s .5s infinite;
+}
+@keyframes wait {
+  0%, 100% {
+    translate: 0 0px;
+  }
+  50% {
+      translate: 0 -2px;
+  }
+}
+.handle {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-handle);
+  border-radius: 15px;
+}
+.langButton .box {
+  font-size: 21px;
+}
+
+/* ===== Mode Switcher ===== */
+.mode-switcher {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  z-index: 200;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.mode-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.mode-btn.theme-btn {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+.mode-btn.theme-btn:hover {
+  background: var(--accent);
+  color: var(--text-white);
+}
+.mode-btn.view-btn {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+.mode-btn.view-btn:hover {
+  background: var(--accent);
+  color: var(--text-white);
+}

@@ -1,0 +1,243 @@
+@media screen and (max-width: 500px) {
+    body {
+        display: block;
+    }
+    .App {
+        width: 100%;
+    }
+    .container {
+        width: 100%;
+    }
+    .prod {
+        width: 100%;
+    }
+    .prodBG {
+        width: 100%;
+    }
+    .cart-content {
+        width: 100%;
+    }
+    .cart-box {
+        width: 95%;
+    }
+    .buyHistoryBox {
+        width: 100%;
+    }
+    .chatBox{
+        width: 90%;
+    }
+}
+@media screen and (max-width: 491px) {
+    .container .buttons ul li a {
+        font-size: 14px;
+    }
+    .container .buttons ul {
+        justify-content: space-around;
+    }
+    .menu-item .text .name p {
+        font-size: 11px;
+    }
+    main .swiper .mainSlide .slideBottom .bottomBlock .block .blockNumber{
+        font-size: 12px;
+    }
+    .buyHistoryBox .buyItems .buyItem .buyItemImage {
+        height: 90%;
+    }
+}
+@media screen and (max-width: 451px) {
+    main .swiper .mainSlide .slideBottom {
+        width: 95%;
+    }
+    main .swiper .mainSlide .slideRight p {
+        font-size: 11px;
+    }
+    main .swiper .mainSlide .slideBottom .bottomBlock .block.third {
+        padding: 5px 7px;
+    }
+    main .swiper .mainSlide .slideBottom .bottomBlock .block.second {
+        padding: 5px 6px;
+        font-size: 13px;
+    }
+    main .swiper .mainSlide .slideBottom .bottomBlock .block.first {
+        padding: 0px 15px;
+    }
+    main {
+        height: 220px;
+    }
+    main .checkBox {
+        height: 3px;
+    }
+    main .checkBox .check {
+        width: 59px;
+    }
+    .container .buttons ul li a {
+        font-size: 13px;
+    }
+    .menuItem-priceBox .menuItem-price {
+        margin-top: 5px;
+        font-size: 16px;
+    }
+    .cart-content .cartItems .cartItem .itemInfo .itemComp {
+        font-size: 10px;
+    }
+    .cart-content .cartItems .cartItem {
+        gap: .5rem;
+    }
+    .cart-content .cartItems .cartItem .cartButton {
+        width: 70px;
+        gap: .5rem;
+        margin-right: 7px;
+    }
+    .menu-item .text .buy {
+        width: 88px;
+        height: 31px;
+        gap: 10px;
+        font-size: 14px;
+    }
+    main .checkBox {
+        gap: 1.5rem;
+    }
+    .buyHistoryBox .buyItems .buyItem .buyItemInf .info {
+        font-size: 11.4px;
+        width: 95%;
+    }
+    .buyHistoryBox .buyItems .buyItem .buyItemInf .info {
+        font-size: 9.4px;
+    }
+    .menuList-container .menu-item {
+        width: 47%;
+    }
+    .cart-content .backItem .rec {
+        font-size: 14px;
+    }
+}
+@media screen and (max-width: 401px) {
+    main .swiper .mainSlide .slideBottom .bottomBlock .block.first {
+        padding: 0px 10px;
+    }
+    main .swiper .mainSlide .slideBottom .bottomBlock .block.second {
+        padding: 5px 7px;
+        gap: .1rem;
+    }
+    main .swiper .mainSlide .slideBottom .bottomPrice .price {
+        font-size: 14px;
+        translate: 0 4px;
+    }
+    .container .buttons ul {
+        gap: 2rem;
+    }
+    .container .buttons ul li {
+        overflow: visible;
+    }
+    .buyHistoryOpen {
+        left: 90%;
+    }
+    .buyHistoryBox .buyItems .buyItem .buyItemImage img {
+        height: 69%;
+    }    
+    .buyHistoryBox .buyItems .buyItem .buyItemImage {
+        width: 110px;
+        align-items: center;
+    }
+    .buyHistoryBox .buyItems .buyItem .buyItemButton .icon {
+        font-size: 24px;
+    }
+    .buyHistoryBox .buyItems .buyItem .buyItemInf .itemPrice span {
+        font-size: 8px;
+    }
+    .buyHistoryBox .buyItems .buyItem .buyItemInf h5 {
+        font-size: 12px;
+    }
+
+}
+@media screen and (max-width: 400px) {
+    .menuList-container .menu-item {
+        height: 200px;
+    }
+    .menu-item .text {
+        height: 40%;
+    }
+    .menu-item .image {
+        height: 50%;
+    }
+    .prodBut .prodCount {
+        gap: 1rem;
+    }
+    .menu-item .image img {
+        height: 80%;
+    }
+    .menu-item .text .name h4 {
+        font-size: 16px;
+    }
+}
+@media screen and (max-width: 351px) {
+    main .swiper .mainSlide .slideBottom .bottomPrice .price span {
+        font-size: 8px;
+    }
+    main .swiper .mainSlide .slideBottom .bottomPrice .price {
+        font-size: 13px;
+    }
+    main .swiper .mainSlide .slideBottom .bottomBlock {
+        gap: 0.5rem;
+    }
+    main .swiper .mainSlide .slideBottom .bottomBlock .block.third {
+        padding: 5px 7px;
+        font-size: 12px;
+    }
+    main .swiper .mainSlide .slideBottom .bottomBlock .block.second {
+        padding: 5px 6px;
+        font-size: 10px;
+    }
+    main .swiper .mainSlide .slideBottom .bottomBlock .block .blockNumber {
+        font-size: 11px;
+    }
+    .menu-item .text .buy {
+        width: 60px;
+        height: 24px;
+        font-size: 12px;
+    }
+    .menu-item .text .buy button {
+        font-size: 22px;
+    }
+    .prodBut .prodCount {
+        gap: 0.5rem;
+    }
+    .cart-content .cartItems .cartItem .itemInfo .itemName {
+        font-size: 11px;
+    }
+    .cart-content .cartItems .cartItem .itemInfo .itemComp {
+        font-size: 9px;
+    }
+    .cart-content .cartItems .cartItem .cartButton button.remCart {
+        translate: 0 -2.7px;
+    }
+    .cart-content .cartItems .cartItem .cartButton button {
+        font-size: 20px;
+    }
+    .cartConf .confTime .min {
+        font-size: 10px;
+    }
+    .cartConf .confirm {
+        width: 35%;
+    }
+    .buyHistoryOpen {
+        left: 88%;
+    }
+    .buy p {
+        font-family: var(--pon-family);
+        font-size: 10px;
+    }
+    .prod .prodCont .prodInf p {
+        font-size: 11px;
+        font-family: var(--pon-family);
+        letter-spacing: .5px;
+    }
+    .menu-item .text .name h4 {
+    font-size: 14px;
+    }
+}
+@media screen and (max-width: 301px) {
+    .menu-item .image img {
+        height: 48%;
+    }
+}

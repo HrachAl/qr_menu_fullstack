@@ -1,0 +1,267 @@
+/* ===== MOBILE MODE STYLES ===== */
+/* When mobile mode is active, force the original 500px layout */
+
+body.mobile-mode {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+body.mobile-mode .App {
+  width: 500px;
+}
+
+body.mobile-mode .container {
+  width: 500px;
+}
+
+/* ===== DESKTOP MODE STYLES ===== */
+/* Applied when body has class "desktop-mode" */
+
+body.desktop-mode {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+}
+
+body.desktop-mode .App {
+  width: 1100px;
+  max-width: 95vw;
+}
+
+/* ---- Hero / MainRec ---- */
+body.desktop-mode main {
+  width: 100%;
+  height: 320px;
+  border-radius: 16px;
+  margin-top: 10px;
+}
+
+body.desktop-mode main .swiper .mainSlide .slideTop {
+  gap: 2rem;
+}
+
+body.desktop-mode main .swiper .mainSlide .slideLeft img {
+  height: 100%;
+  max-height: 200px;
+}
+
+body.desktop-mode main .swiper .mainSlide .slideRight h3 {
+  font-size: 26px;
+}
+
+body.desktop-mode main .swiper .mainSlide .slideRight p {
+  font-size: 15px;
+}
+
+body.desktop-mode main .swiper .mainSlide .slideBottom {
+  width: 80%;
+}
+
+body.desktop-mode main .swiper .mainSlide .slideBottom .bottomPrice .price {
+  font-size: 20px;
+}
+
+/* ---- Menu Navigation ---- */
+body.desktop-mode .container {
+  width: 1100px;
+  max-width: 95vw;
+  border-radius: 0 0 12px 12px;
+}
+
+body.desktop-mode .container .buttons {
+  height: 50px;
+}
+
+body.desktop-mode .container .buttons ul {
+  gap: 3rem;
+  justify-content: center;
+}
+
+body.desktop-mode .container .buttons ul li a {
+  font-size: 16px;
+}
+
+/* ---- Menu List (Grid) ---- */
+body.desktop-mode .menuList-container {
+  border-radius: 12px;
+  padding: 30px 20px;
+  gap: 2.5rem;
+}
+
+body.desktop-mode .menuList-container .bigestBox {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  padding-left: 0;
+  padding: 0 10px;
+}
+
+body.desktop-mode .menuList-container .type-heading {
+  grid-column: 1 / -1;
+  font-size: 22px;
+  padding-left: 10px;
+}
+
+body.desktop-mode .menuList-container .menu-item {
+  width: 100%;
+  height: 260px;
+  border-radius: 16px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+body.desktop-mode .menuList-container .menu-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body.desktop-mode .menu-item .image {
+  height: 58%;
+  border-radius: 14px;
+}
+
+body.desktop-mode .menu-item .image img {
+  height: 85%;
+  transition: transform 0.2s;
+}
+
+body.desktop-mode .menu-item:hover .image img {
+  transform: scale(1.05);
+}
+
+body.desktop-mode .menu-item .text .name h4 {
+  font-size: 17px;
+}
+
+body.desktop-mode .menu-item .text .name p {
+  font-size: 12px;
+}
+
+body.desktop-mode .menuItem-priceBox .menuItem-price {
+  font-size: 18px;
+}
+
+/* ---- Cart Bar ---- */
+body.desktop-mode .cart-box {
+  width: 600px;
+  max-width: 60vw;
+  height: 60px;
+  border-radius: 30px;
+}
+
+body.desktop-mode .cart-content {
+  width: 600px;
+  max-width: 70vw;
+  border-radius: 25px 25px 0 0;
+}
+
+body.desktop-mode .cartBack.backActive {
+  width: 100%;
+}
+
+/* ---- Product Modal ---- */
+body.desktop-mode .prod {
+  width: 600px;
+  max-width: 70vw;
+  height: 500px;
+  border-radius: 25px 25px 0 0;
+}
+
+body.desktop-mode .prodBG {
+  width: 100%;
+}
+
+body.desktop-mode .prod .prodCont .prodImg {
+  height: 55%;
+}
+
+body.desktop-mode .prod .prodCont .prodImg img {
+  max-height: 280px;
+}
+
+body.desktop-mode .prod .prodCont .prodInf {
+  height: 90px;
+}
+
+body.desktop-mode .prod .prodCont .prodInf h5 {
+  font-size: 22px;
+}
+
+body.desktop-mode .prod .prodCont .prodInf p {
+  font-size: 15px;
+}
+
+/* ---- Buy History ---- */
+body.desktop-mode .buyHistoryBox {
+  width: 600px;
+  max-width: 70vw;
+}
+
+body.desktop-mode .buyHistoryBg {
+  width: 100%;
+}
+
+body.desktop-mode .buyHistoryOpen {
+  position: fixed;
+  top: 15px;
+  right: 20px;
+  left: auto;
+  z-index: 80;
+  font-size: 32px;
+}
+
+/* ---- Chat Box ---- */
+body.desktop-mode .chatBox {
+  width: 420px;
+  height: 520px;
+  bottom: 12%;
+  border-radius: 20px;
+}
+
+body.desktop-mode .dragContainer {
+  width: 56px;
+  height: 56px;
+}
+
+body.desktop-mode .dragContainer.chatActive {
+  bottom: calc(12% + 535px) !important;
+}
+
+/* ---- Lang Button ---- */
+body.desktop-mode .langButton {
+  position: fixed;
+  top: 15px;
+  left: 20px;
+  z-index: 100;
+}
+
+/* ---- Scrollbar styling for desktop ---- */
+body.desktop-mode ::-webkit-scrollbar {
+  width: 6px;
+}
+
+body.desktop-mode ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body.desktop-mode ::-webkit-scrollbar-thumb {
+  background: var(--bg-scrollbar);
+  border-radius: 3px;
+}
+
+/* ---- Responsive for desktop mode on smaller screens ---- */
+@media screen and (max-width: 900px) {
+  body.desktop-mode .menuList-container .bigestBox {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media screen and (max-width: 700px) {
+  body.desktop-mode .menuList-container .bigestBox {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  body.desktop-mode .App {
+    max-width: 100vw;
+  }
+}

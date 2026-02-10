@@ -1,0 +1,101 @@
+/* ===== DARK THEME (default) ===== */
+body.theme-dark {
+  --bg-primary: #000;
+  --bg-secondary: #161616;
+  --bg-card: #292828;
+  --bg-gradient-start: #181818;
+  --bg-gradient-end: #2e2e2eb5;
+  --bg-menu-gradient-start: #161616;
+  --bg-menu-gradient-end: #282828b4;
+  --bg-input: transparent;
+  --bg-chat-box: linear-gradient(#181818, #191919);
+  --bg-chat-received: #2B2B2B;
+  --bg-chat-sent: #5C5C5C;
+  --bg-chat-recommend: #3A3A3A;
+  --bg-cart-content: #171717;
+  --bg-cart-item: #323232;
+  --bg-block: #676767;
+  --bg-product: #292624;
+  --bg-buy-history: linear-gradient(#171717, #181818);
+  --bg-overlay: #00000082;
+  --bg-overlay-light: #0000004e;
+  --bg-image-card: #d8d3ca;
+  --bg-submit-btn: #292624;
+  --bg-scrollbar: #4F4F4F;
+  --bg-handle: rgba(255, 255, 255, 0.163);
+
+  --text-primary: #CFCFCF;
+  --text-secondary: #BCBCBC;
+  --text-heading: #CECECE;
+  --text-white: #fff;
+  --text-price: white;
+  --text-muted: #E3E3E3;
+
+  --border-color: rgba(255, 255, 255, 0.058);
+  --border-input: rgba(255, 255, 255, 0.344);
+  --border-buy-item: rgba(255, 255, 255, 0.196);
+  --border-lang: rgba(255, 255, 255, 0.189);
+
+  --accent: #D4693B;
+  --accent-hover: #D2683B;
+  --accent-badge: #EC752A;
+  --accent-badge-text: #181818;
+
+  --shadow-card: 0 1px 18px 0 #000000b3;
+  --shadow-cart: 0px 6px 3px -4px #00000057;
+
+  --check-bg: #4a4a4a94;
+  --check-active: #4a4a4a;
+  --active-tab-bg: #161616;
+}
+
+/* ===== LIGHT THEME ===== */
+body.theme-light {
+  --bg-primary: #f5f5f5;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --bg-gradient-start: #e8e8e8;
+  --bg-gradient-end: #f0f0f0;
+  --bg-menu-gradient-start: #ffffff;
+  --bg-menu-gradient-end: #f5f5f5;
+  --bg-input: #ffffff;
+  --bg-chat-box: linear-gradient(#f9f9f9, #f5f5f5);
+  --bg-chat-received: #e8e8e8;
+  --bg-chat-sent: #D4693B;
+  --bg-chat-recommend: #f0f0f0;
+  --bg-cart-content: #ffffff;
+  --bg-cart-item: #f0f0f0;
+  --bg-block: #e0e0e0;
+  --bg-product: #ffffff;
+  --bg-buy-history: linear-gradient(#ffffff, #f9f9f9);
+  --bg-overlay: #00000040;
+  --bg-overlay-light: #00000030;
+  --bg-image-card: #f0ebe4;
+  --bg-submit-btn: #333333;
+  --bg-scrollbar: #cccccc;
+  --bg-handle: rgba(0, 0, 0, 0.1);
+
+  --text-primary: #333333;
+  --text-secondary: #555555;
+  --text-heading: #222222;
+  --text-white: #ffffff;
+  --text-price: #222222;
+  --text-muted: #444444;
+
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-input: rgba(0, 0, 0, 0.2);
+  --border-buy-item: rgba(0, 0, 0, 0.1);
+  --border-lang: rgba(0, 0, 0, 0.15);
+
+  --accent: #D4693B;
+  --accent-hover: #c25e33;
+  --accent-badge: #EC752A;
+  --accent-badge-text: #ffffff;
+
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.1);
+  --shadow-cart: 0px 4px 8px rgba(0, 0, 0, 0.08);
+
+  --check-bg: #cccccc;
+  --check-active: #999999;
+  --active-tab-bg: #e0e0e0;
+}
