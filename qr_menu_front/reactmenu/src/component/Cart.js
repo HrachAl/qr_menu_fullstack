@@ -4,6 +4,9 @@ import { TbTilde } from "react-icons/tb";
 import { useLang } from "../LangContext";
 import { RiArrowDownWideLine } from "react-icons/ri";
 import { useWebSocketForm } from "../WebSocketProvider";
+import axios from "axios";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 
 export default function Cart({setSelectedProduct, setShowProduct, show}) {
     const { cartItems, addToCart, removeFromCart, confirm } = useCart();
@@ -48,9 +51,28 @@ export default function Cart({setSelectedProduct, setShowProduct, show}) {
         }
     }, [cartItems, langItems]);
 
-    const handleConClick = () => {
-        confirm()
-        setShowCart(prev => !prev)
+    const handleConClick = async () => {
+        if (cartItems.length === 0) return;
+        
+        try {
+            const token = localStorage.getItem("token");
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            
+            const orderData = {
+                user_id: 0,
+                items: cartItems.map(item => ({ id: item.id, count: item.count })),
+                total: total
+            };
+            
+            await axios.post(`${API_URL}/api/orders/checkout`, orderData, { headers });
+            
+            confirm();
+            setShowCart(prev => !prev);
+        } catch (error) {
+            console.error("Failed to create order:", error);
+            confirm();
+            setShowCart(prev => !prev);
+        }
     }
 
     const getCount = (id) => {
@@ -58,8 +80,17 @@ export default function Cart({setSelectedProduct, setShowProduct, show}) {
         return found ? found.count : 0;
     };
 
-    const handleAdd = (id) => {
-        addToCart(id)
+    const handleAdd = async (id) => {
+        addToCart(id);
+        
+        try {
+            const token = localStorage.getItem("token");
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            
+            await axios.post(`${API_URL}/api/cart/add`, { id, count: 1 }, { headers });
+        } catch (error) {
+            console.error("Failed to log cart event:", error);
+        }
     }
     const handleRemove = (id) => {
         removeFromCart(id)

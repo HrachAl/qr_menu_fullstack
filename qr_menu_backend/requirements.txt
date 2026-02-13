@@ -3,3 +3,5 @@ uvicorn
 uvicorn[standard]
 openai
 python-dotenv
+pyjwt
+python-multipart

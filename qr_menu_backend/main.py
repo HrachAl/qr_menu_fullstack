@@ -12,6 +12,7 @@ from typing import Dict, List
 from contextlib import asynccontextmanager
 from models import EntryLog, ButtonRequests, ChatHistory, Recommendation, GPT_Message
 from datetime import datetime
+from routes import auth, admin, orders, products
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,6 +30,11 @@ async def lifespan(app: FastAPI):
     logger.info("Application shutting down")
 
 app = FastAPI(lifespan=lifespan)
+
+app.include_router(auth.router)
+app.include_router(admin.router)
+app.include_router(orders.router)
+app.include_router(products.router)
 
 app.mount("/admin_panel", StaticFiles(directory="admin_panel", html=True), name="admin")
 app.mount("/build", StaticFiles(directory="build", html=True), name="main")
