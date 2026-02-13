@@ -44,6 +44,8 @@ body.theme-dark {
   --shadow-card: 0 1px 18px 0 #000000b3;
   --shadow-cart: 0px 6px 3px -4px #00000057;
 
+  --border-card: transparent;
+
   --check-bg: #4a4a4a94;
   --check-active: #4a4a4a;
   --active-tab-bg: #161616;
@@ -51,51 +53,89 @@ body.theme-dark {
 
 /* ===== LIGHT THEME ===== */
 body.theme-light {
-  --bg-primary: #f5f5f5;
+  --bg-primary: #f2f2f2;
   --bg-secondary: #ffffff;
   --bg-card: #ffffff;
-  --bg-gradient-start: #e8e8e8;
-  --bg-gradient-end: #f0f0f0;
+  --bg-gradient-start: #ffffff;
+  --bg-gradient-end: #f7f7f7;
   --bg-menu-gradient-start: #ffffff;
-  --bg-menu-gradient-end: #f5f5f5;
+  --bg-menu-gradient-end: #fafafa;
   --bg-input: #ffffff;
-  --bg-chat-box: linear-gradient(#f9f9f9, #f5f5f5);
-  --bg-chat-received: #e8e8e8;
+  --bg-chat-box: linear-gradient(#ffffff, #f7f7f7);
+  --bg-chat-received: #f0f0f0;
   --bg-chat-sent: #D4693B;
-  --bg-chat-recommend: #f0f0f0;
+  --bg-chat-recommend: #f5f5f5;
   --bg-cart-content: #ffffff;
-  --bg-cart-item: #f0f0f0;
-  --bg-block: #e0e0e0;
+  --bg-cart-item: #f5f5f5;
+  --bg-block: #e8e8e8;
   --bg-product: #ffffff;
-  --bg-buy-history: linear-gradient(#ffffff, #f9f9f9);
-  --bg-overlay: #00000040;
-  --bg-overlay-light: #00000030;
-  --bg-image-card: #f0ebe4;
-  --bg-submit-btn: #333333;
-  --bg-scrollbar: #cccccc;
-  --bg-handle: rgba(0, 0, 0, 0.1);
+  --bg-buy-history: linear-gradient(#ffffff, #fafafa);
+  --bg-overlay: #00000050;
+  --bg-overlay-light: #00000035;
+  --bg-image-card: #f5f0ea;
+  --bg-submit-btn: #2a2a2a;
+  --bg-scrollbar: #c0c0c0;
+  --bg-handle: rgba(0, 0, 0, 0.08);
 
-  --text-primary: #333333;
-  --text-secondary: #555555;
-  --text-heading: #222222;
+  --text-primary: #1a1a1a;
+  --text-secondary: #444444;
+  --text-heading: #111111;
   --text-white: #ffffff;
-  --text-price: #222222;
-  --text-muted: #444444;
+  --text-price: #1a1a1a;
+  --text-muted: #333333;
 
-  --border-color: rgba(0, 0, 0, 0.08);
-  --border-input: rgba(0, 0, 0, 0.2);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --border-input: rgba(0, 0, 0, 0.25);
   --border-buy-item: rgba(0, 0, 0, 0.1);
-  --border-lang: rgba(0, 0, 0, 0.15);
+  --border-lang: rgba(0, 0, 0, 0.2);
+  --border-card: rgba(0, 0, 0, 0.08);
 
   --accent: #D4693B;
   --accent-hover: #c25e33;
   --accent-badge: #EC752A;
   --accent-badge-text: #ffffff;
 
-  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.1);
-  --shadow-cart: 0px 4px 8px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.08);
+  --shadow-cart: 0px 4px 12px rgba(0, 0, 0, 0.06);
 
-  --check-bg: #cccccc;
-  --check-active: #999999;
-  --active-tab-bg: #e0e0e0;
+  --check-bg: #d0d0d0;
+  --check-active: #888888;
+  --active-tab-bg: #ebebeb;
+}
+
+/* ===== LIGHT THEME OVERRIDES ===== */
+body.theme-light .langButton {
+  color: #333333;
+}
+
+body.theme-light .buyHistoryOpen {
+  color: #333333;
+}
+
+body.theme-light .container {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+body.theme-light .menuList-container .menu-item:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+body.theme-light .prodBut .prodCount button {
+  color: #333333;
+}
+
+body.theme-light .prodBut .prodCount p {
+  color: #333333;
+}
+
+body.theme-light .cart-content .cartItems .cartItem .cartButton {
+  color: var(--text-white);
+}
+
+body.theme-light .chatBox .chatInput form input {
+  background: #fafafa;
+}
+
+body.theme-light .mode-btn {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }

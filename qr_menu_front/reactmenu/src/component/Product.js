@@ -2,9 +2,14 @@ import { useCart } from "../CartContext";
 import { useEffect, useState } from "react";
 import { useLang } from "../LangContext";
 import { RiArrowDownWideLine } from "react-icons/ri";
+import { IoClose } from "react-icons/io5";
+import { useViewMode } from "../ViewModeContext";
 
 export default function Product({ product, show, setShow, clearProduct}) {
     const [count, setCount] = useState(0)
+    const { viewMode } = useViewMode();
+    const isDesktop = viewMode === "desktop";
+
     const handleClose = () => {
         setShow(false);
         clearProduct();
@@ -39,6 +44,45 @@ export default function Product({ product, show, setShow, clearProduct}) {
     const handleClick = () => {
         addMoreToCart(product.item_id, count);
         setShow(prev => !prev)
+    }
+
+    if (isDesktop) {
+        return (
+            <>
+                {show && (
+                    <div className="prodOverlay" onClick={handleClose}>
+                        <div className="prodDesktop" onClick={(e) => e.stopPropagation()}>
+                            <button className="prodDesktopClose" onClick={handleClose}>
+                                <IoClose />
+                            </button>
+                            {product && (
+                                <>
+                                    <div className="prodDesktopImage">
+                                        <img src={`new_menu/${product.image}`} alt={product.name} />
+                                    </div>
+                                    <div className="prodDesktopInfo">
+                                        <h2 className="prodDesktopName">{product.name}</h2>
+                                        <p className="prodDesktopDesc">{product.description}</p>
+                                        <div className="prodDesktopPrice">
+                                            <span className="prodDesktopPriceNum">{product.price}</span>
+                                            <span className="prodDesktopPriceCur">{amd}</span>
+                                        </div>
+                                        <div className="prodDesktopActions">
+                                            <div className="prodDesktopCounter">
+                                                <button className="prodDesktopCountBtn" onClick={handleMin}>−</button>
+                                                <span className="prodDesktopCountNum">{count}</span>
+                                                <button className="prodDesktopCountBtn" onClick={handlePlus}>+</button>
+                                            </div>
+                                            <button className="prodDesktopAdd" onClick={handleClick}>{add}</button>
+                                        </div>
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </>
+        );
     }
 
     return (

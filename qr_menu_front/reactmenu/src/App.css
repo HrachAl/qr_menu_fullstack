@@ -216,17 +216,101 @@ main .checkBox .check.active {
   display: flex;
   align-items: center;
 }
+
+ .container .buttons .menuNav {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+ }
+
+ .container .buttons .menuNav::before,
+ .container .buttons .menuNav::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 34px;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+ }
+
+ .container .buttons .menuNav::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--bg-gradient-start), transparent);
+ }
+
+ .container .buttons .menuNav::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--bg-gradient-end), transparent);
+ }
+
+ .container .buttons .menuNav.canLeft::before {
+  opacity: 1;
+ }
+
+ .container .buttons .menuNav.canRight::after {
+  opacity: 1;
+ }
+
+ .container .buttons .menuNavBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+ }
+
+ .container .buttons .menuNavBtn.left {
+  left: 6px;
+ }
+
+ .container .buttons .menuNavBtn.right {
+  right: 6px;
+ }
+
+ .container .buttons .menuNavBtn.show {
+  opacity: 1;
+  pointer-events: auto;
+ }
+
+ .container .buttons .menuNavBtn:hover {
+  background: var(--accent);
+  color: var(--text-white);
+  transform: translateY(-50%) scale(1.05);
+ }
+
+ .container .buttons .menuNavBtn:active {
+  transform: translateY(-50%) scale(0.98);
+ }
 .container .buttons ul {
   display: flex;
   width: 100%;
-  align-items: end;
+  align-items: center;
   list-style: none;
   gap: 3rem;
   position: relative;
   height: 100%;
-  padding: 0 5px;
+  padding: 6px 8px;
   overflow: auto;
   white-space: nowrap;
+  scroll-behavior: smooth;
 }
 .container .buttons ul::-webkit-scrollbar {
   display: none;
@@ -245,18 +329,31 @@ main .checkBox .check.active {
   background: transparent;
   cursor: pointer;
   display: inline-block;
-  margin-bottom: 10px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin-bottom: 0;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
+
+ .container .buttons ul li a:hover {
+  color: var(--text-heading);
+  transform: translateY(-1px);
+ }
+
+ .container .buttons ul li a:active {
+  transform: translateY(0);
+ }
 .container .buttons ul .active {
   position: absolute;
-  bottom: 0;
-  height: 100%;
+  bottom: 4px;
+  height: calc(100% - 8px);
   cursor: pointer;
   background: var(--active-tab-bg);
   transition: .3s;
   z-index: 0;
   transition: all .3s ease;
-  border-radius: 0 0 2px 2px;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
 }
 .menuList-container {
   display: flex;
@@ -299,7 +396,8 @@ main .checkBox .check.active {
   height: 210px ;
   border-radius: 12px;
   background: var(--bg-card);
-  transition: background 0.3s;
+  border: 1px solid var(--border-card);
+  transition: background 0.3s, border 0.3s;
 }
 .menu-item .image {
   width: 100%;

@@ -78,9 +78,11 @@ class ChatBot:
             assistant_response = ""
             for msg in messages.data:
                 if msg.role == "user":
+                    time_key = f"{self.language}_time"
+                    time_prompt = PROMPT_DICT.get(time_key, PROMPT_DICT.get("am_time", ""))
                     time_message = {
                         "role": "system",
-                        "content": PROMPT_DICT[self.language + "_time"].format(
+                        "content": time_prompt.format(
                             current_time=self.user_message_times[time_index]
                         )
                     }
@@ -96,11 +98,26 @@ class ChatBot:
             try:
                 response_data: dict = json.loads(assistant_response)
                 gpt_message = GPT_Message(**response_data)
-                item_ids = (rec['item_id'] for rec in response_data.get("options", []))
-                types_unique = set(menu[item_id]['type'] for item_id in item_ids)
-                if len(types_unique) <= 2:
-                    for rec in response_data.get("options", []):
-                        rec['count'] = 0
+                options = response_data.get("options", [])
+                if isinstance(options, list):
+                    normalized_item_ids = []
+                    for rec in options:
+                        if not isinstance(rec, dict):
+                            continue
+                        item_id = rec.get("item_id")
+                        if isinstance(item_id, str):
+                            try:
+                                item_id = int(item_id)
+                            except ValueError:
+                                pass
+                        if item_id in menu:
+                            normalized_item_ids.append(item_id)
+
+                    types_unique = set(menu[item_id]["type"] for item_id in normalized_item_ids)
+                    if len(types_unique) <= 2:
+                        for rec in options:
+                            if isinstance(rec, dict):
+                                rec["count"] = 0
                 response_payload = response_data
                 
             except (json.JSONDecodeError, ValueError):
@@ -114,8 +131,14 @@ class ChatBot:
             return gpt_message
 
         except Exception as e:
-            logger.error(f"Error in chat processing: {str(e)}")
-            error_response = {"role": "assistant", "content": json.dumps({"error": str(e)})}
+            logger.exception("Error in chat processing")
+            error_payload = {
+                "error": {
+                    "message": str(e),
+                    "type": e.__class__.__name__,
+                }
+            }
+            error_response = {"role": "assistant", "content": json.dumps(error_payload)}
             if self.connection:
                 await self.connection.send_json([error_response])
             if return_only_response:
