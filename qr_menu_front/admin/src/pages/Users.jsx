@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { api } from '../api';
 
 export default function Users() {
@@ -6,10 +6,22 @@ export default function Users() {
   const [error, setError] = useState('');
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const load = () => api('/api/admin/users').then(setList).catch(e => setError(e.message));
 
   useEffect(() => { load(); }, []);
+
+  const filteredList = useMemo(() => {
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.trim().toLowerCase();
+    return list.filter((u) => {
+      const name = (u.fullname || '').toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      const role = (u.access_level || '').toLowerCase();
+      return name.includes(q) || email.includes(q) || role.includes(q);
+    });
+  }, [list, searchQuery]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -80,6 +92,9 @@ export default function Users() {
           </form>
         </div>
       )}
+      <div className="search-bar">
+        <input type="search" placeholder="Search by name, email, role…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+      </div>
       <div className="card">
         <table className="admin-table">
           <thead>
@@ -92,7 +107,7 @@ export default function Users() {
             </tr>
           </thead>
           <tbody>
-            {list.map(u => (
+            {filteredList.map(u => (
               <tr key={u.id}>
                 <td>{u.id}</td>
                 <td>{u.fullname}</td>

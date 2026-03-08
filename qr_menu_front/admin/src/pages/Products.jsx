@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { api, uploadFile, productImageUrl } from '../api';
 
 const CURRENCY = 'AMD';
+const ACCESS_LEVELS = ['user', 'vip_user', 'admin', 'superadmin'];
 
 function StockBadge({ availability }) {
   if (availability === 1) {
@@ -17,13 +18,26 @@ export default function Products() {
   const [saving, setSaving] = useState(false);
   const [sortKey, setSortKey] = useState('id');
   const [sortDir, setSortDir] = useState('asc');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const load = () => api('/api/admin/products').then(setList).catch(e => setError(e.message));
 
   useEffect(() => { load(); }, []);
 
+  const filteredList = useMemo(() => {
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.trim().toLowerCase();
+    return list.filter((p) => {
+      const title = (p.name_en || p.name_am || p.name_ru || '').toLowerCase();
+      const sku = String(p.item_id ?? p.id ?? '');
+      const cat = (p.type_name || '').toLowerCase();
+      const access = (p.access_level || '').toLowerCase();
+      return title.includes(q) || sku.includes(q) || cat.includes(q) || access.includes(q);
+    });
+  }, [list, searchQuery]);
+
   const sortedList = useMemo(() => {
-    const arr = [...list];
+    const arr = [...filteredList];
     arr.sort((a, b) => {
       let va, vb;
       if (sortKey === 'price') {
@@ -38,6 +52,9 @@ export default function Products() {
       } else if (sortKey === 'category') {
         va = (a.type_name || '').toLowerCase();
         vb = (b.type_name || '').toLowerCase();
+      } else if (sortKey === 'access_level') {
+        va = (a.access_level || '').toLowerCase();
+        vb = (b.access_level || '').toLowerCase();
       } else {
         va = a[sortKey];
         vb = b[sortKey];
@@ -47,7 +64,7 @@ export default function Products() {
       return sortDir === 'asc' ? cmp : -cmp;
     });
     return arr;
-  }, [list, sortKey, sortDir]);
+  }, [filteredList, sortKey, sortDir]);
 
   function toggleSort(key) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
@@ -81,12 +98,12 @@ export default function Products() {
       if (form.id) {
         await api(`/api/admin/products/${form.id}`, { method: 'PATCH', body: JSON.stringify({
           price: form.price, img_path: form.img_path, type: form.type, type_name: form.type_name,
-          availability: form.availability ?? 1, name_en: form.name_en, name_am: form.name_am, name_ru: form.name_ru,
+          availability: form.availability ?? 1, access_level: form.access_level || null, name_en: form.name_en, name_am: form.name_am, name_ru: form.name_ru,
         }) });
       } else {
         await api('/api/admin/products', { method: 'POST', body: JSON.stringify({
           price: Number(form.price), img_path: form.img_path || 'new_menu/placeholder.png', type: form.type, type_name: form.type_name,
-          availability: form.availability ?? 1, name_en: form.name_en, name_am: form.name_am, name_ru: form.name_ru,
+          availability: form.availability ?? 1, access_level: form.access_level || null, name_en: form.name_en, name_am: form.name_am, name_ru: form.name_ru,
         }) });
       }
       setForm(null);
@@ -129,58 +146,78 @@ export default function Products() {
     <div>
       <div className="page-header">
         <h1 className="page-title">Products</h1>
-        <button type="button" className="btn btn-primary" onClick={() => setForm({ price: 0, img_path: '', type: 'main_course', type_name: 'Main', availability: 1, name_en: '', name_am: '', name_ru: '' })}>
+        <button type="button" className="btn btn-primary" onClick={() => setForm({ price: 0, img_path: '', type: 'main_course', type_name: 'Main', availability: 1, access_level: '', name_en: '', name_am: '', name_ru: '' })}>
           Add product
         </button>
       </div>
 
       {form && (
-        <div className="card" style={{ marginBottom: 24 }}>
-          <h2>{form.id ? 'Edit product' : 'New product'}</h2>
-          <form onSubmit={handleSubmit}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
-              <div className="form-group">
-                <label>Title (name EN)</label>
-                <input value={form.name_en} onChange={e => setForm(f => ({ ...f, name_en: e.target.value }))} />
+        <div className="product-modal-overlay" onClick={() => setForm(null)}>
+          <div className="product-modal-content card" onClick={e => e.stopPropagation()}>
+            <h2>{form.id ? 'Edit product' : 'New product'}</h2>
+            <form onSubmit={handleSubmit}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16 }}>
+                <div className="form-group">
+                  <label>Title (name EN)</label>
+                  <input value={form.name_en} onChange={e => setForm(f => ({ ...f, name_en: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label>Price</label>
+                  <input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} required />
+                </div>
+                <div className="form-group">
+                  <label>Category (type name)</label>
+                  <input value={form.type_name} onChange={e => setForm(f => ({ ...f, type_name: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label>Type key</label>
+                  <input value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} />
+                </div>
+                <div className="form-group">
+                  <label>Availability</label>
+                  <select value={form.availability} onChange={e => setForm(f => ({ ...f, availability: Number(e.target.value) }))}>
+                    <option value={1}>In stock</option>
+                    <option value={0}>Out of stock</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Access level</label>
+                  <select value={form.access_level ?? ''} onChange={e => setForm(f => ({ ...f, access_level: e.target.value || null }))}>
+                    <option value="">—</option>
+                    {ACCESS_LEVELS.map(lvl => (
+                      <option key={lvl} value={lvl}>{lvl}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="form-group">
-                <label>Price</label>
-                <input type="number" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} required />
+                <label>Image path</label>
+                <input value={form.img_path} onChange={e => setForm(f => ({ ...f, img_path: e.target.value }))} />
               </div>
               <div className="form-group">
-                <label>Category (type name)</label>
-                <input value={form.type_name} onChange={e => setForm(f => ({ ...f, type_name: e.target.value }))} />
+                <label>Upload image</label>
+                <input type="file" accept="image/*" onChange={handleUpload} />
+                {form.img_path && (
+                  <img src={productImageUrl(form.img_path)} alt="" className="img-thumb-lg" style={{ marginTop: 8 }} onError={e => { e.target.style.display = 'none'; }} />
+                )}
               </div>
-              <div className="form-group">
-                <label>Type key</label>
-                <input value={form.type} onChange={e => setForm(f => ({ ...f, type: e.target.value }))} />
+              <div className="form-actions">
+                <button type="submit" className="btn btn-primary" disabled={saving}>{form.id ? 'Update' : 'Create'}</button>
+                <button type="button" className="btn" onClick={() => setForm(null)}>Cancel</button>
               </div>
-              <div className="form-group">
-                <label>Availability</label>
-                <select value={form.availability} onChange={e => setForm(f => ({ ...f, availability: Number(e.target.value) }))}>
-                  <option value={1}>In stock</option>
-                  <option value={0}>Out of stock</option>
-                </select>
-              </div>
-            </div>
-            <div className="form-group">
-              <label>Image path</label>
-              <input value={form.img_path} onChange={e => setForm(f => ({ ...f, img_path: e.target.value }))} />
-            </div>
-            <div className="form-group">
-              <label>Upload image</label>
-              <input type="file" accept="image/*" onChange={handleUpload} />
-              {form.img_path && (
-                <img src={productImageUrl(form.img_path)} alt="" className="img-thumb-lg" style={{ marginTop: 8 }} onError={e => { e.target.style.display = 'none'; }} />
-              )}
-            </div>
-            <div className="form-actions">
-              <button type="submit" className="btn btn-primary" disabled={saving}>{form.id ? 'Update' : 'Create'}</button>
-              <button type="button" className="btn" onClick={() => setForm(null)}>Cancel</button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       )}
+
+      <div className="search-bar">
+        <input
+          type="search"
+          placeholder="Search by title, SKU, category, access level…"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+        />
+      </div>
 
       <div className="card products-table-wrap">
         <table className="admin-table">
@@ -191,6 +228,7 @@ export default function Products() {
               <Th id="title" label="TITLE" />
               <Th id="category" label="CATEGORY" />
               <Th id="price" label="PRICE" className="num" />
+              <Th id="access_level" label="ACCESS LEVEL" />
               <Th id="stock" label="STOCK" sortable={false} />
               <th style={{ width: 140 }}></th>
             </tr>
@@ -205,6 +243,7 @@ export default function Products() {
                 <td>{p.name_en || p.name_am || p.name_ru || '—'}</td>
                 <td>{p.type_name || '—'}</td>
                 <td className="num">{formatPrice(p.price)}</td>
+                <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{p.access_level || '—'}</td>
                 <td><StockBadge availability={p.availability} /></td>
                 <td>
                   <div className="cell-actions">

@@ -1,13 +1,29 @@
+import { useState, useMemo } from "react";
 import { useCart } from "../CartContext";
 import { useLang } from "../LangContext";
 
 export default function MenuList({showMenu, setSelectedProduct, setShowProduct}) {
-    const {langItems, add, amd} = useLang()
-    const grouped = langItems.reduce((acc, item) => {
-        acc[item.type] = acc[item.type] || [];
-        acc[item.type].push(item);
-        return acc;
-    }, {});
+    const {langItems, add, amd, lang} = useLang()
+    const [searchQuery, setSearchQuery] = useState('');
+
+    const filteredItems = useMemo(() => {
+        if (!searchQuery.trim()) return langItems;
+        const q = searchQuery.trim().toLowerCase();
+        return langItems.filter((item) => {
+            const name = (item.name || '').toLowerCase();
+            const short = (item.short_description || '').toLowerCase();
+            const desc = (item.description || '').toLowerCase();
+            return name.includes(q) || short.includes(q) || desc.includes(q);
+        });
+    }, [langItems, searchQuery]);
+
+    const grouped = useMemo(() => {
+        return filteredItems.reduce((acc, item) => {
+            acc[item.type] = acc[item.type] || [];
+            acc[item.type].push(item);
+            return acc;
+        }, {});
+    }, [filteredItems]);
 
     const {addToCart, removeFromCart, cartItems} = useCart()
 
@@ -27,6 +43,15 @@ export default function MenuList({showMenu, setSelectedProduct, setShowProduct})
 
     return (
         <div className="menuList-container" style={{padding: showMenu ? '' : '130px 0px 75px 0px'}}>
+            <div className="menu-search-wrap">
+                <input
+                    type="search"
+                    className="menu-search-input"
+                    placeholder={lang === 'EN' ? 'Search menu…' : lang === 'RU' ? 'Поиск…' : 'Փնտրել մենյու…'}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+            </div>
             {Object.entries(grouped).map(([type, items]) => (
                 <div key={type} id={type} className="bigestBox">
                     <p className="type-heading">{

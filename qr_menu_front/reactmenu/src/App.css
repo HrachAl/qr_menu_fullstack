@@ -289,10 +289,10 @@ main .checkBox .check.active {
 
 /* Customer auth (Login/Register) – dark theme */
 .customer-auth {
-  position: fixed;
-  top: 12px;
-  right: 60px;
+  position: relative;
   z-index: 1000;
+  display: flex;
+  align-items: center;
 }
 .customer-auth .customer-auth-btn {
   padding: 6px 14px;
@@ -310,6 +310,67 @@ main .checkBox .check.active {
   background: var(--accent);
   border-color: var(--accent);
   color: var(--text-white);
+}
+.customer-auth-fullname {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-right: 8px;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.top-bar .customer-auth-fullname {
+  color: var(--text-white);
+  max-width: 140px;
+}
+.customer-auth-user-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--text-white);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 50%;
+}
+.customer-auth-user-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.top-bar .customer-auth-user-btn {
+  color: var(--text-white);
+}
+.customer-auth-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  min-width: 160px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 10px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  z-index: 1002;
+}
+.customer-auth-dropdown button {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  text-align: left;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  cursor: pointer;
+}
+.customer-auth-dropdown button:hover {
+  background: var(--bg-primary);
 }
 .customer-auth-modal {
   position: fixed;
@@ -395,6 +456,94 @@ main .checkBox .check.active {
   padding: 0;
   margin-left: 2px;
 }
+
+/* Order history panel */
+.order-history-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+  padding: 20px;
+}
+.order-history-panel {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: 14px;
+  box-shadow: var(--shadow-card);
+  width: min(92vw, 640px);
+  max-height: 88vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.order-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--border-card);
+  flex-shrink: 0;
+}
+.order-history-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.order-history-close {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 4px;
+}
+.order-history-body {
+  padding: 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+.order-history-loading,
+.order-history-error,
+.order-history-empty {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+.order-history-error { color: #e57373; }
+.order-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.order-history-item {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border-card);
+}
+.order-history-item:last-child { border-bottom: none; }
+.order-history-item-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+.order-history-id { font-weight: 600; }
+.order-history-status { text-transform: capitalize; }
+.order-history-price { margin-left: auto; }
+.order-history-date { color: var(--text-secondary); font-size: 13px; }
+.order-history-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.order-history-items li { padding: 4px 0; }
 
 .mainLoad {
   --d:22px;
@@ -567,6 +716,25 @@ main .checkBox .check.active {
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
 }
+.menu-search-wrap {
+  padding: 0 16px 12px;
+  width: 100%;
+}
+.menu-search-input {
+  width: 100%;
+  max-width: 320px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-card);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+.menu-search-input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
 .menuList-container {
   display: flex;
   flex-direction: column;

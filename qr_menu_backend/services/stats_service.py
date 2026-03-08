@@ -6,12 +6,12 @@ from typing import Optional
 
 
 def top_products(conn: sqlite3.Connection, limit: int = 5) -> list[dict]:
+    """Top products by total quantity ordered (all orders regardless of status)."""
     rows = conn.execute("""
         SELECT p.id, p.item_id, p.name_en AS name, p.img_path, SUM(oi.count) AS total
         FROM order_items oi
         JOIN orders o ON o.id = oi.order_id
         JOIN products p ON p.id = oi.product_id
-        WHERE o.status IN ('confirmed', 'completed')
         GROUP BY oi.product_id
         ORDER BY total DESC
         LIMIT ?

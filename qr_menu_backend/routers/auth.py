@@ -1,14 +1,21 @@
 """
-Auth routes: login, register.
+Auth routes: login, register, me.
 """
 import sqlite3
 from fastapi import APIRouter, Depends, HTTPException, status
 from db.database import get_db
 from db import repositories
 from auth.service import verify_password, hash_password, create_access_token
+from auth.deps import get_current_user
 from models import LoginRequest, UserCreate, Token
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+
+@router.get("/me")
+def get_me(user=Depends(get_current_user)):
+    """Current user info for customer UI (fullname, email)."""
+    return {"fullname": user.get("fullname") or "", "email": user.get("email") or ""}
 
 
 @router.post("/login", response_model=Token)

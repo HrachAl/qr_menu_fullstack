@@ -1,16 +1,54 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useLang } from "../LangContext";
+import { HiOutlineUserCircle } from "react-icons/hi2";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
-export default function CustomerAuth() {
+export default function CustomerAuth({ onOpenOrdersHistory, onOpenCart }) {
   const [show, setShow] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
   const [mode, setMode] = useState("login"); // 'login' | 'register'
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullname, setFullname] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [userFullname, setUserFullname] = useState("");
   const token = localStorage.getItem("customer_token");
+  const { refetchMenu } = useLang();
+
+  useEffect(() => {
+    if (!token) {
+      setUserFullname("");
+      return;
+    }
+    fetch(`${API_BASE}/api/auth/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    })
+      .then((res) => {
+        if (res.status === 401) {
+          localStorage.removeItem("customer_token");
+          return null;
+        }
+        return res.ok ? res.json() : null;
+      })
+      .then((data) => {
+        if (data && data.fullname != null) setUserFullname(data.fullname || "");
+      })
+      .catch(() => setUserFullname(""));
+  }, [token]);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+    }
+    if (menuOpen) {
+      document.addEventListener("click", handleClickOutside);
+      return () => document.removeEventListener("click", handleClickOutside);
+    }
+  }, [menuOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +71,7 @@ export default function CustomerAuth() {
       setEmail("");
       setPassword("");
       setFullname("");
+      refetchMenu();
     } catch (err) {
       setError(err.message || "Request failed");
     } finally {
@@ -41,16 +80,51 @@ export default function CustomerAuth() {
   };
 
   const logout = () => {
+    setMenuOpen(false);
+    setUserFullname("");
     localStorage.removeItem("customer_token");
     setShow(false);
+    refetchMenu();
+  };
+
+  const openOrdersHistory = () => {
+    setMenuOpen(false);
+    onOpenOrdersHistory?.();
+  };
+
+  const openUnconfirmedOrder = () => {
+    setMenuOpen(false);
+    onOpenCart?.();
   };
 
   if (token) {
     return (
-      <div className="customer-auth">
-        <button type="button" onClick={logout} className="customer-auth-btn">
-          Logout
+      <div className="customer-auth" ref={menuRef}>
+        {userFullname && (
+          <span className="customer-auth-fullname">{userFullname}</span>
+        )}
+        <button
+          type="button"
+          className="customer-auth-user-btn"
+          onClick={() => setMenuOpen((o) => !o)}
+          aria-haspopup="true"
+          aria-expanded={menuOpen}
+        >
+          <HiOutlineUserCircle />
         </button>
+        {menuOpen && (
+          <div className="customer-auth-dropdown">
+            <button type="button" onClick={openOrdersHistory}>
+              Orders history
+            </button>
+            <button type="button" onClick={openUnconfirmedOrder}>
+              Unconfirmed order
+            </button>
+            <button type="button" onClick={logout}>
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     );
   }

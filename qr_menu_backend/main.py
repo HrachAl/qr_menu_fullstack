@@ -50,6 +50,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 from routers import auth, admin, orders, menu
+
 app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(orders.router)

@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { api } from '../api';
 
 export default function Orders() {
   const [list, setList] = useState([]);
   const [error, setError] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [detail, setDetail] = useState(null);
 
   const load = () => {
@@ -13,6 +14,17 @@ export default function Orders() {
   };
 
   useEffect(() => { load(); }, [statusFilter]);
+
+  const filteredList = useMemo(() => {
+    if (!searchQuery.trim()) return list;
+    const q = searchQuery.trim().toLowerCase();
+    return list.filter((o) => {
+      const id = String(o.id ?? '');
+      const userId = String(o.user_id ?? '');
+      const status = (o.status || '').toLowerCase();
+      return id.includes(q) || userId.includes(q) || status.includes(q);
+    });
+  }, [list, searchQuery]);
 
   async function loadDetail(id) {
     try {
@@ -49,6 +61,9 @@ export default function Orders() {
           </select>
         </div>
       </div>
+      <div className="search-bar">
+        <input type="search" placeholder="Search by order ID, user ID, status…" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+      </div>
       <div className="card">
         <table className="admin-table">
           <thead>
@@ -62,7 +77,7 @@ export default function Orders() {
             </tr>
           </thead>
           <tbody>
-            {list.map(o => (
+            {filteredList.map(o => (
               <tr key={o.id}>
                 <td>{o.id}</td>
                 <td>{o.user_id ?? 'Guest'}</td>

@@ -9,7 +9,7 @@ const recTitles = {
   EN: "Recommended items",
 };
 
-export default function TopBar() {
+export default function TopBar({ onOpenOrdersHistory, onOpenCart }) {
   const { lang } = useLang();
   const title = recTitles[lang] || recTitles.AM;
 
@@ -20,7 +20,7 @@ export default function TopBar() {
       </div>
       <h1 className="top-bar-title">{title}</h1>
       <div className="top-bar-right">
-        <CustomerAuth />
+        <CustomerAuth onOpenOrdersHistory={onOpenOrdersHistory} onOpenCart={onOpenCart} />
         <ModeSwitcher />
       </div>
     </header>

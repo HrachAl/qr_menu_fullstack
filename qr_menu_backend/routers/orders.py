@@ -1,14 +1,29 @@
 """
-Public API: create order (guest or with user).
+Public API: create order (guest or with user), get my orders (authenticated).
 """
 import sqlite3
 from fastapi import APIRouter, Depends, HTTPException, status
 from db.database import get_db
 from db import repositories
-from auth.deps import get_current_user_optional
+from auth.deps import get_current_user_optional, get_current_user
 from models import OrderCreate, OrderResponse
 
 router = APIRouter(prefix="/api", tags=["orders"])
+
+
+@router.get("/my-orders")
+def get_my_orders(
+    limit: int = 50,
+    conn: sqlite3.Connection = Depends(get_db),
+    user=Depends(get_current_user),
+):
+    """Return orders for the authenticated user (order history)."""
+    orders = repositories.order_list(conn, user_id=user["id"], limit=limit)
+    out = []
+    for o in orders:
+        items = repositories.order_items_by_order_id(conn, o["id"])
+        out.append({"order": o, "items": items})
+    return out
 
 
 @router.post("/orders", response_model=OrderResponse)

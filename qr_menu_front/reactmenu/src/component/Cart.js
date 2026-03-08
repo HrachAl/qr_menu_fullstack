@@ -5,22 +5,29 @@ import { useLang } from "../LangContext";
 import { RiArrowDownWideLine } from "react-icons/ri";
 import { useWebSocketForm } from "../WebSocketProvider";
 
-export default function Cart({setSelectedProduct, setShowProduct, show}) {
+export default function Cart({ setSelectedProduct, setShowProduct, show, showCartPanel, onCartPanelOpened }) {
     const { cartItems, addToCart, removeFromCart, confirm } = useCart();
-    const {amd, sub, min, tot, lang} = useLang()
+    const { amd, sub, min, tot, lang } = useLang();
     const [showCart, setShowCart] = useState(false);
-    const [total, setTotal]  = useState(0)
-    const {langItems, add} = useLang()
-    const [len, setLen] = useState(0)
+    const [total, setTotal] = useState(0);
+    const { langItems, add } = useLang();
+    const [len, setLen] = useState(0);
 
-    const {requestRecommendOrders, recommendOrdersResponse, recResponse} = useWebSocketForm()
+    const { requestRecommendOrders, recommendOrdersResponse, recResponse } = useWebSocketForm();
+
+    useEffect(() => {
+        if (showCartPanel) {
+            setShowCart(true);
+            onCartPanelOpened?.();
+        }
+    }, [showCartPanel, onCartPanelOpened]);
 
     const handleClick = () => {
         setShowCart(prev => !prev);
-        if(!showCart && (len < cartItems.length)) requestRecommendOrders(lang, cartItems);
-        setLen(cartItems.length)
+        if (!showCart && (len < cartItems.length)) requestRecommendOrders(lang, cartItems);
+        setLen(cartItems.length);
     };
-    
+
     useEffect(() => {
         if (showCart || show) {
           document.body.style.overflow = 'hidden';

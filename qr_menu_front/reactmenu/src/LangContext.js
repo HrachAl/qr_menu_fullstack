@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
@@ -17,6 +17,11 @@ export const LangProvider = ({ children }) => {
     const [write, setWrite] = useState('Write a message...');
     const [menuTypes, setMenuTypes] = useState([]);
     const [menuError, setMenuError] = useState(null);
+    const [menuVersion, setMenuVersion] = useState(0);
+
+    const refetchMenu = useCallback(() => {
+        setMenuVersion((v) => v + 1);
+    }, []);
 
     useEffect(() => {
         const langCode = lang === 'EN' ? 'en' : lang === 'RU' ? 'ru' : 'am';
@@ -49,7 +54,9 @@ export const LangProvider = ({ children }) => {
             setAddAll('Ավելացնել բոլորը');
         }
         setMenuError(null);
-        fetch(`${API_BASE}/api/menu?language=${langCode}`)
+        const token = typeof localStorage !== 'undefined' ? localStorage.getItem('customer_token') : null;
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        fetch(`${API_BASE}/api/menu?language=${langCode}`, { headers, cache: 'no-store' })
             .then(res => res.ok ? res.json() : Promise.reject(new Error(res.statusText)))
             .then(data => {
                 setLangItems(Array.isArray(data) ? data : []);
@@ -66,11 +73,11 @@ export const LangProvider = ({ children }) => {
                 setLangItems([]);
                 setMenuTypes([]);
             });
-    }, [lang]);
+    }, [lang, menuVersion]);
 
     return (
         <LangContext.Provider value={{
-            langItems, setLang, lang, add, min, amd, sub, tot, cl, write, addAll, menuTypes, menuError
+            langItems, setLang, lang, add, min, amd, sub, tot, cl, write, addAll, menuTypes, menuError, refetchMenu
         }}>
             {children}
         </LangContext.Provider>

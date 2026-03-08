@@ -13,6 +13,7 @@ import BuyHistory from './component/BuyHistory';
 import { LangProvider } from './LangContext';
 import TopBar from './component/TopBar';
 import Draq from './component/Drag';
+import OrderHistoryPanel from './component/OrderHistoryPanel';
 import { WebSocketFormProvider } from './WebSocketProvider';
 import { ViewModeProvider } from './ViewModeContext';
 
@@ -20,6 +21,8 @@ function App() {
   const [showMenu, setShowMenu] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProduct, setShowProduct] = useState(false);
+  const [showOrdersHistory, setShowOrdersHistory] = useState(false);
+  const [showCartPanel, setShowCartPanel] = useState(false);
 
   return (
     <ViewModeProvider>
@@ -27,7 +30,10 @@ function App() {
         <WebSocketFormProvider>
           <CartProvider>
             <div className="App">
-              <TopBar />
+              <TopBar
+                onOpenOrdersHistory={() => setShowOrdersHistory(true)}
+                onOpenCart={() => setShowCartPanel(true)}
+              />
               <MainRec 
                 setSelectedProduct={setSelectedProduct} 
                 setShowProduct={setShowProduct}/>
@@ -44,9 +50,15 @@ function App() {
                 clearProduct={() => setSelectedProduct(null)}   
               />
               <Cart
-                setSelectedProduct={setSelectedProduct} 
+                setSelectedProduct={setSelectedProduct}
                 setShowProduct={setShowProduct}
                 show={showProduct}
+                showCartPanel={showCartPanel}
+                onCartPanelOpened={() => setShowCartPanel(false)}
+              />
+              <OrderHistoryPanel
+                show={showOrdersHistory}
+                onClose={() => setShowOrdersHistory(false)}
               />
               <BuyHistory 
                 setSelectedProduct={setSelectedProduct} 

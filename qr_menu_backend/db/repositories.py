@@ -121,8 +121,26 @@ def product_list(conn: sqlite3.Connection, availability: Optional[int] = None) -
     return [_row_to_dict(r) for r in rows]
 
 
-def product_list_for_menu(conn: sqlite3.Connection, language: str = "en") -> list[dict]:
-    """Return products as menu items with name/description/short_description for the given language."""
+def _allowed_access_levels(viewer_level: Optional[str]) -> Optional[tuple]:
+    """Allowed product access_level values for a viewer. None = no filter (show all)."""
+    if viewer_level == "superadmin":
+        return None  # all
+    if viewer_level == "admin":
+        return (None, "user", "vip_user", "admin")
+    if viewer_level == "vip_user":
+        return (None, "user", "vip_user")
+    # guest or "user" -> no restriction + user only
+    return (None, "user")
+
+
+def product_list_for_menu(
+    conn: sqlite3.Connection,
+    language: str = "en",
+    viewer_access_level: Optional[str] = None,
+) -> list[dict]:
+    """Return products as menu items with name/description/short_description for the given language.
+    Filter by viewer_access_level: guest/None and 'user' see (no restriction, user); vip_user sees + vip_user;
+    admin sees + admin; superadmin sees all."""
     lang = language.lower()
     if lang not in ("en", "am", "ru"):
         lang = "en"
@@ -130,11 +148,27 @@ def product_list_for_menu(conn: sqlite3.Connection, language: str = "en") -> lis
     name_col = "name" + suffix
     desc_col = "description" + suffix
     short_col = "short_description" + suffix
-    rows = conn.execute(
-        f"""SELECT id, item_id, price, img_path, type, type_name, {name_col} AS name, {desc_col} AS description,
+    allowed = _allowed_access_levels(viewer_access_level)
+    if allowed is not None:
+        non_null = [a for a in allowed if a is not None]
+        if non_null:
+            placeholders = ",".join("?" for _ in non_null)
+            cond = "(access_level IS NULL OR access_level IN ({}))".format(placeholders)
+        else:
+            cond = "access_level IS NULL"
+        sql = (
+            f"""SELECT id, item_id, price, img_path, type, type_name, {name_col} AS name, {desc_col} AS description,
+            {short_col} AS short_description, composition
+            FROM products WHERE availability = 1 AND {cond}
+            ORDER BY type, id"""
+        )
+        rows = conn.execute(sql, non_null).fetchall()
+    else:
+        rows = conn.execute(
+            f"""SELECT id, item_id, price, img_path, type, type_name, {name_col} AS name, {desc_col} AS description,
             {short_col} AS short_description, composition
             FROM products WHERE availability = 1 ORDER BY type, id"""
-    ).fetchall()
+        ).fetchall()
     out = []
     for r in rows:
         d = _row_to_dict(r)
