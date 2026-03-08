@@ -29,13 +29,13 @@ export default function MenuList({showMenu, setSelectedProduct, setShowProduct})
         <div className="menuList-container" style={{padding: showMenu ? '' : '130px 0px 75px 0px'}}>
             {Object.entries(grouped).map(([type, items]) => (
                 <div key={type} id={type} className="bigestBox">
-                    <h2 className="type-heading">{
+                    <p className="type-heading">{
                         menuTypes.map((pro) => {
                             if( type === pro.type) {
                                 return pro.type_name;
                             }
                         })
-                        }</h2>
+                        }</p>
                     {items.map((item, index) => (
                         <div key={index} className="menu-item">
                             <div className="image">

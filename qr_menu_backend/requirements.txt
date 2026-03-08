@@ -1,5 +1,7 @@
 fastapi
-uvicorn
 uvicorn[standard]
 openai
 python-dotenv
+bcrypt
+python-jose[cryptography]
+python-multipart

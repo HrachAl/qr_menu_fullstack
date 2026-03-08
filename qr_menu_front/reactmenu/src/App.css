@@ -28,9 +28,96 @@ p, h1, h2, h3, h4, h5, button   {
   overflow-x: hidden;
 }
 
+/* ===== Top bar (language, title, auth, mode) ===== */
+.top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px 0 14px;
+  background: linear-gradient(90deg, var(--bg-gradient-start), var(--bg-gradient-end));
+  z-index: 100;
+  flex-shrink: 0;
+}
+.top-bar-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+.top-bar .langButton {
+  position: static;
+  top: auto;
+  left: auto;
+  height: auto;
+}
+.top-bar-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-white);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 60%;
+  text-align: center;
+  pointer-events: none;
+}
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.top-bar .customer-auth {
+  position: static;
+  top: auto;
+  right: auto;
+}
+.top-bar .customer-auth .customer-auth-btn {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--text-white);
+}
+.top-bar .customer-auth .customer-auth-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: var(--text-white);
+}
+.top-bar .mode-switcher {
+  position: static;
+  top: auto;
+  right: auto;
+}
+.top-bar .mode-btn {
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-white);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.top-bar .mode-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  color: var(--text-white);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
 main {
   width: 100%;
   height: 260px;
+  padding-top: 48px;
+  box-sizing: border-box;
   background: linear-gradient(90deg, var(--bg-gradient-start), var(--bg-gradient-end));
   display: flex;
   justify-content: center;
@@ -38,28 +125,43 @@ main {
   position: relative;
 }
 
- .mainRecTitle {
-  position: absolute;
-  top: 12px;
-  left: 16px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  letter-spacing: 0.2px;
- }
-
  .mainRecLoading {
   width: 100%;
-  height: 100%;
+  min-height: 140px;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 14px;
+  padding: 16px 0;
+ }
+
+ .mainRecSkeleton {
+  display: flex;
   gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 320px;
+ }
+
+ .mainRecSkeletonCard {
+  width: 100px;
+  height: 100px;
+  border-radius: 12px;
+  background: var(--bg-card);
+  animation: mainRecShimmer 1.2s ease-in-out infinite;
+ }
+
+ @keyframes mainRecShimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
  }
 
  .mainRecLoadingText {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-secondary);
+  opacity: 0.9;
  }
 
 main .swiper {
@@ -184,6 +286,116 @@ main .checkBox .check {
 main .checkBox .check.active {
   background: var(--check-active);
 }
+
+/* Customer auth (Login/Register) – dark theme */
+.customer-auth {
+  position: fixed;
+  top: 12px;
+  right: 60px;
+  z-index: 1000;
+}
+.customer-auth .customer-auth-btn {
+  padding: 6px 14px;
+  margin-right: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  border: 1px solid var(--border-card);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  transition: background 0.2s, border-color 0.2s;
+}
+.customer-auth .customer-auth-btn:last-of-type { margin-right: 0; }
+.customer-auth .customer-auth-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--text-white);
+}
+.customer-auth-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+.customer-auth-modal-content {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 24px;
+  border-radius: 14px;
+  min-width: 320px;
+  max-width: 90vw;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-card);
+}
+.customer-auth-modal-content h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  color: var(--text-primary);
+}
+.customer-auth-form input {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  border: 1px solid var(--border-card);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+.customer-auth-form input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+.customer-auth-form .customer-auth-error {
+  color: #e57373;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+.customer-auth-form .customer-auth-submit {
+  padding: 10px 20px;
+  margin-right: 8px;
+  border-radius: 8px;
+  border: none;
+  background: var(--accent);
+  color: var(--text-white);
+  cursor: pointer;
+  font-size: 14px;
+}
+.customer-auth-form .customer-auth-submit:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+.customer-auth-form .customer-auth-cancel {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border-card);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 14px;
+}
+.customer-auth-form .customer-auth-cancel:hover {
+  background: var(--bg-primary);
+}
+.customer-auth-switch {
+  font-size: 12px;
+  margin-top: 14px;
+  margin-bottom: 0;
+  color: var(--text-secondary);
+}
+.customer-auth-switch button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  color: var(--accent);
+  padding: 0;
+  margin-left: 2px;
+}
+
 .mainLoad {
   --d:22px;
   width: 4px;
@@ -374,9 +586,13 @@ main .checkBox .check.active {
 .menuList-container .type-heading {
   width: 100%;
   padding-left: 20px;
-  margin-bottom: -10px;
-  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  opacity: 0.85;
   font-family: var(--pon-family);
+  letter-spacing: 0.02em;
 }
 .backMenu-box {
   width: 100%;
@@ -393,11 +609,16 @@ main .checkBox .check.active {
   align-items: center;
   flex-direction: column;
   gap: .5rem;
-  height: 210px ;
+  height: 210px;
   border-radius: 12px;
   background: var(--bg-card);
   border: 1px solid var(--border-card);
-  transition: background 0.3s, border 0.3s;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.menuList-container .menu-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 .menu-item .image {
   width: 100%;
@@ -473,19 +694,24 @@ main .checkBox .check.active {
 }
 .cart-box {
   position: fixed;
-  width: 460px;
-  bottom: 5px;
-  background: var(--accent);
-  border-radius: 25px;
-  height: 55px;
-  z-index: 90;
+  width: min(460px, calc(100vw - 24px));
+  bottom: 14px;
   left: 50%;
-  translate: -50% 0;
+  transform: translateX(-50%);
+  background: var(--accent);
+  border-radius: 28px;
+  height: 58px;
+  padding: 0 8px;
+  z-index: 90;
   cursor: pointer;
-  transition: all .3s, background 0s, bottom 0s;
+  transition: background 0.2s, transform 0.2s;
   display: flex;
   justify-content: center;
   align-items: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+.cart-box:hover {
+  transform: translateX(-50%) translateY(-2px);
 }
 .cartBack {
   width: auto;
@@ -520,27 +746,31 @@ main .checkBox .check.active {
 }
 .cart-box .cartPrice {
   height: 80%;
-  width: 91%;
+  width: 92%;
   display: flex;
   justify-content: space-between;
-  align-items: center; 
+  align-items: center;
   color: var(--text-white);
 }
 .cart-box .cartPrice .totalPrice h5 {
   font-size: 10px;
   font-weight: 400;
   font-family: var(--mon-family);
-  margin-bottom: 3px;
+  margin: 0 0 2px 0;
+  opacity: 0.95;
 }
 .cart-box .cartPrice .totalPrice .total {
   font-family: var(--pon-family);
   display: flex;
-  align-items: end;
-  gap: .1rem;
+  align-items: baseline;
+  gap: 2px;
   font-size: 18px;
+  font-weight: 600;
 }
 .cart-box .cartPrice .totalPrice .total span {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.95;
 }
 .submit {
   height: 100%;

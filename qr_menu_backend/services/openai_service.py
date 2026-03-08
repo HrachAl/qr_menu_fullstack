@@ -18,15 +18,13 @@ assistant_ids = {
     "ru": "asst_wYkaLvIOu8yPQc48zott4udb"
 }
 
-with open("services/menu_am.json", "r", encoding="utf-8") as f:
-    menu_data = json.load(f)
-    menu = {item['item_id']: item for item in menu_data}
 
 class ChatBot:
-    def __init__(self, connection, prompt_language: str = "am"):
+    def __init__(self, connection, prompt_language: str = "am", menu: Optional[Dict] = None):
         self.connection = connection
         self.language = prompt_language
-        self.assistant_id = assistant_ids[prompt_language]
+        self.menu = menu or {}
+        self.assistant_id = assistant_ids.get(prompt_language, assistant_ids["en"])
         self.thread = client.beta.threads.create()
         self.user_message_times: List[str] = []
         self.history: List[Dict[str, str]] = []
@@ -110,10 +108,10 @@ class ChatBot:
                                 item_id = int(item_id)
                             except ValueError:
                                 pass
-                        if item_id in menu:
+                        if item_id in self.menu:
                             normalized_item_ids.append(item_id)
 
-                    types_unique = set(menu[item_id]["type"] for item_id in normalized_item_ids)
+                    types_unique = set(self.menu[item_id]["type"] for item_id in normalized_item_ids)
                     if len(types_unique) <= 2:
                         for rec in options:
                             if isinstance(rec, dict):

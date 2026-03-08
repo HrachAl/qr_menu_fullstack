@@ -580,6 +580,11 @@ body.desktop-mode .langButton {
   left: 20px;
   z-index: 100;
 }
+body.desktop-mode .top-bar .langButton {
+  position: static;
+  top: auto;
+  left: auto;
+}
 
 /* ---- Scrollbar styling for desktop ---- */
 body.desktop-mode ::-webkit-scrollbar {

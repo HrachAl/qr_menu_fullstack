@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -24,11 +24,36 @@ sessions: Dict[str, ChatBot] = {}
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Application starting up")
+    from db.database import get_connection, init_db
+    from db import repositories
+    init_db()
+    conn = get_connection()
+    try:
+        app.state.menu = repositories.product_list_as_menu_dict(conn)
+        # Create default superadmin if no users exist (from env)
+        if repositories.user_list(conn):
+            pass
+        else:
+            import os
+            from auth.service import hash_password
+            email = os.getenv("SUPERADMIN_EMAIL", "admin@example.com")
+            password = os.getenv("SUPERADMIN_PASSWORD", "admin")
+            fullname = os.getenv("SUPERADMIN_FULLNAME", "Admin")
+            repositories.user_create(conn, fullname=fullname, password=hash_password(password), access_level="superadmin", email=email)
+            logger.info("Created default superadmin user")
+    finally:
+        conn.close()
     yield
     sessions.clear()
     logger.info("Application shutting down")
 
 app = FastAPI(lifespan=lifespan)
+
+from routers import auth, admin, orders, menu
+app.include_router(auth.router)
+app.include_router(admin.router)
+app.include_router(orders.router)
+app.include_router(menu.router)
 
 app.mount("/admin_panel", StaticFiles(directory="admin_panel", html=True), name="admin")
 app.mount("/build", StaticFiles(directory="build", html=True), name="main")
@@ -72,7 +97,8 @@ async def websocket_endpoint(websocket: WebSocket):
             prompt_language = str(lang).lower()
 
             if not chatbot:
-                chatbot = ChatBot(websocket, prompt_language=prompt_language)
+                menu = getattr(app.state, "menu", {})
+                chatbot = ChatBot(websocket, prompt_language=prompt_language, menu=menu)
 
             payload = {
                 "message": message,
@@ -105,16 +131,17 @@ async def log_chat_history(chat_history: ChatHistory):
     return {"status": "success", "received": chat_history.root}
 
 @app.get("/recommend/time", response_model=List[Recommendation])
-async def recommend_by_time(language: str = "en"):
+async def recommend_by_time(request: Request, language: str = "en"):
     language = language.lower()
     user_id = str(uuid.uuid4())
-    chatbot = ChatBot(None, prompt_language=language)
+    menu = getattr(request.app.state, "menu", {})
+    chatbot = ChatBot(None, prompt_language=language, menu=menu)
     prompt = prompt_rec_time[language].format(current_time=datetime.now().strftime("%H:%M"))
     response = await chatbot.ask(prompt, return_only_response=True)
     return response.options or []
 
 @app.post("/recommend/orders", response_model=GPT_Message)
-async def recommend_by_orders(button_requests: ButtonRequests, language: str = "en"):
+async def recommend_by_orders(request: Request, button_requests: ButtonRequests, language: str = "en"):
     language = language.lower()
     user_id = str(uuid.uuid4()) # test
     new_orders = set(req.id for req in button_requests.root)
@@ -125,7 +152,8 @@ async def recommend_by_orders(button_requests: ButtonRequests, language: str = "
         }
     elif orders[user_id]["response"]:
         return orders[user_id]["response"]
-    chatbot = ChatBot(None, prompt_language=language)
+    menu = getattr(request.app.state, "menu", {})
+    chatbot = ChatBot(None, prompt_language=language, menu=menu)
     order_summary = ", ".join([f"Button ID {req.id} at {req.timestamp}" for req in button_requests.root])
     prompt = prompt_rec_orders[language].format(orders=order_summary)
     response = await chatbot.ask(prompt, return_only_response=True)

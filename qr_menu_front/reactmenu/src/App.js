@@ -11,11 +11,10 @@ import { CartProvider } from './CartContext';
 import Cart from './component/Cart';
 import BuyHistory from './component/BuyHistory';
 import { LangProvider } from './LangContext';
-import LangButton from './component/LangButton';
+import TopBar from './component/TopBar';
 import Draq from './component/Drag';
 import { WebSocketFormProvider } from './WebSocketProvider';
 import { ViewModeProvider } from './ViewModeContext';
-import ModeSwitcher from './component/ModeSwitcher';
 
 function App() {
   const [showMenu, setShowMenu] = useState(true);
@@ -28,7 +27,7 @@ function App() {
         <WebSocketFormProvider>
           <CartProvider>
             <div className="App">
-              <ModeSwitcher />
+              <TopBar />
               <MainRec 
                 setSelectedProduct={setSelectedProduct} 
                 setShowProduct={setShowProduct}/>
@@ -54,7 +53,6 @@ function App() {
                 setShowProduct={setShowProduct}
                 showProduct={showProduct}
               />
-              <LangButton />
               <Draq 
                 setSelectedProduct={setSelectedProduct} 
                 setShowProduct={setShowProduct}

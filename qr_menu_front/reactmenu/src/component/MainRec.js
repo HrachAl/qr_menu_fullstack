@@ -80,10 +80,13 @@ export default function MainRec({setSelectedProduct, setShowProduct}) {
 
     return (
         <main>
-            <div className="mainRecTitle">{uiText.title}</div>
             {recommendTimeLoading ? (
                 <div className="mainRecLoading">
-                    <div className="mainLoad"></div>
+                    <div className="mainRecSkeleton">
+                        <div className="mainRecSkeletonCard" />
+                        <div className="mainRecSkeletonCard" />
+                        <div className="mainRecSkeletonCard" />
+                    </div>
                     <div className="mainRecLoadingText">{uiText.loading}</div>
                 </div>
             ) : menu.length > 0 ? (

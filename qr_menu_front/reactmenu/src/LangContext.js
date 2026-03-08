@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import menuAmData from "./menu_am.json";
-import menuEnData from "./menu_en.json";
-import menuRuData from "./menu_ru.json";
+
+const API_BASE = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
 
 const LangContext = createContext();
 
@@ -16,13 +15,12 @@ export const LangProvider = ({ children }) => {
     const [tot, setTot] = useState('Total Price');
     const [cl, setCl] = useState('Close The tab');
     const [write, setWrite] = useState('Write a message...');
-
     const [menuTypes, setMenuTypes] = useState([]);
+    const [menuError, setMenuError] = useState(null);
 
     useEffect(() => {
-        let newLangItems;
+        const langCode = lang === 'EN' ? 'en' : lang === 'RU' ? 'ru' : 'am';
         if (lang === 'EN') {
-            newLangItems = menuEnData;
             setAdd('Add');
             setMin('minute');
             setAmd('AMD');
@@ -32,7 +30,6 @@ export const LangProvider = ({ children }) => {
             setWrite('write a message...');
             setAddAll('Add all');
         } else if (lang === 'RU') {
-            newLangItems = menuRuData;
             setAdd('добавить');
             setMin('минут');
             setAmd('др');
@@ -42,7 +39,6 @@ export const LangProvider = ({ children }) => {
             setWrite('напишите сообщение...');
             setAddAll('Добавить все');
         } else {
-            newLangItems = menuAmData;
             setAdd('Ավելացնել');
             setMin('րոպե');
             setAmd('դր');
@@ -52,25 +48,29 @@ export const LangProvider = ({ children }) => {
             setWrite('գրեք հաղորդագրություն...');
             setAddAll('Ավելացնել բոլորը');
         }
-
-        setLangItems(newLangItems);
-
-        const types = [];
-        newLangItems.forEach(item => {
-            if (!types.find(t => t.type === item.type)) {
-                types.push({
-                    type: item.type,
-                    type_name: item.type_name
+        setMenuError(null);
+        fetch(`${API_BASE}/api/menu?language=${langCode}`)
+            .then(res => res.ok ? res.json() : Promise.reject(new Error(res.statusText)))
+            .then(data => {
+                setLangItems(Array.isArray(data) ? data : []);
+                const types = [];
+                (Array.isArray(data) ? data : []).forEach(item => {
+                    if (!types.find(t => t.type === item.type)) {
+                        types.push({ type: item.type, type_name: item.type_name });
+                    }
                 });
-            }
-        });
-        setMenuTypes(types);
-
+                setMenuTypes(types);
+            })
+            .catch(err => {
+                setMenuError(err.message);
+                setLangItems([]);
+                setMenuTypes([]);
+            });
     }, [lang]);
 
     return (
         <LangContext.Provider value={{
-            langItems, setLang, lang, add, min, amd, sub, tot, cl, write, addAll, menuTypes
+            langItems, setLang, lang, add, min, amd, sub, tot, cl, write, addAll, menuTypes, menuError
         }}>
             {children}
         </LangContext.Provider>
