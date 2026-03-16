@@ -4,10 +4,35 @@ const WebSocketFormContext = createContext();
 
 export const useWebSocketForm = () => useContext(WebSocketFormContext);
 
+const buildSessionKey = () => {
+  const params = new URLSearchParams(window.location.search);
+  const table = params.get('table') || params.get('t') || 'default';
+  return `chat_session_id_${table}`;
+};
+
+const generateSessionId = () => {
+  if (window.crypto?.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+  return `sess_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+};
+
+const getOrCreateSessionId = () => {
+  const storageKey = buildSessionKey();
+  const existing = window.localStorage.getItem(storageKey);
+  if (existing) {
+    return existing;
+  }
+  const next = generateSessionId();
+  window.localStorage.setItem(storageKey, next);
+  return next;
+};
+
 export const WebSocketFormProvider = ({ children }) => {
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
   const WS_BASE_URL = process.env.REACT_APP_WS_BASE_URL || API_BASE_URL.replace(/^http(s)?:\/\//, (m) => (m === "https://" ? "wss://" : "ws://"));
   const ws = useRef(null);
+  const [sessionId] = useState(() => getOrCreateSessionId());
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
@@ -121,7 +146,7 @@ export const WebSocketFormProvider = ({ children }) => {
 
         const messageData = { id, text: messageText, type: "sent", time };
         setMessages((prev) => [...prev, messageData]);
-        socket.send(JSON.stringify({ id, message: messageText, lang }));
+      socket.send(JSON.stringify({ id, message: messageText, lang, session_id: sessionId }));
     }
 };
 
@@ -129,7 +154,7 @@ export const WebSocketFormProvider = ({ children }) => {
     try {
       setRecommendTimeLoading(true);
       setRecommendTimeError(null);
-      const response = await fetch(`${API_BASE_URL}/recommend/time?language=${language}`);
+      const response = await fetch(`${API_BASE_URL}/recommend/time?language=${language}&session_id=${encodeURIComponent(sessionId)}`);
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const data = await response.json();
       console.log(data)
@@ -145,7 +170,7 @@ export const WebSocketFormProvider = ({ children }) => {
   const requestRecommendOrders = async (language, data) => {
     try {
       if (!Array.isArray(data)) throw new Error("Input must be a JSON array");
-      const response = await fetch(`${API_BASE_URL}/recommend/orders?language=${language}`, {
+      const response = await fetch(`${API_BASE_URL}/recommend/orders?language=${language}&session_id=${encodeURIComponent(sessionId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
@@ -176,7 +201,8 @@ export const WebSocketFormProvider = ({ children }) => {
         disconnectChat,
         sendMessage,
         requestRecommendTime,
-        requestRecommendOrders
+        requestRecommendOrders,
+        sessionId
       }}
     >
       {children}

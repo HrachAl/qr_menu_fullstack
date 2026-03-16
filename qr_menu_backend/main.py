@@ -4,7 +4,6 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from services.ai_service import ChatBot
 import uvicorn
-import uuid
 import logging
 import json
 from prompts import prompt_rec_time, prompt_rec_orders
@@ -87,24 +86,33 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
 
     chatbot: ChatBot | None = None
+    active_session_id = "default_session"
 
     while True:
         try:
             data = await websocket.receive_text()
             parsed = json.loads(data)
             message = parsed.get("message")
+            session_id = str(parsed.get("session_id", active_session_id) or active_session_id)
 
             lang = parsed.get("lang", "am")
             prompt_language = str(lang).lower()
 
             if not chatbot:
                 menu = getattr(app.state, "menu", {})
-                chatbot = ChatBot(websocket, prompt_language=prompt_language, menu=menu)
+                chatbot = ChatBot(
+                    websocket,
+                    prompt_language=prompt_language,
+                    menu=menu,
+                    session_id=session_id,
+                )
+                active_session_id = session_id
 
             payload = {
                 "message": message,
                 "language": prompt_language,
                 "time": datetime.now().strftime("%H:%M"),
+                "session_id": session_id,
             }
             await chatbot.ask(json.dumps(payload), return_only_response=True)
 
@@ -132,19 +140,29 @@ async def log_chat_history(chat_history: ChatHistory):
     return {"status": "success", "received": chat_history.root}
 
 @app.get("/recommend/time", response_model=List[Recommendation])
-async def recommend_by_time(request: Request, language: str = "en"):
+async def recommend_by_time(request: Request, language: str = "en", session_id: str = "default_session"):
     language = language.lower()
-    user_id = str(uuid.uuid4())
     menu = getattr(request.app.state, "menu", {})
-    chatbot = ChatBot(None, prompt_language=language, menu=menu)
+    chatbot = ChatBot(None, prompt_language=language, menu=menu, session_id=session_id)
     prompt = prompt_rec_time[language].format(current_time=datetime.now().strftime("%H:%M"))
-    response = await chatbot.ask(prompt, return_only_response=True)
+    payload = {
+        "message": prompt,
+        "language": language,
+        "time": datetime.now().strftime("%H:%M"),
+        "session_id": session_id,
+    }
+    response = await chatbot.ask(json.dumps(payload), return_only_response=True)
     return response.options or []
 
 @app.post("/recommend/orders", response_model=GPT_Message)
-async def recommend_by_orders(request: Request, button_requests: ButtonRequests, language: str = "en"):
+async def recommend_by_orders(
+    request: Request,
+    button_requests: ButtonRequests,
+    language: str = "en",
+    session_id: str = "default_session",
+):
     language = language.lower()
-    user_id = str(uuid.uuid4()) # test
+    user_id = session_id
     new_orders = set(req.id for req in button_requests.root)
     if not orders.get(user_id) or orders.get(user_id) != new_orders:
         orders[user_id] = {
@@ -154,10 +172,16 @@ async def recommend_by_orders(request: Request, button_requests: ButtonRequests,
     elif orders[user_id]["response"]:
         return orders[user_id]["response"]
     menu = getattr(request.app.state, "menu", {})
-    chatbot = ChatBot(None, prompt_language=language, menu=menu)
+    chatbot = ChatBot(None, prompt_language=language, menu=menu, session_id=session_id)
     order_summary = ", ".join([f"Button ID {req.id} at {req.timestamp}" for req in button_requests.root])
     prompt = prompt_rec_orders[language].format(orders=order_summary)
-    response = await chatbot.ask(prompt, return_only_response=True)
+    payload = {
+        "message": prompt,
+        "language": language,
+        "time": datetime.now().strftime("%H:%M"),
+        "session_id": session_id,
+    }
+    response = await chatbot.ask(json.dumps(payload), return_only_response=True)
     orders[user_id]['response'] = response
     return response
 

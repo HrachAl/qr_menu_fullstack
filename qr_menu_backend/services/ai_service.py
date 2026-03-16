@@ -4,7 +4,9 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import re
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 try:
@@ -20,7 +22,9 @@ from prompts import PROMPT_DICT
 
 logger = logging.getLogger(__name__)
 
-MODEL_NAME = "gemini-2.5-flash"
+MODEL_NAME = "gemini-3.1-flash-lite-preview"
+BACKEND_ROOT = Path(__file__).resolve().parent.parent
+CHAT_MEMORY_DIR = BACKEND_ROOT / "chat_memory"
 
 
 def _build_client() -> Optional[Any]:
@@ -35,13 +39,32 @@ client = _build_client()
 
 
 class ChatBot:
-    def __init__(self, connection: Any, prompt_language: str = "am", menu: Optional[Dict[Any, Any]] = None):
+    def __init__(
+        self,
+        connection: Any,
+        prompt_language: str = "am",
+        menu: Optional[Dict[Any, Any]] = None,
+        session_id: Optional[str] = None,
+    ):
         self.connection = connection
         self.language = prompt_language.lower()
         self.menu = menu or {}
+        self.session_id = self._sanitize_session_id(session_id)
+        self.memory_file_path = self._build_memory_file_path(self.session_id)
         self.user_message_times: List[str] = []
-        self.history: List[Dict[str, str]] = []
         self.menu_by_id = self._normalize_menu(self.menu)
+
+    @staticmethod
+    def _sanitize_session_id(session_id: Optional[str]) -> str:
+        raw = str(session_id or "default_session").strip()
+        safe = re.sub(r"[^a-zA-Z0-9_-]", "_", raw)
+        safe = safe.strip("._")
+        return safe or "default_session"
+
+    @staticmethod
+    def _build_memory_file_path(session_id: str) -> Path:
+        CHAT_MEMORY_DIR.mkdir(parents=True, exist_ok=True)
+        return CHAT_MEMORY_DIR / f"{session_id}.txt"
 
     @staticmethod
     def _normalize_menu(menu: Dict[Any, Any]) -> Dict[int, Dict[str, Any]]:
@@ -67,12 +90,38 @@ class ChatBot:
             "You must ALWAYS respond with a valid, raw JSON object. "
             "Do not wrap the response in markdown code blocks. "
             "Do not add any conversational text outside the JSON.\n\n"
+            "You are provided with the Previous Context of this conversation and a New User Message. "
+            "Use Previous Context to maintain continuity.\n"
+            "Conversational Flow: NEVER repeat greetings (like Hello, Hi, Good morning) if you have already greeted the user in this session. "
+            "Speak naturally like an ongoing conversation.\n"
+            "Time Handling: The current time is provided ONLY for your internal context so you can recommend appropriate meals "
+            "(breakfast vs dinner). DO NOT explicitly state the time to the user unless they specifically ask what time it is.\n"
+            "You must answer the user in the response field.\n"
+            "Summary Memory (CRITICAL): In the updated_summary field, you MUST record the user's name, preferences, state, "
+            "AND specifically list the actual menu items you have recently recommended to them. "
+            "You must remember your own past actions so you can modify past orders. "
+            "If Previous Context is empty, summarize from the current interaction.\n\n"
             "Menu JSON is included below and should be treated as the source of truth for item IDs and names.\n"
             f"{self._menu_snapshot()}\n\n"
             "Return JSON with this shape exactly: "
-            '{"response":"...","options":[{"item_id":123,"reason":"...","count":0}]}. '
+            '{"updated_summary":"...","response":"...","options":[{"item_id":123,"reason":"...","count":0}]}. '
             "If there are no recommendations, set options to null or an empty array."
         )
+
+    def _read_previous_context(self) -> str:
+        try:
+            if not self.memory_file_path.exists():
+                return ""
+            return self.memory_file_path.read_text(encoding="utf-8").strip()
+        except Exception:
+            logger.exception("Failed to read chat memory", extra={"session_id": self.session_id})
+            return ""
+
+    def _write_updated_context(self, updated_summary: str) -> None:
+        try:
+            self.memory_file_path.write_text(updated_summary.strip(), encoding="utf-8")
+        except Exception:
+            logger.exception("Failed to write chat memory", extra={"session_id": self.session_id})
 
     @staticmethod
     def _looks_like_recommendation_request(user_input: str) -> bool:
@@ -144,16 +193,17 @@ class ChatBot:
     def _coerce_response_payload(self, assistant_text: str) -> Dict[str, Any]:
         stripped = assistant_text.strip()
         if not stripped:
-            return {"response": "", "options": None}
+            return {"updated_summary": "", "response": "", "options": None}
 
         try:
             parsed = json.loads(stripped)
         except json.JSONDecodeError:
-            return {"response": stripped, "options": None}
+            return {"updated_summary": "", "response": stripped, "options": None}
 
         if isinstance(parsed, list):
             options = self._normalize_options(parsed)
             return {
+                "updated_summary": "",
                 "response": "",
                 "options": options if options else None,
             }
@@ -169,14 +219,20 @@ class ChatBot:
                 response_text = parsed.get("message", "")
             response_text = str(response_text) if response_text is not None else ""
 
+            updated_summary = parsed.get("updated_summary")
+            if updated_summary is None:
+                updated_summary = parsed.get("summary", "")
+            updated_summary = str(updated_summary) if updated_summary is not None else ""
+
             return {
+                "updated_summary": updated_summary,
                 "response": response_text,
                 "options": options if options else None,
             }
 
-        return {"response": stripped, "options": None}
+        return {"updated_summary": "", "response": stripped, "options": None}
 
-    async def _generate(self, user_input: str, current_time: str) -> str:
+    async def _generate(self, user_input: str, current_time: str, previous_context: str) -> str:
         if client is None:
             raise RuntimeError("GEMINI_API_KEY is missing. Set it in environment/.env.")
         if types is None:
@@ -186,7 +242,11 @@ class ChatBot:
 
         time_key = f"{self.language}_time"
         time_prompt = PROMPT_DICT.get(time_key, PROMPT_DICT.get("en_time", "Current time is {current_time}"))
-        contextual_input = f"{time_prompt.format(current_time=current_time)}\nUser message: {user_input}"
+        contextual_input = (
+            f"{time_prompt.format(current_time=current_time)}\n\n"
+            f"Previous Context:\n{previous_context or '(empty)'}\n\n"
+            f"New User Message:\n{user_input}"
+        )
 
         config_kwargs: Dict[str, Any] = {
             "temperature": 0.4,
@@ -237,37 +297,43 @@ class ChatBot:
                     lang = str(payload_input.get("language", self.language)).lower()
                     if lang != self.language:
                         self.language = lang
+                    payload_session_id = payload_input.get("session_id")
+                    if payload_session_id is not None:
+                        next_session_id = self._sanitize_session_id(str(payload_session_id))
+                        if next_session_id != self.session_id:
+                            self.session_id = next_session_id
+                            self.memory_file_path = self._build_memory_file_path(self.session_id)
                 else:
                     payload_input = {}
             except json.JSONDecodeError:
                 payload_input = {}
 
             self.user_message_times.append(current_time)
-            assistant_response = await self._generate(user_input=user_input, current_time=current_time)
-
-            self.history.append(
-                {
-                    "role": "user",
-                    "content": user_input,
-                }
-            )
-            self.history.append(
-                {
-                    "role": "assistant",
-                    "content": assistant_response,
-                }
+            previous_context = self._read_previous_context()
+            assistant_response = await self._generate(
+                user_input=user_input,
+                current_time=current_time,
+                previous_context=previous_context,
             )
 
             response_payload = self._coerce_response_payload(assistant_response)
+            updated_summary = str(response_payload.get("updated_summary", "")).strip()
+            if not updated_summary:
+                updated_summary = previous_context
+            self._write_updated_context(updated_summary)
+
+            client_payload = {
+                "response": response_payload.get("response", ""),
+                "options": response_payload.get("options"),
+            }
+
             gpt_message = GPT_Message(
-                response=response_payload.get("response", ""),
-                options=response_payload.get("options"),
+                response=client_payload.get("response", ""),
+                options=client_payload.get("options"),
             )
 
-            if return_only_response and self.connection:
-                await self.connection.send_json(response_payload)
-            elif self.connection:
-                await self.connection.send_json(self.history)
+            if self.connection:
+                await self.connection.send_json(client_payload)
 
             return gpt_message
 
