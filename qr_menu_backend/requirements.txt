@@ -1,6 +1,6 @@
 fastapi
 uvicorn[standard]
-openai
+google-genai
 python-dotenv
 bcrypt
 python-jose[cryptography]
