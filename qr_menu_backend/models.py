@@ -1,5 +1,6 @@
-from pydantic import RootModel, BaseModel, Field
-from typing import List, Optional
+import json
+from pydantic import RootModel, BaseModel, Field, ConfigDict, field_validator
+from typing import Any, List, Optional
 from datetime import datetime
 
 class OpenAIRequest(BaseModel):
@@ -68,6 +69,9 @@ class UserResponse(BaseModel):
 
 # ----- Products -----
 class ProductCreate(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    item_id: Optional[int] = None
     price: int
     img_path: str
     type: str
@@ -83,10 +87,55 @@ class ProductCreate(BaseModel):
     short_description_en: Optional[str] = None
     short_description_am: Optional[str] = None
     short_description_ru: Optional[str] = None
-    composition: Optional[str] = None
+    composition: Optional[List[str] | str] = None
+
+    @field_validator("item_id", "price", "availability", mode="before")
+    @classmethod
+    def _coerce_ints(cls, value: Any):
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return int(value)
+        if isinstance(value, (int, float)):
+            return int(value)
+        text = str(value).strip()
+        if not text:
+            return None
+        return int(float(text))
+
+    @field_validator("access_level", mode="before")
+    @classmethod
+    def _normalize_access_level(cls, value: Any):
+        if value is None:
+            return None
+        text = str(value).strip()
+        return text or None
+
+    @field_validator("composition", mode="before")
+    @classmethod
+    def _normalize_composition(cls, value: Any):
+        if value is None:
+            return None
+        if isinstance(value, list):
+            return [str(v).strip() for v in value if str(v).strip()]
+        text = str(value).strip()
+        if not text:
+            return None
+        try:
+            parsed = json.loads(text)
+            if isinstance(parsed, list):
+                return [str(v).strip() for v in parsed if str(v).strip()]
+        except Exception:
+            pass
+        if "," in text or "\n" in text:
+            return [part.strip() for part in text.replace("\r", "").replace("\n", ",").split(",") if part.strip()]
+        return text
 
 
 class ProductUpdate(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    item_id: Optional[int] = None
     price: Optional[int] = None
     img_path: Optional[str] = None
     type: Optional[str] = None
@@ -102,11 +151,54 @@ class ProductUpdate(BaseModel):
     short_description_en: Optional[str] = None
     short_description_am: Optional[str] = None
     short_description_ru: Optional[str] = None
-    composition: Optional[str] = None
+    composition: Optional[List[str] | str] = None
+
+    @field_validator("item_id", "price", "availability", mode="before")
+    @classmethod
+    def _coerce_ints(cls, value: Any):
+        if value is None:
+            return None
+        if isinstance(value, bool):
+            return int(value)
+        if isinstance(value, (int, float)):
+            return int(value)
+        text = str(value).strip()
+        if not text:
+            return None
+        return int(float(text))
+
+    @field_validator("access_level", mode="before")
+    @classmethod
+    def _normalize_access_level(cls, value: Any):
+        if value is None:
+            return None
+        text = str(value).strip()
+        return text or None
+
+    @field_validator("composition", mode="before")
+    @classmethod
+    def _normalize_composition(cls, value: Any):
+        if value is None:
+            return None
+        if isinstance(value, list):
+            return [str(v).strip() for v in value if str(v).strip()]
+        text = str(value).strip()
+        if not text:
+            return None
+        try:
+            parsed = json.loads(text)
+            if isinstance(parsed, list):
+                return [str(v).strip() for v in parsed if str(v).strip()]
+        except Exception:
+            pass
+        if "," in text or "\n" in text:
+            return [part.strip() for part in text.replace("\r", "").replace("\n", ",").split(",") if part.strip()]
+        return text
 
 
 class ProductResponse(BaseModel):
     id: int
+    item_id: Optional[int] = None
     price: int
     img_path: str
     availability: int

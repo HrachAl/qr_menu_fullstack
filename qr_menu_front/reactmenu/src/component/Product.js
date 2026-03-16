@@ -3,28 +3,41 @@ import { useEffect, useState } from "react";
 import { useLang } from "../LangContext";
 import { RiArrowDownWideLine } from "react-icons/ri";
 import { IoClose } from "react-icons/io5";
-import { useViewMode } from "../ViewModeContext";
+import { menuImageUrl } from "../imageUrl";
 
 export default function Product({ product, show, setShow, clearProduct}) {
-    const [count, setCount] = useState(0)
-    const { viewMode } = useViewMode();
-    const isDesktop = viewMode === "desktop";
+    const [count, setCount] = useState(1)
+    const [isDesktop, setIsDesktop] = useState(() => window.matchMedia("(min-width: 900px)").matches);
+
+    useEffect(() => {
+        const mediaQuery = window.matchMedia("(min-width: 900px)");
+        const handleMediaChange = (event) => {
+            setIsDesktop(event.matches);
+        };
+
+        setIsDesktop(mediaQuery.matches);
+        mediaQuery.addEventListener("change", handleMediaChange);
+
+        return () => {
+            mediaQuery.removeEventListener("change", handleMediaChange);
+        };
+    }, []);
 
     const handleClose = () => {
         setShow(false);
         clearProduct();
-        setCount(0);
+        setCount(1);
     };
     
     const {addMoreToCart} = useCart()
     const {add, amd} = useLang()
 
     const handlePlus = () => {
-        setCount(count + 1)
-    } 
+        setCount((prev) => prev + 1)
+    }
     const handleMin = () => {
-        setCount(count - 1)
-    } 
+        setCount((prev) => Math.max(1, prev - 1))
+    }
 
     useEffect(() => {
         if (show) {
@@ -42,7 +55,8 @@ export default function Product({ product, show, setShow, clearProduct}) {
     }, [show]);
 
     const handleClick = () => {
-        addMoreToCart(product.item_id, count);
+        const safeCount = Math.max(1, Number(count) || 1);
+        addMoreToCart(product.item_id, safeCount);
         setShow(prev => !prev)
     }
 
@@ -58,7 +72,7 @@ export default function Product({ product, show, setShow, clearProduct}) {
                             {product && (
                                 <>
                                     <div className="prodDesktopImage">
-                                        <img src={`new_menu/${product.image}`} alt={product.name} />
+                                        <img src={menuImageUrl(product.image)} alt={product.name} />
                                     </div>
                                     <div className="prodDesktopInfo">
                                         <h2 className="prodDesktopName">{product.name}</h2>
@@ -94,7 +108,7 @@ export default function Product({ product, show, setShow, clearProduct}) {
                 {product && (
                     <div className="prodCont">
                         <div className="prodImg">
-                            <img src={`new_menu/${product.image}`} alt={product.name} />
+                            <img src={menuImageUrl(product.image)} alt={product.name} />
                         </div>
                         <div className="prodInf">
                             <h5>{product.name}</h5>

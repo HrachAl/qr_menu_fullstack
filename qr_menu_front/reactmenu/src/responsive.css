@@ -241,3 +241,210 @@
         height: 48%;
     }
 }
+
+@media screen and (max-width: 768px) {
+    .top-bar {
+        justify-content: space-between;
+        gap: 8px;
+        padding: 0 10px;
+        height: 52px;
+    }
+
+    .top-bar-title {
+        display: none;
+    }
+
+    .top-bar-left,
+    .top-bar-right {
+        min-width: 0;
+    }
+
+    .top-bar-right {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 8px;
+        flex: 1;
+    }
+
+    .top-bar .customer-auth {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .top-bar .customer-auth-fullname {
+        display: none;
+    }
+
+    .top-bar .customer-auth .customer-auth-btn {
+        padding: 5px 9px;
+        font-size: 11px;
+        border-radius: 16px;
+    }
+
+    .top-bar .mode-btn,
+    .top-bar .customer-auth-user-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    main {
+        height: auto;
+        min-height: 330px;
+        padding-top: 60px;
+        padding-bottom: 16px;
+    }
+
+    main .swiper,
+    main .swiper .mainSlide {
+        height: auto;
+        min-height: 260px;
+    }
+
+    main .swiper .mainSlide {
+        gap: 10px;
+        padding: 0 10px;
+    }
+
+    main .swiper .mainSlide .slideTop {
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        height: auto;
+        gap: 8px;
+    }
+
+    main .swiper .mainSlide .slideLeft,
+    main .swiper .mainSlide .slideRight {
+        width: 100%;
+        height: auto;
+        text-align: center;
+    }
+
+    main .swiper .mainSlide .slideLeft {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    main .swiper .mainSlide .slideLeft img {
+        width: 100%;
+        max-width: 180px;
+        height: auto;
+        max-height: 140px;
+        object-fit: contain;
+    }
+
+    main .swiper .mainSlide .slideRight h3 {
+        font-size: 18px;
+        margin-bottom: 8px;
+    }
+
+    main .swiper .mainSlide .slideRight p {
+        font-size: 12px;
+        line-height: 1.4;
+    }
+
+    main .swiper .mainSlide .slideBottom {
+        width: 100%;
+        height: auto;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    main .swiper .mainSlide .slideBottom .bottomBlock,
+    main .swiper .mainSlide .slideBottom .bottomPrice {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .menuList-container {
+        padding: 10px 10px 120px;
+        gap: 16px;
+    }
+
+    .menuList-container .bigestBox {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .menuList-container .type-heading {
+        grid-column: 1 / -1;
+        padding-left: 2px;
+        margin-bottom: 2px;
+    }
+
+    .menuList-container .menu-item {
+        width: auto;
+        min-width: 0;
+        height: 240px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .menu-item .image {
+        height: 108px;
+        min-height: 108px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .menu-item .image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .menu-item .text {
+        flex: 1;
+        min-height: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 10px;
+        gap: 6px;
+    }
+
+    .menu-item .text .name {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        gap: 4px;
+        min-height: 0;
+    }
+
+    .menu-item .text .name h4 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        line-height: 1.3;
+    }
+
+    .menu-item .text .name p {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: normal;
+        line-height: 1.35;
+    }
+
+    .menuItem-priceBox {
+        margin-top: auto;
+    }
+}

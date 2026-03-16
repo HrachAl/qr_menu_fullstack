@@ -174,12 +174,20 @@ def product_list_for_menu(
         d = _row_to_dict(r)
         d["item_id"] = d.get("item_id") if d.get("item_id") is not None else d.get("id")
         d.pop("id", None)
+        d["type_name"] = d.get("type_name") or (d.get("type") or "Menu").replace("_", " ").title()
+        d["name"] = d.get("name") or d["type_name"]
+        d["description"] = d.get("description") or d["name"]
+        d["short_description"] = d.get("short_description") or str(d["description"])[:120]
         d["image"] = d.get("img_path", "").split("/")[-1] if d.get("img_path") else ""
+        if not d["image"]:
+            d["image"] = "placeholder.png"
         if d.get("composition"):
             try:
                 d["composition"] = json.loads(d["composition"]) if isinstance(d["composition"], str) else d["composition"]
             except Exception:
                 d["composition"] = []
+        else:
+            d["composition"] = []
         out.append(d)
     return out
 
@@ -197,18 +205,27 @@ def product_list_as_menu_dict(conn: sqlite3.Connection) -> dict:
         item_id = d.get("item_id") if d.get("item_id") is not None else pk
         d.pop("item_id", None)
         d["item_id"] = item_id
+        d["type_name"] = d.get("type_name") or (d.get("type") or "Menu").replace("_", " ").title()
+        d["name"] = d.get("name") or d["type_name"]
+        d["description"] = d.get("description") or d["name"]
+        d["short_description"] = d.get("short_description") or str(d["description"])[:120]
         d["image"] = d.get("img_path", "").split("/")[-1] if d.get("img_path") else ""
+        if not d["image"]:
+            d["image"] = "placeholder.png"
         if d.get("composition"):
             try:
                 d["composition"] = json.loads(d["composition"]) if isinstance(d["composition"], str) else d["composition"]
             except Exception:
                 d["composition"] = []
+        else:
+            d["composition"] = []
         out[item_id] = d
     return out
 
 
 def product_update(conn: sqlite3.Connection, product_id: int, **kwargs) -> None:
     allowed = {
+        "item_id",
         "price", "img_path", "availability", "access_level", "type", "type_name",
         "name_en", "name_am", "name_ru", "description_en", "description_am", "description_ru",
         "short_description_en", "short_description_am", "short_description_ru", "composition",

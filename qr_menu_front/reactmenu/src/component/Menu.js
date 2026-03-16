@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useLang } from "../LangContext";
 import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
-export default function Menu({ showMenu, setShowMenu }) {
+export default function Menu() {
   const [left, setLeft] = useState("0px");
   const [width, setWidth] = useState("92px");
   const [first, setFirst] = useState(0);
@@ -10,11 +10,27 @@ export default function Menu({ showMenu, setShowMenu }) {
   const [scroll, setScroll] = useState(0);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isStuck, setIsStuck] = useState(false);
   const {menuTypes} = useLang()
   const itemRefs = useRef([]);
   const listRef = useRef(null);
+  const switchAnimTimeoutRef = useRef(null);
+  const stickySentinelRef = useRef(null);
 
-const handleClick = (index) => {
+const handleClick = (index, withTransition = true) => {
+  setActiveIndex(index);
+
+  if (withTransition && document.body.classList.contains("desktop-mode")) {
+    document.body.classList.add("category-switching");
+    if (switchAnimTimeoutRef.current) {
+      window.clearTimeout(switchAnimTimeoutRef.current);
+    }
+    switchAnimTimeoutRef.current = window.setTimeout(() => {
+      document.body.classList.remove("category-switching");
+    }, 320);
+  }
+
   const el = itemRefs.current[index];
   const container = listRef.current;
   if (!el || !container) return;
@@ -81,14 +97,6 @@ const handleClick = (index) => {
     updateScrollButtons();
   }, [menuTypes]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setShowMenu(window.scrollY <= 335);
-    };
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   function waitForScrollEnd(element, callback) {
     let lastLeft = element.scrollLeft;
     let sameCounter = 0;
@@ -118,7 +126,7 @@ const handleClick = (index) => {
     });
 
     if (currentSection !== -1) {
-      handleClick(currentSection);
+      handleClick(currentSection, false);
 
       const menuEl = itemRefs.current[currentSection];
       const ul = listRef.current;
@@ -136,49 +144,85 @@ const handleClick = (index) => {
         });
 
         waitForScrollEnd(ul, () => {
-          handleClick(currentSection);
+          handleClick(currentSection, false);
         });
       } else {
-        handleClick(currentSection);
+        handleClick(currentSection, false);
       }
 
     }
   }, [scroll]);
 
+  useEffect(() => {
+    return () => {
+      if (switchAnimTimeoutRef.current) {
+        window.clearTimeout(switchAnimTimeoutRef.current);
+      }
+      document.body.classList.remove("category-switching");
+    };
+  }, []);
+
+  useEffect(() => {
+    const sentinel = stickySentinelRef.current;
+    if (!sentinel || typeof IntersectionObserver === "undefined") return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsStuck(entry.intersectionRatio < 1);
+      },
+      {
+        threshold: [1],
+      }
+    );
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <div className="container" style={{ position: showMenu ? '' : 'fixed' }}>
-      <div className="buttons">
-        <div className={`menuNav ${canScrollLeft ? "canLeft" : ""} ${canScrollRight ? "canRight" : ""}`}>
-          <button
-            className={`menuNavBtn left ${canScrollLeft ? "show" : ""}`}
-            onClick={() => scrollByAmount("left")}
-            type="button"
-            aria-label="Scroll left"
-          >
-            <IoChevronBack />
-          </button>
+    <>
+      <div ref={stickySentinelRef} className="menuStickySentinel" aria-hidden="true" />
+      <div className={`container ${isStuck ? "is-stuck" : ""}`}>
+        <div className="buttons">
+          <div className={`menuNav ${canScrollLeft ? "canLeft" : ""} ${canScrollRight ? "canRight" : ""}`}>
+            <button
+              className={`menuNavBtn left ${canScrollLeft ? "show" : ""}`}
+              onClick={() => scrollByAmount("left")}
+              type="button"
+              aria-label="Scroll left"
+            >
+              <IoChevronBack />
+            </button>
 
-          <ul ref={listRef} onScroll={updateScrollButtons}>
-            {menuTypes.map((item, i) => (
-              <li key={i} ref={el => (itemRefs.current[i] = el)}>
-                <a href={`#${item.type}`} onClick={() => handleClick(i)}>
-                  {item.type_name}
-                </a>
-              </li>
-            ))}
-            <div className="active" style={{ left : `${left}`, width : `${width}`, clipPath : `polygon(${first}% 0%, ${sec}% 0%, 100% 100%, 0% 100%)`}} />
-          </ul>
+            <ul ref={listRef} onScroll={updateScrollButtons}>
+              {menuTypes.map((item, i) => (
+                <li
+                  key={i}
+                  ref={el => (itemRefs.current[i] = el)}
+                  className={activeIndex === i ? "active-link" : ""}
+                >
+                  <a href={`#${item.type}`} onClick={() => handleClick(i)}>
+                    {item.type_name}
+                  </a>
+                </li>
+              ))}
+              <div className="active" style={{ left : `${left}`, width : `${width}`, clipPath : `polygon(${first}% 0%, ${sec}% 0%, 100% 100%, 0% 100%)`}} />
+            </ul>
 
-          <button
-            className={`menuNavBtn right ${canScrollRight ? "show" : ""}`}
-            onClick={() => scrollByAmount("right")}
-            type="button"
-            aria-label="Scroll right"
-          >
-            <IoChevronForward />
-          </button>
+            <button
+              className={`menuNavBtn right ${canScrollRight ? "show" : ""}`}
+              onClick={() => scrollByAmount("right")}
+              type="button"
+              aria-label="Scroll right"
+            >
+              <IoChevronForward />
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

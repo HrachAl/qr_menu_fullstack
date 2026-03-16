@@ -3,6 +3,7 @@ import { SlActionRedo } from "react-icons/sl";
 import { useLang } from "../LangContext";
 import { useWebSocketForm } from "../WebSocketProvider";
 import { useCart } from "../CartContext";
+import { menuImageUrl } from "../imageUrl";
 
 export default function Draq({setSelectedProduct, setShowProduct, show}) {
     const { write, langItems, add, tot, amd, addAll } = useLang()
@@ -168,11 +169,12 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
     };
 
     const updateCount = (id, count) => {
+        const safeCount = Math.max(0, Number(count) || 0);
         const updatedMessages = messages.map(msg => ({
             ...msg,
             menuItem: Array.isArray(msg.menuItem)
                 ? msg.menuItem.map(pro =>
-                    pro.item_id === id ? { ...pro, count } : pro
+                    pro.item_id === id ? { ...pro, count: safeCount } : pro
                 )
                 : msg.menuItem
         }));
@@ -186,7 +188,8 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
             const item = langItems.find(pro => pro.item_id === item_id)
             if(!item) return null;
 
-            total += item.price * count
+            const safeCount = Math.max(0, Number(count) || 0);
+            total += item.price * safeCount
         })
         return total;
     }
@@ -247,7 +250,7 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
                                                     return (
                                                     <div className="botChat-recommend" key={item_id}>
                                                         <div className="backRecomend_item">
-                                                            <div className="image"><img src={`new_menu/${item.image}`} alt={item.name} onClick={() => {
+                                                            <div className="image"><img src={menuImageUrl(item.image)} alt={item.name} onClick={() => {
                                                                 setSelectedProduct(item);
                                                                 setShowProduct(true);
                                                                 setActive(!active)

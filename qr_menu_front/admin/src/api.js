@@ -1,9 +1,19 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || (typeof window !== 'undefined' && window.location.origin) || 'http://localhost:8000';
+const DEV_BACKEND = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || (
+  typeof window !== 'undefined' && window.location.hostname === 'localhost' && window.location.port !== '8000'
+    ? DEV_BACKEND
+    : (typeof window !== 'undefined' ? window.location.origin : DEV_BACKEND)
+);
 
 /** Product image URL: backend serves static files under /build (e.g. /build/new_menu/1.png) */
 export function productImageUrl(imgPath) {
   if (!imgPath) return '';
-  const path = imgPath.startsWith('http') ? imgPath : `${API_BASE}/build/${imgPath}`;
+  if (imgPath.startsWith('http')) return imgPath;
+  const normalized = String(imgPath)
+    .replace(/\\/g, '/')
+    .replace(/^\/+/, '')
+    .replace(/^build\//, '');
+  const path = `${API_BASE}/build/${normalized}`;
   return path;
 }
 

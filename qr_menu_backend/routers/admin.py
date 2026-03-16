@@ -21,6 +21,121 @@ def _user_to_response(u: dict) -> dict:
     return {k: v for k, v in u.items() if k != "password"}
 
 
+def _to_int(value, default: int | None = None) -> int | None:
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return int(value)
+    if isinstance(value, (int, float)):
+        return int(value)
+    s = str(value).strip()
+    if not s:
+        return default
+    try:
+        return int(float(s))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=f"Invalid integer value: {value}") from exc
+
+
+def _normalize_img_path(path: str | None) -> str:
+    raw = (path or "").strip().replace("\\", "/")
+    if not raw:
+        return "new_menu/placeholder.png"
+    if raw.startswith("http://") or raw.startswith("https://"):
+        raw = raw.split("?")[0]
+        if "/build/" in raw:
+            raw = raw.split("/build/", 1)[1]
+        else:
+            raw = raw.rsplit("/", 1)[-1]
+    raw = raw.lstrip("/")
+    if raw.startswith("build/"):
+        raw = raw[len("build/"):]
+    if raw.startswith("new_menu/"):
+        return raw
+    return f"new_menu/{raw.rsplit('/', 1)[-1]}"
+
+
+def _normalize_composition(value):
+    if value is None:
+        return None
+    if isinstance(value, list):
+        parts = [str(x).strip() for x in value if str(x).strip()]
+        return json.dumps(parts) if parts else None
+    text = str(value).strip()
+    if not text:
+        return None
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, list):
+            parts = [str(x).strip() for x in parsed if str(x).strip()]
+            return json.dumps(parts) if parts else None
+    except Exception:
+        pass
+    parts = [p.strip() for p in text.replace("\r", "").replace("\n", ",").split(",") if p.strip()]
+    return json.dumps(parts) if parts else None
+
+
+def _normalize_product_payload(data: dict, existing: dict | None = None, *, for_create: bool = False) -> dict:
+    out = dict(data)
+
+    if "price" in out or for_create:
+        out["price"] = _to_int(out.get("price"), default=_to_int((existing or {}).get("price"), default=0))
+    if "availability" in out or for_create:
+        out["availability"] = _to_int(out.get("availability"), default=_to_int((existing or {}).get("availability"), default=1))
+        out["availability"] = 1 if out["availability"] else 0
+    if "item_id" in out:
+        item_id = _to_int(out.get("item_id"), default=None)
+        out["item_id"] = item_id
+    elif for_create:
+        out["item_id"] = None
+
+    if "img_path" in out or for_create:
+        out["img_path"] = _normalize_img_path(out.get("img_path"))
+
+    if "access_level" in out:
+        level = out.get("access_level")
+        out["access_level"] = level if level in {"user", "vip_user", "admin", "superadmin"} else None
+    elif for_create:
+        out["access_level"] = None
+
+    if "type" in out or for_create:
+        type_val = str(out.get("type") or (existing or {}).get("type") or "main_course").strip()
+        out["type"] = type_val or "main_course"
+    if "type_name" in out or for_create:
+        type_name_val = str(out.get("type_name") or (existing or {}).get("type_name") or "Main").strip()
+        out["type_name"] = type_name_val or "Main"
+
+    if "composition" in out or for_create:
+        out["composition"] = _normalize_composition(out.get("composition"))
+
+    existing = existing or {}
+    names = {
+        "name_en": (out.get("name_en") if "name_en" in out else existing.get("name_en")),
+        "name_am": (out.get("name_am") if "name_am" in out else existing.get("name_am")),
+        "name_ru": (out.get("name_ru") if "name_ru" in out else existing.get("name_ru")),
+    }
+    base_name = next((str(v).strip() for v in names.values() if v is not None and str(v).strip()), "New item")
+    for key in ("name_en", "name_am", "name_ru"):
+        if for_create or key in out:
+            val = names.get(key)
+            out[key] = str(val).strip() if val is not None and str(val).strip() else base_name
+
+    desc_keys = ["description_en", "description_am", "description_ru"]
+    short_keys = ["short_description_en", "short_description_am", "short_description_ru"]
+    for d_key, s_key, n_key in zip(desc_keys, short_keys, ["name_en", "name_am", "name_ru"]):
+        current_desc = out.get(d_key) if d_key in out else existing.get(d_key)
+        current_short = out.get(s_key) if s_key in out else existing.get(s_key)
+        fallback_name = out.get(n_key) or existing.get(n_key) or base_name
+        fallback_short = str(current_desc).strip() if current_desc is not None and str(current_desc).strip() else str(fallback_name)
+        fallback_short = fallback_short[:120]
+        if for_create or d_key in out:
+            out[d_key] = str(current_desc).strip() if current_desc is not None and str(current_desc).strip() else str(fallback_name)
+        if for_create or s_key in out:
+            out[s_key] = str(current_short).strip() if current_short is not None and str(current_short).strip() else fallback_short
+
+    return out
+
+
 # ---------- Users (superadmin only) ----------
 @router.get("/users", response_model=list[UserResponse])
 def admin_list_users(conn: sqlite3.Connection = Depends(get_db), user=Depends(require_superadmin)):
@@ -78,14 +193,30 @@ def admin_list_products(conn: sqlite3.Connection = Depends(get_db), user=Depends
 
 @router.post("/products", response_model=ProductResponse)
 def admin_create_product(data: ProductCreate, conn: sqlite3.Connection = Depends(get_db), user=Depends(require_admin)):
-    pid = repositories.product_create(
-        conn, price=data.price, img_path=data.img_path, type_=data.type, type_name=data.type_name,
-        availability=data.availability, access_level=data.access_level,
-        name_en=data.name_en, name_am=data.name_am, name_ru=data.name_ru,
-        description_en=data.description_en, description_am=data.description_am, description_ru=data.description_ru,
-        short_description_en=data.short_description_en, short_description_am=data.short_description_am, short_description_ru=data.short_description_ru,
-        composition=data.composition,
-    )
+    payload = _normalize_product_payload(data.model_dump(), for_create=True)
+    try:
+        pid = repositories.product_create(
+            conn,
+            item_id=payload.get("item_id"),
+            price=payload["price"],
+            img_path=payload["img_path"],
+            type_=payload["type"],
+            type_name=payload["type_name"],
+            availability=payload["availability"],
+            access_level=payload.get("access_level"),
+            name_en=payload.get("name_en"),
+            name_am=payload.get("name_am"),
+            name_ru=payload.get("name_ru"),
+            description_en=payload.get("description_en"),
+            description_am=payload.get("description_am"),
+            description_ru=payload.get("description_ru"),
+            short_description_en=payload.get("short_description_en"),
+            short_description_am=payload.get("short_description_am"),
+            short_description_ru=payload.get("short_description_ru"),
+            composition=payload.get("composition"),
+        )
+    except sqlite3.IntegrityError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid product data: {exc}") from exc
     return repositories.product_get_by_id(conn, pid)
 
 
@@ -102,8 +233,11 @@ def admin_update_product(product_id: int, data: ProductUpdate, conn: sqlite3.Con
     p = repositories.product_get_by_id(conn, product_id)
     if not p:
         raise HTTPException(status_code=404, detail="Product not found")
-    kwargs = data.model_dump(exclude_unset=True)
-    repositories.product_update(conn, product_id, **kwargs)
+    kwargs = _normalize_product_payload(data.model_dump(exclude_unset=True), existing=p, for_create=False)
+    try:
+        repositories.product_update(conn, product_id, **kwargs)
+    except sqlite3.IntegrityError as exc:
+        raise HTTPException(status_code=400, detail=f"Invalid product update: {exc}") from exc
     return repositories.product_get_by_id(conn, product_id)
 
 
@@ -119,7 +253,9 @@ def admin_delete_product(product_id: int, conn: sqlite3.Connection = Depends(get
 @router.post("/products/upload-image")
 def admin_upload_image(file: UploadFile = File(...), user=Depends(require_admin)):
     os.makedirs(UPLOAD_DIR, exist_ok=True)
-    ext = os.path.splitext(file.filename or "")[1] or ".png"
+    ext = (os.path.splitext(file.filename or "")[1] or ".png").lower()
+    if ext not in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
+        ext = ".png"
     name = f"{uuid.uuid4().hex}{ext}"
     path = os.path.join(UPLOAD_DIR, name)
     with open(path, "wb") as f:

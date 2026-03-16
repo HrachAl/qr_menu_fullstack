@@ -16,6 +16,9 @@ body.theme-dark {
   --bg-cart-item: #323232;
   --bg-block: #676767;
   --bg-product: #292624;
+  --bg-product-elevated: #1f1f1f;
+  --bg-card-elevated: #1b1b1b;
+  --bg-glass: rgba(35, 35, 35, 0.62);
   --bg-buy-history: linear-gradient(#171717, #181818);
   --bg-overlay: #00000082;
   --bg-overlay-light: #0000004e;
@@ -43,6 +46,7 @@ body.theme-dark {
 
   --shadow-card: 0 1px 18px 0 #000000b3;
   --shadow-cart: 0px 6px 3px -4px #00000057;
+  --shadow-glow: 0 12px 40px rgba(212, 105, 59, 0.24);
 
   --border-card: transparent;
 
@@ -69,6 +73,9 @@ body.theme-light {
   --bg-cart-item: #f5f5f5;
   --bg-block: #e8e8e8;
   --bg-product: #ffffff;
+  --bg-product-elevated: #ffffff;
+  --bg-card-elevated: #fcfbf9;
+  --bg-glass: rgba(255, 255, 255, 0.62);
   --bg-buy-history: linear-gradient(#ffffff, #fafafa);
   --bg-overlay: #00000050;
   --bg-overlay-light: #00000035;
@@ -97,6 +104,7 @@ body.theme-light {
 
   --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.08);
   --shadow-cart: 0px 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-glow: 0 12px 34px rgba(212, 105, 59, 0.2);
 
   --check-bg: #d0d0d0;
   --check-active: #888888;

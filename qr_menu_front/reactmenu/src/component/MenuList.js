@@ -1,8 +1,9 @@
 import { useState, useMemo } from "react";
 import { useCart } from "../CartContext";
 import { useLang } from "../LangContext";
+import { menuImageUrl } from "../imageUrl";
 
-export default function MenuList({showMenu, setSelectedProduct, setShowProduct}) {
+export default function MenuList({setSelectedProduct, setShowProduct}) {
     const {langItems, add, amd, lang} = useLang()
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -42,7 +43,7 @@ export default function MenuList({showMenu, setSelectedProduct, setShowProduct})
     }
 
     return (
-        <div className="menuList-container" style={{padding: showMenu ? '' : '130px 0px 75px 0px'}}>
+        <div className="menuList-container">
             <div className="menu-search-wrap">
                 <input
                     type="search"
@@ -65,7 +66,7 @@ export default function MenuList({showMenu, setSelectedProduct, setShowProduct})
                         <div key={index} className="menu-item">
                             <div className="image">
                                 <img 
-                                    src={`new_menu/${item.image}`} 
+                                    src={menuImageUrl(item.image)} 
                                     alt={item.name} 
                                     onClick={() => {
                                         setSelectedProduct(item);
@@ -76,7 +77,7 @@ export default function MenuList({showMenu, setSelectedProduct, setShowProduct})
                             </div>
                             <div className="text">
                                 <div className="name">
-                                    <h4>{item.name.slice(0, 12)}{item.name.length > 11 ? '...' : ''}</h4>
+                                    <h4>{item.name}</h4>
                                     <p>
                                         {item.short_description}
                                     </p>

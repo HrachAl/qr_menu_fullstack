@@ -6,6 +6,7 @@ import { HiDotsHorizontal } from "react-icons/hi";
 import { useCart } from "../CartContext";
 import { useLang } from "../LangContext";
 import { useWebSocketForm } from "../WebSocketProvider";
+import { menuImageUrl } from "../imageUrl";
 
 export default function MainRec({setSelectedProduct, setShowProduct}) {
     const {langItems, add, min, amd, lang} = useLang()
@@ -101,7 +102,7 @@ export default function MainRec({setSelectedProduct, setShowProduct}) {
                         <div className="mainSlide">
                             <div className="slideTop">
                                 <div className="slideLeft">
-                                    <img src={`new_menu/${item.image}`} alt={item.name} onClick={() => {
+                                    <img src={menuImageUrl(item.image)} alt={item.name} onClick={() => {
                                         setSelectedProduct(item);
                                         setShowProduct(true);
                                     }} />

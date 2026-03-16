@@ -1,20 +1,3 @@
-/* ===== MOBILE MODE STYLES ===== */
-/* When mobile mode is active, force the original 500px layout */
-
-body.mobile-mode {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-body.mobile-mode .App {
-  width: 500px;
-}
-
-body.mobile-mode .container {
-  width: 500px;
-}
-
 /* ===== DESKTOP MODE STYLES ===== */
 /* Applied when body has class "desktop-mode" */
 
@@ -23,6 +6,9 @@ body.desktop-mode {
   justify-content: center;
   align-items: flex-start;
   min-height: 100vh;
+  background: var(--bg-primary);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
 }
 
 body.desktop-mode .App {
@@ -30,106 +16,217 @@ body.desktop-mode .App {
   max-width: 98vw;
 }
 
+body.desktop-mode {
+  --desktop-surface: var(--bg-card-elevated);
+  --desktop-float: var(--bg-glass);
+}
+
 /* ---- Hero / MainRec ---- */
 body.desktop-mode main {
   width: 100%;
-  height: 320px;
-  border-radius: 16px;
-  margin-top: 10px;
+  height: 372px;
+  border-radius: 26px;
+  margin-top: 14px;
+  padding: 16px 12px 22px;
+  overflow: hidden;
 }
 
 body.desktop-mode main .swiper .mainSlide .slideTop {
-  gap: 2rem;
+  gap: 2.6rem;
+}
+
+body.desktop-mode main .swiper .mainSlide .slideLeft {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 body.desktop-mode main .swiper .mainSlide .slideLeft img {
   height: 100%;
-  max-height: 200px;
+  max-height: 248px;
+  transition: transform 0.35s ease, filter 0.35s ease;
+}
+
+body.desktop-mode main .swiper .mainSlide .slideLeft img:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 8px 26px rgba(231, 122, 61, 0.35));
 }
 
 body.desktop-mode main .swiper .mainSlide .slideRight h3 {
-  font-size: 26px;
+  font-size: 34px;
+  letter-spacing: -0.3px;
 }
 
 body.desktop-mode main .swiper .mainSlide .slideRight p {
-  font-size: 15px;
+  font-size: 16px;
+  max-width: 92%;
+  line-height: 1.55;
 }
 
 body.desktop-mode main .swiper .mainSlide .slideBottom {
-  width: 80%;
+  width: 86%;
 }
 
 body.desktop-mode main .swiper .mainSlide .slideBottom .bottomPrice .price {
-  font-size: 20px;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+body.desktop-mode main .swiper .mainSlide .slideBottom .bottomBlock .block {
+  background: color-mix(in srgb, var(--desktop-float) 84%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-color);
+}
+
+body.desktop-mode main .swiper .mainSlide .slideBottom .bottomPrice .buy {
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #e77a3d, #d4693b);
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.desktop-mode main .swiper .mainSlide .slideBottom .bottomPrice .buy:hover {
+  filter: brightness(1.06);
+  box-shadow: var(--shadow-glow);
 }
 
 /* ---- Menu Navigation ---- */
 body.desktop-mode .container {
   width: 1400px;
   max-width: 98vw;
-  border-radius: 0 0 12px 12px;
+  border-radius: 0 0 16px 16px;
+  background: color-mix(in srgb, var(--bg-menu-gradient-start) 80%, var(--bg-menu-gradient-end));
+  border-bottom: 1px solid var(--border-color);
 }
 
 body.desktop-mode .container .buttons {
-  height: 50px;
+  height: 56px;
 }
 
 body.desktop-mode .container .buttons ul {
   gap: 1.4rem;
   justify-content: center;
-  padding: 8px 10px;
+  padding: 8px 10px 12px;
 }
 
 body.desktop-mode .container .buttons ul li a {
   font-size: 16px;
-  padding: 10px 16px;
-  border-radius: 14px;
+  padding: 8px 4px;
+  border-radius: 0;
+  position: relative;
+  transition: color 0.22s ease;
+}
+
+body.desktop-mode .container .buttons ul li a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -8px;
+  height: 2px;
+  width: 100%;
+  background: #e77a3d;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.24s ease;
+}
+
+body.desktop-mode .container .buttons ul li a:hover::after,
+body.desktop-mode .container .buttons ul li.active-link a::after {
+  transform: scaleX(1);
+}
+
+body.desktop-mode .container .buttons ul li.active-link a,
+body.desktop-mode .container .buttons ul li a:hover {
+  color: #e77a3d;
+}
+
+body.desktop-mode .container .buttons ul .active {
+  height: 2px;
+  bottom: 4px;
+  border-radius: 9999px;
+  background: #e77a3d;
+  box-shadow: 0 2px 10px rgba(231, 122, 61, 0.35);
+  clip-path: none !important;
 }
 
 /* ---- Menu List (Grid) ---- */
 body.desktop-mode .menuList-container {
-  border-radius: 12px;
-  padding: 20px 10px;
+  border-radius: 16px;
+  padding: 24px 14px 110px;
   gap: 2rem;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+body.desktop-mode.category-switching .menuList-container {
+  opacity: 0.48;
+  transform: translateY(8px);
 }
 
 body.desktop-mode .menuList-container .bigestBox {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 1rem;
-  padding: 0 5px;
+  gap: 1.2rem;
+  padding: 0 8px;
 }
 
 body.desktop-mode .menuList-container .type-heading {
   grid-column: 1 / -1;
-  font-size: 22px;
-  padding-left: 10px;
+  font-size: 24px;
+  padding-left: 6px;
 }
 
 body.desktop-mode .menuList-container .menu-item {
   width: 100%;
   height: 260px;
-  border-radius: 16px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  border-radius: 20px;
+  background: var(--desktop-surface);
+  border: 1px solid var(--border-color);
+  transition: transform 0.26s, box-shadow 0.26s, border-color 0.26s;
+  opacity: 1;
+  animation: none;
+}
+
+body.desktop-mode.page-intro .menuList-container .menu-item {
+  opacity: 0;
+  animation: cardFadeInUp 0.55s ease forwards;
 }
 
 body.desktop-mode .menuList-container .menu-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  transform: translateY(-8px);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.24);
+  border-color: color-mix(in srgb, #e77a3d 40%, var(--border-color));
+}
+
+body.desktop-mode.page-intro .menuList-container .menu-item:nth-of-type(1) { animation-delay: 0.05s; }
+body.desktop-mode.page-intro .menuList-container .menu-item:nth-of-type(2) { animation-delay: 0.09s; }
+body.desktop-mode.page-intro .menuList-container .menu-item:nth-of-type(3) { animation-delay: 0.13s; }
+body.desktop-mode.page-intro .menuList-container .menu-item:nth-of-type(4) { animation-delay: 0.17s; }
+body.desktop-mode.page-intro .menuList-container .menu-item:nth-of-type(5) { animation-delay: 0.21s; }
+
+@keyframes cardFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 body.desktop-mode .menu-item .image {
-  height: 58%;
-  border-radius: 14px;
+  height: 60%;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 body.desktop-mode .menu-item .image img {
   height: 85%;
-  transition: transform 0.2s;
+  transition: transform 0.3s ease;
 }
 
 body.desktop-mode .menu-item:hover .image img {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 body.desktop-mode .menu-item .text .name h4 {
@@ -141,7 +238,31 @@ body.desktop-mode .menu-item .text .name p {
 }
 
 body.desktop-mode .menuItem-priceBox .menuItem-price {
-  font-size: 18px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+body.desktop-mode .menuItem-priceBox .buy {
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #e77a3d, #d4693b);
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.desktop-mode .menuItem-priceBox .buy:hover {
+  filter: brightness(1.07);
+  box-shadow: var(--shadow-glow);
+}
+
+body.desktop-mode .buy button {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 20px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+body.desktop-mode .buy button:hover {
+  background: rgba(255, 255, 255, 0.28);
 }
 
 /* ---- Cart Bar ---- */
@@ -149,17 +270,49 @@ body.desktop-mode .cart-box {
   width: 600px;
   max-width: 60vw;
   height: 60px;
-  border-radius: 30px;
+  border-radius: 9999px;
+  bottom: 24px;
+  background: color-mix(in srgb, #e77a3d 78%, transparent);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 body.desktop-mode .cart-content {
-  width: 600px;
+  width: 640px;
   max-width: 70vw;
-  border-radius: 25px 25px 0 0;
+  border-radius: 22px;
+  bottom: 100px;
+  background: color-mix(in srgb, var(--desktop-float) 92%, transparent);
+  backdrop-filter: blur(16px) saturate(125%);
+  -webkit-backdrop-filter: blur(16px) saturate(125%);
+  border: 1px solid var(--border-color);
+  opacity: 0;
+  transform: translateY(18px) scale(0.94);
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+body.desktop-mode .cart-content.contAct {
+  bottom: 100px;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
 }
 
 body.desktop-mode .cartBack.backActive {
   width: 100%;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+body.desktop-mode .cartBack .cartClose {
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+body.desktop-mode .cartBack .cartClose:hover {
+  color: #e77a3d;
+  transform: rotate(90deg);
 }
 
 /* ---- Product Modal (Desktop - new centered layout) ---- */
@@ -174,12 +327,12 @@ body.desktop-mode .prodBG {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.55);
   z-index: 200;
   display: flex;
   justify-content: center;
   align-items: center;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(14px);
   animation: prodOverlayFadeIn 0.3s ease-out;
 }
 
@@ -198,7 +351,7 @@ body.desktop-mode .prodBG {
   width: 860px;
   max-width: 92vw;
   max-height: 85vh;
-  background: var(--bg-card);
+  background: color-mix(in srgb, var(--desktop-float) 92%, transparent);
   border-radius: 28px;
   display: flex;
   overflow: hidden;
@@ -258,7 +411,7 @@ body.desktop-mode .prodBG {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 35px;
+  padding: 48px;
   min-height: 420px;
   position: relative;
   overflow: hidden;
@@ -297,9 +450,11 @@ body.desktop-mode .prodBG {
   padding: 45px 40px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 20px;
   position: relative;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .prodDesktopInfo::before {
@@ -333,14 +488,20 @@ body.desktop-mode .prodBG {
   font-family: var(--pon-family);
   line-height: 1.7;
   letter-spacing: 0.3px;
-  max-height: 140px;
+  max-height: clamp(220px, 38vh, 360px);
+  min-height: 180px;
+  flex: 1;
   overflow-y: auto;
-  padding-right: 8px;
+  padding-right: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: #e77a3d transparent;
   position: relative;
+  /* -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%); */
+  /* mask-image: linear-gradient(to bottom, #000 80%, transparent 100%); */
 }
 
 .prodDesktopDesc::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 
 .prodDesktopDesc::-webkit-scrollbar-track {
@@ -348,8 +509,8 @@ body.desktop-mode .prodBG {
 }
 
 .prodDesktopDesc::-webkit-scrollbar-thumb {
-  background: var(--bg-scrollbar);
-  border-radius: 2px;
+  background: #e77a3d;
+  border-radius: 9999px;
 }
 
 .prodDesktopPrice {
@@ -378,6 +539,7 @@ body.desktop-mode .prodBG {
 .prodDesktopPriceNum {
   font-size: 32px;
   font-weight: 800;
+  margin-left: 20px;
   color: var(--text-price);
   font-family: var(--pon-family);
   letter-spacing: -0.5px;
@@ -420,10 +582,11 @@ body.desktop-mode .prodBG {
 }
 
 .prodDesktopCountBtn {
-  width: 52px;
-  height: 52px;
+  width: 42px;
+  height: 42px;
   border: none;
-  background: transparent;
+  background: color-mix(in srgb, var(--desktop-float) 86%, transparent);
+  border-radius: 50%;
   color: var(--text-primary);
   font-size: 24px;
   cursor: pointer;
@@ -457,7 +620,7 @@ body.desktop-mode .prodBG {
 
 .prodDesktopCountBtn:hover {
   color: var(--text-white);
-  transform: scale(1.1);
+  transform: translateY(-1px) scale(1.04);
 }
 
 .prodDesktopCountNum {
@@ -474,7 +637,7 @@ body.desktop-mode .prodBG {
   flex: 1;
   height: 52px;
   border: none;
-  border-radius: 16px;
+  border-radius: 9999px;
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
   color: var(--text-white);
   font-size: 18px;
@@ -487,6 +650,72 @@ body.desktop-mode .prodBG {
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(212, 105, 59, 0.25);
+}
+
+body.desktop-mode .cart-content .backItem .backItemBox {
+  gap: 1rem;
+}
+
+body.desktop-mode .cart-content .backItem .backItemBox .backItem_item {
+  width: 150px;
+  border-radius: 18px;
+  padding: 10px 10px 12px;
+  gap: 0.75rem;
+}
+
+body.desktop-mode .cart-content .backItem .backItemBox .backItem_item .backItem_sub {
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+body.desktop-mode .cart-content .backItem .backItemBox .backItem_item .backItem_sub .backItem_price {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+body.desktop-mode .cart-content .backItem .backItemBox .backItem_item .backItem_sub .backItem_add {
+  min-height: 30px;
+  border-radius: 9999px;
+  padding: 4px 8px;
+  margin-top: 0;
+  justify-content: center;
+}
+
+body.desktop-mode .cart-content .backItem .backItemBox .backItem_item .backItem_sub .backItem_add > p {
+  width: 100%;
+  text-align: center;
+  line-height: 22px;
+}
+
+body.desktop-mode .cart-content .backItem .backItemBox .backItem_item .backItem_sub .backItem_add button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 17px;
+  line-height: 1;
+}
+
+body.desktop-mode .cart-content .backItem .backItemBox .backItem_item .backItem_sub .backItem_add button:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+body.desktop-mode .cart-content .cartItems .cartItem .cartButton {
+  border-radius: 9999px;
+}
+
+body.desktop-mode .cart-content .cartItems .cartItem .cartButton button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 16px;
+}
+
+body.desktop-mode .cart-content .cartItems .cartItem .cartButton button:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .prodDesktopAdd::before {
@@ -619,5 +848,427 @@ body.desktop-mode ::-webkit-scrollbar-thumb {
   }
   body.desktop-mode .App {
     max-width: 100vw;
+  }
+}
+
+/* ===== FORCE OVERRIDES (debug hard-fix) ===== */
+html,
+body,
+#root,
+body.desktop-mode,
+body.desktop-mode #root,
+body.desktop-mode .App {
+  min-height: 100vh !important;
+  height: auto !important;
+  background: var(--bg-primary) !important;
+}
+
+body,
+body.desktop-mode {
+  background-attachment: fixed !important;
+  background-repeat: no-repeat !important;
+}
+
+/* Keep card intro animation only on initial page-intro state */
+body.desktop-mode .menuList-container .menu-item {
+  animation: none !important;
+  opacity: 1 !important;
+}
+
+body.desktop-mode.page-intro .menuList-container .menu-item {
+  animation: cardFadeInUp 0.55s ease forwards !important;
+  opacity: 0 !important;
+}
+
+/* Verified Product modal classes from Product.jsx */
+.prodOverlay {
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+}
+
+.prodDesktop {
+  width: 860px !important;
+  max-width: 92vw !important;
+  max-height: 85vh !important;
+  overflow: hidden !important;
+}
+
+.prodDesktopInfo {
+  min-height: 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.prodDesktopDesc {
+  max-height: 300px !important;
+  min-height: 150px !important;
+  overflow-y: auto !important;
+  padding-right: 10px !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: #e77a3d transparent !important;
+  /* -webkit-mask-image: linear-gradient(to bottom, #000 80%, transparent 100%) !important; */
+  /* mask-image: linear-gradient(to bottom, #000 80%, transparent 100%) !important; */
+}
+
+.prodDesktopDesc::-webkit-scrollbar {
+  width: 3px !important;
+}
+
+.prodDesktopDesc::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+.prodDesktopDesc::-webkit-scrollbar-thumb {
+  background: #e77a3d !important;
+  border-radius: 9999px !important;
+}
+
+/* ===== Strict Product Grid Normalization ===== */
+body.desktop-mode .menuList-container .bigestBox {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)) !important;
+  gap: 20px !important;
+  align-items: stretch !important;
+}
+
+body.desktop-mode .menuList-container .type-heading {
+  grid-column: 1 / -1 !important;
+}
+
+body.desktop-mode .menuList-container .menu-item {
+  grid-column: auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  min-height: 340px !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  align-self: stretch !important;
+}
+
+body.desktop-mode .menuList-container .menu-item .image {
+  width: 100% !important;
+  height: 160px !important;
+  min-height: 160px !important;
+  overflow: hidden !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 160px !important;
+}
+
+body.desktop-mode .menuList-container .menu-item .image img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  display: block !important;
+}
+
+body.desktop-mode .menuList-container .menu-item .text {
+  width: 100% !important;
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+  padding: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+}
+
+body.desktop-mode .menuList-container .menu-item .text .name {
+  min-height: 0 !important;
+  flex-grow: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  gap: 4px !important;
+}
+
+body.desktop-mode .menuList-container .menu-item .text .name h4 {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  line-height: 1.3 !important;
+  min-height: calc(1.3em * 2) !important;
+}
+
+body.desktop-mode .menuList-container .menu-item .text .name p {
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: normal !important;
+  line-height: 1.45 !important;
+  font-size: 13px !important;
+}
+
+body.desktop-mode .menuList-container .menu-item .menuItem-priceBox {
+  margin-top: auto !important;
+}
+
+@media screen and (max-width: 768px) {
+  body.desktop-mode .menuStickySentinel {
+    width: 100%;
+    height: 1px;
+    pointer-events: none;
+  }
+
+  body.desktop-mode .App {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding-bottom: 120px !important;
+  }
+
+  body.desktop-mode .top-bar {
+    position: sticky !important;
+    top: 0 !important;
+    height: auto !important;
+    min-height: 56px !important;
+    padding: 12px 16px !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: rgba(18, 22, 28, 0.6) !important;
+    backdrop-filter: blur(14px) saturate(120%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(120%) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    z-index: 130 !important;
+  }
+
+  body.desktop-mode .top-bar-title {
+    display: none !important;
+  }
+
+  body.desktop-mode .top-bar-right {
+    margin-left: auto !important;
+    gap: 8px !important;
+  }
+
+  body.desktop-mode main {
+    height: auto !important;
+    min-height: fit-content !important;
+    margin-top: 8px !important;
+    padding: 8px 12px 14px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+    border-radius: 20px !important;
+    overflow: visible !important;
+  }
+
+  body.desktop-mode main .swiper {
+    height: auto !important;
+  }
+
+  body.desktop-mode main .swiper .mainSlide {
+    height: auto !important;
+    gap: 10px !important;
+    padding: 0 4px !important;
+    align-items: stretch !important;
+  }
+
+  body.desktop-mode main .swiper .mainSlide .slideTop {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    width: 100% !important;
+    height: auto !important;
+    gap: 8px !important;
+  }
+
+  body.desktop-mode main .swiper .mainSlide .slideLeft,
+  body.desktop-mode main .swiper .mainSlide .slideRight {
+    width: 100% !important;
+    height: auto !important;
+    text-align: center !important;
+  }
+
+  body.desktop-mode main .swiper .mainSlide .slideLeft img {
+    margin-top: 20px !important;
+    width: 100% !important;
+    max-width: 190px !important;
+    max-height: 150px !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+
+  body.desktop-mode main .swiper .mainSlide .slideRight h3 {
+    margin-bottom: 8px !important;
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+  }
+
+  body.desktop-mode main .swiper .mainSlide .slideRight p {
+    margin: 0 auto !important;
+    max-width: 94% !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+    color: var(--text-secondary) !important;
+    text-align: center !important;
+  }
+
+  body.desktop-mode main .swiper .mainSlide .slideBottom {
+    width: 100% !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-top: 6px !important;
+  }
+
+  body.desktop-mode main .swiper .mainSlide .slideBottom .bottomBlock {
+    width: 100% !important;
+    height: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 12px 0 !important;
+  }
+
+  body.desktop-mode main .swiper .mainSlide .slideBottom .bottomPrice {
+    width: 100% !important;
+    height: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 16px !important;
+    margin: 0 0 24px !important;
+  }
+
+  body.desktop-mode main .checkBox {
+    position: static !important;
+    margin: 4px 0 8px !important;
+    height: 4px !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+
+  body.desktop-mode main .checkBox .check {
+    width: 42px !important;
+  }
+
+  body.desktop-mode .container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    position: sticky !important;
+    top: 56px !important;
+    z-index: 110 !important;
+    margin-top: 8px !important;
+    border-radius: 0 !important;
+    background: color-mix(in srgb, var(--bg-menu-gradient-start) 85%, transparent) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(120%) !important;
+    backdrop-filter: blur(10px) saturate(120%) !important;
+    border-bottom: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  body.desktop-mode .container.is-stuck {
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.18) !important;
+    border-bottom-color: color-mix(in srgb, var(--border-color) 100%, transparent) !important;
+  }
+
+  body.desktop-mode .container .buttons {
+    height: 46px !important;
+  }
+
+  body.desktop-mode .container .buttons .menuNav::before,
+  body.desktop-mode .container .buttons .menuNav::after {
+    display: none !important;
+  }
+
+  body.desktop-mode .container .buttons .menuNavBtn {
+    display: none !important;
+  }
+
+  body.desktop-mode .container .buttons ul {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+    gap: 12px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    white-space: nowrap !important;
+    scrollbar-width: none !important;
+  }
+
+  body.desktop-mode .container .buttons ul::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  body.desktop-mode .container .buttons ul li {
+    flex: 0 0 auto !important;
+  }
+
+  body.desktop-mode .container .buttons ul li a {
+    padding: 8px 10px !important;
+    margin: 0 !important;
+    font-size: 14px !important;
+  }
+
+  body.desktop-mode .container .buttons ul li:first-child a {
+    margin-left: 0 !important;
+  }
+
+  body.desktop-mode .container .buttons ul li:last-child a {
+    margin-right: 0 !important;
+  }
+
+  body.desktop-mode .container .buttons ul .active {
+    bottom: 6px !important;
+    height: calc(100% - 12px) !important;
+  }
+
+  body.desktop-mode .menuList-container {
+    padding: 12px 10px 130px !important;
+    gap: 16px !important;
+  }
+
+  body.desktop-mode .menu-search-wrap {
+    padding: 0 2px 8px !important;
+  }
+
+  body.desktop-mode .menuList-container .bigestBox {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+    padding: 0 !important;
+  }
+
+  body.desktop-mode .cart-box {
+    bottom: 12px !important;
+    z-index: 95 !important;
+  }
+
+  body.desktop-mode .dragContainer {
+    position: fixed !important;
+    left: auto !important;
+    right: 16px !important;
+    bottom: 90px !important;
+    width: 48px !important;
+    height: 48px !important;
+    z-index: 50 !important;
+  }
+
+  body.desktop-mode .dragContainer.chatActive {
+    left: auto !important;
+    right: 16px !important;
+    bottom: 90px !important;
+    translate: 0 0 !important;
+  }
+
+  body.desktop-mode .chatBox {
+    width: min(94vw, 420px) !important;
+    height: min(64vh, 500px) !important;
+    bottom: 148px !important;
+    z-index: 92 !important;
   }
 }

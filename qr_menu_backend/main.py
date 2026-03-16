@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from services.ai_service import ChatBot
 import uvicorn
 import logging
@@ -17,6 +18,11 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+BASE_DIR = Path(__file__).resolve().parent
+ADMIN_PANEL_DIR = BASE_DIR / "admin_panel"
+BUILD_DIR = BASE_DIR / "build"
+NEW_MENU_DIR = BUILD_DIR / "new_menu"
 
 sessions: Dict[str, ChatBot] = {}
 
@@ -55,8 +61,9 @@ app.include_router(admin.router)
 app.include_router(orders.router)
 app.include_router(menu.router)
 
-app.mount("/admin_panel", StaticFiles(directory="admin_panel", html=True), name="admin")
-app.mount("/build", StaticFiles(directory="build", html=True), name="main")
+app.mount("/admin_panel", StaticFiles(directory=str(ADMIN_PANEL_DIR), html=True), name="admin")
+app.mount("/build", StaticFiles(directory=str(BUILD_DIR), html=True), name="main")
+app.mount("/new_menu", StaticFiles(directory=str(NEW_MENU_DIR), html=True), name="new_menu")
 
 app.add_middleware(
     CORSMiddleware,
@@ -75,11 +82,11 @@ async def info():
 
 @app.get("/admin_panel", include_in_schema=False)
 async def admin_index():
-    return FileResponse("admin_panel/index.html")
+    return FileResponse(str(ADMIN_PANEL_DIR / "index.html"))
 
 @app.get("/build", include_in_schema=False)
 async def main_page():
-    return FileResponse("build/index.html")
+    return FileResponse(str(BUILD_DIR / "index.html"))
 
 @app.websocket("/chat")
 async def websocket_endpoint(websocket: WebSocket):

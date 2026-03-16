@@ -1,15 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Armenian:wght@400;500;600;700;800&display=swap');
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 :root {
-  --pon-family:'Pontano Sans';
-  --mon-family: 'Montserrat';
+  --pon-family: 'Noto Sans Armenian', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  --mon-family: 'Noto Sans Armenian', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
 }
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  min-height: 100%;
 }
 body {
   background: var(--bg-primary);
@@ -17,6 +20,9 @@ body {
   justify-content: center;
   align-items: center;
   overflow-x: hidden;
+  min-height: 100vh;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   transition: background 0.3s;
 }
 p, h1, h2, h3, h4, h5, button   {
@@ -24,6 +30,8 @@ p, h1, h2, h3, h4, h5, button   {
 }
 .App {
   width: 500px;
+  min-height: 100vh;
+  background: var(--bg-primary);
   position: relative;
   overflow-x: hidden;
 }
@@ -566,11 +574,15 @@ main .checkBox .check.active {
 }
 .container {
   width: 500px;
+  position: sticky;
   top: 0;
   left: auto;
-  z-index: 25;
+  z-index: 100;
   background: linear-gradient(90deg, var(--bg-gradient-start), var(--bg-gradient-end));
-  transition: .3s;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+  transition: box-shadow 0.3s ease, background-color 0.3s ease, padding 0.3s ease;
 }
 .container .buttons {
   height: 40px;

@@ -4,6 +4,7 @@ import { TbTilde } from "react-icons/tb";
 import { useLang } from "../LangContext";
 import { RiArrowDownWideLine } from "react-icons/ri";
 import { useWebSocketForm } from "../WebSocketProvider";
+import { menuImageUrl } from "../imageUrl";
 
 export default function Cart({ setSelectedProduct, setShowProduct, show, showCartPanel, onCartPanelOpened }) {
     const { cartItems, addToCart, removeFromCart, confirm } = useCart();
@@ -47,7 +48,8 @@ export default function Cart({ setSelectedProduct, setShowProduct, show, showCar
         if (cartItems && cartItems.length > 0) {
             const total = cartItems.reduce((acc, { id, count }) => {
                 const item = langItems.find((prod) => prod.item_id === id);
-                return item ? acc + Number(item.price) * count : acc;
+                const safeCount = Math.max(0, Number(count) || 0);
+                return item ? acc + Number(item.price) * safeCount : acc;
             }, 0);
             setTotal(total);
         } else {
@@ -98,7 +100,7 @@ export default function Cart({ setSelectedProduct, setShowProduct, show, showCar
 
                         return(
                             <div className="cartItem" key={id}>
-                                <div className="cartItemImg"><img src={`new_menu/${item.image}`} alt={item.name} onClick={() => {
+                                <div className="cartItemImg"><img src={menuImageUrl(item.image)} alt={item.name} onClick={() => {
                                         setSelectedProduct(item);
                                         setShowProduct(true);
                                         setShowCart(!showCart)
@@ -127,7 +129,7 @@ export default function Cart({ setSelectedProduct, setShowProduct, show, showCar
                                 return(
                                     <div className="backItem_item" key={item.item_id}>
                                         <div className="backItem_info">
-                                            <div className="backItem_image"><img src={`new_menu/${item.image}`} alt={item.name} onClick={() => {
+                                            <div className="backItem_image"><img src={menuImageUrl(item.image)} alt={item.name} onClick={() => {
                                         setSelectedProduct(item);
                                         setShowProduct(true);
                                         setShowCart(!showCart)

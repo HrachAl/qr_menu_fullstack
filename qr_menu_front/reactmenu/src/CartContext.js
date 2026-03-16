@@ -53,16 +53,18 @@ export const CartProvider = ({ children }) => {
     };
 
     const addMoreToCart = (id, x) => {
+        const delta = Math.max(0, Number(x) || 0);
+        if (delta <= 0) return;
         setCartItems((prev) => {
             const existingItem = prev.find((item) => item.id === id);
             if (existingItem) {
                 return prev.map((item) =>
                     item.id === id
-                        ? { ...item, count: item.count + x }
+                        ? { ...item, count: Math.max(0, item.count + delta) }
                         : item
-                );
+                ).filter((item) => item.count > 0);
             } else {
-                return [...prev, { id, count: x, timestamp: new Date()}];
+                return [...prev, { id, count: delta, timestamp: new Date()}];
             }
         });
     };
@@ -71,14 +73,15 @@ export const CartProvider = ({ children }) => {
         setCartItems((prevCart) => {
             let updatedCart = [...prevCart];
             arr.forEach(({ item_id, count }) => {
-                if (count <= 0) return;
+                const safeCount = Math.max(0, Number(count) || 0);
+                if (safeCount <= 0) return;
                 const pro = langItems.find(prod => prod.item_id === item_id);
                 if (!pro) return;
                 const existingIndex = updatedCart.findIndex(item => item.id === item_id);
                 if (existingIndex !== -1) {
-                    updatedCart[existingIndex].count += count;
+                    updatedCart[existingIndex].count += safeCount;
                 } else {
-                    updatedCart.push({ id: item_id, count: count, timestamp: new Date() });
+                    updatedCart.push({ id: item_id, count: safeCount, timestamp: new Date() });
                 }
             });
             return updatedCart;
@@ -90,7 +93,7 @@ export const CartProvider = ({ children }) => {
             prev
                 .map((item) =>
                     item.id === id
-                        ? { ...item, count: item.count - 1 }
+                        ? { ...item, count: Math.max(0, item.count - 1) }
                         : item
                 )
                 .filter((item) => item.count > 0)

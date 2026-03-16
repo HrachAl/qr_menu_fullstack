@@ -3,6 +3,7 @@ import { useCart } from "../CartContext";
 import { useEffect, useState } from "react";
 import { useLang } from "../LangContext";
 import { RiArrowDownWideLine } from "react-icons/ri";
+import { menuImageUrl } from "../imageUrl";
 
 export default function BuyHistory({setSelectedProduct, setShowProduct, showProduct}) {
     const [show, setShow] = useState(false)
@@ -52,7 +53,7 @@ export default function BuyHistory({setSelectedProduct, setShowProduct, showProd
                         const item = langItems.find(item => item.item_id === id)
                         return(
                             <div className="buyItem" key={id}>
-                                <div className="buyItemImage"><img src={`new_menu/${item.image}`} alt={item.name} onClick={() => {
+                                <div className="buyItemImage"><img src={menuImageUrl(item.image)} alt={item.name} onClick={() => {
                                         setSelectedProduct(item);
                                         setShowProduct(true);
                                         setShow(!show)

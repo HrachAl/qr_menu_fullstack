@@ -7,6 +7,105 @@ const ACCESS_LEVELS = ['user', 'vip_user', 'admin', 'superadmin'];
 const INPUT_CLASS = 'w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40';
 const LABEL_CLASS = 'mb-1.5 block text-sm font-medium text-slate-300';
 
+function emptyProductForm() {
+  return {
+    item_id: '',
+    price: 0,
+    img_path: '',
+    type: 'main_course',
+    type_name: 'Main',
+    availability: 1,
+    access_level: '',
+    name_en: '',
+    name_am: '',
+    name_ru: '',
+    description_en: '',
+    description_am: '',
+    description_ru: '',
+    short_description_en: '',
+    short_description_am: '',
+    short_description_ru: '',
+    composition_input: '',
+  };
+}
+
+function compositionToInput(composition) {
+  if (!composition) return '';
+  if (Array.isArray(composition)) return composition.join('\n');
+  if (typeof composition === 'string') {
+    try {
+      const parsed = JSON.parse(composition);
+      if (Array.isArray(parsed)) return parsed.join('\n');
+    } catch (_) {
+      return composition;
+    }
+    return composition;
+  }
+  return '';
+}
+
+function parseCompositionInput(value) {
+  if (!value || !value.trim()) return [];
+  return value
+    .replace(/\r/g, '')
+    .split(/\n|,/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function normalizeOptionalText(value) {
+  const trimmed = String(value ?? '').trim();
+  return trimmed || null;
+}
+
+function buildProductPayload(form, isUpdate = false) {
+  const composition = parseCompositionInput(form.composition_input);
+  const itemIdValue = String(form.item_id ?? '').trim();
+  const payload = {
+    item_id: itemIdValue ? Number(itemIdValue) : undefined,
+    price: Number(form.price ?? 0),
+    img_path: String(form.img_path || '').trim() || 'new_menu/placeholder.png',
+    type: String(form.type || '').trim(),
+    type_name: String(form.type_name || '').trim(),
+    availability: Number(form.availability ?? 1),
+    access_level: form.access_level || undefined,
+    name_en: normalizeOptionalText(form.name_en) ?? undefined,
+    name_am: normalizeOptionalText(form.name_am) ?? undefined,
+    name_ru: normalizeOptionalText(form.name_ru) ?? undefined,
+    description_en: normalizeOptionalText(form.description_en) ?? undefined,
+    description_am: normalizeOptionalText(form.description_am) ?? undefined,
+    description_ru: normalizeOptionalText(form.description_ru) ?? undefined,
+    short_description_en: normalizeOptionalText(form.short_description_en) ?? undefined,
+    short_description_am: normalizeOptionalText(form.short_description_am) ?? undefined,
+    short_description_ru: normalizeOptionalText(form.short_description_ru) ?? undefined,
+    composition: composition.length ? composition : undefined,
+  };
+
+  if (!Number.isFinite(payload.price)) delete payload.price;
+  if (!Number.isFinite(payload.availability)) delete payload.availability;
+
+  if (isUpdate) {
+    // PATCH payload: omit undefined keys to avoid schema rejections and accidental nulling.
+    return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== undefined));
+  }
+
+  return {
+    ...payload,
+    item_id: payload.item_id ?? null,
+    access_level: payload.access_level ?? null,
+    name_en: payload.name_en ?? null,
+    name_am: payload.name_am ?? null,
+    name_ru: payload.name_ru ?? null,
+    description_en: payload.description_en ?? null,
+    description_am: payload.description_am ?? null,
+    description_ru: payload.description_ru ?? null,
+    short_description_en: payload.short_description_en ?? null,
+    short_description_am: payload.short_description_am ?? null,
+    short_description_ru: payload.short_description_ru ?? null,
+    composition: payload.composition ?? [],
+  };
+}
+
 function StockBadge({ availability }) {
   if (availability === 1) {
     return <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-2.5 py-1 text-xs font-medium text-emerald-300 ring-1 ring-emerald-500/30">In stock</span>;
@@ -99,15 +198,11 @@ export default function Products() {
     setSaving(true);
     try {
       if (form.id) {
-        await api(`/api/admin/products/${form.id}`, { method: 'PATCH', body: JSON.stringify({
-          price: form.price, img_path: form.img_path, type: form.type, type_name: form.type_name,
-          availability: form.availability ?? 1, access_level: form.access_level || null, name_en: form.name_en, name_am: form.name_am, name_ru: form.name_ru,
-        }) });
+        const payload = buildProductPayload(form, true);
+        await api(`/api/admin/products/${form.id}`, { method: 'PATCH', body: JSON.stringify(payload) });
       } else {
-        await api('/api/admin/products', { method: 'POST', body: JSON.stringify({
-          price: Number(form.price), img_path: form.img_path || 'new_menu/placeholder.png', type: form.type, type_name: form.type_name,
-          availability: form.availability ?? 1, access_level: form.access_level || null, name_en: form.name_en, name_am: form.name_am, name_ru: form.name_ru,
-        }) });
+        const payload = buildProductPayload(form, false);
+        await api('/api/admin/products', { method: 'POST', body: JSON.stringify(payload) });
       }
       setForm(null);
       load();
@@ -153,7 +248,7 @@ export default function Products() {
         <button
           type="button"
           className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500"
-          onClick={() => setForm({ price: 0, img_path: '', type: 'main_course', type_name: 'Main', availability: 1, access_level: '', name_en: '', name_am: '', name_ru: '' })}
+          onClick={() => setForm(emptyProductForm())}
         >
           <Plus size={16} />
           Add product
@@ -182,8 +277,8 @@ export default function Products() {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
-                  <label className={LABEL_CLASS}>Title (English)</label>
-                  <input className={INPUT_CLASS} value={form.name_en} onChange={(e) => setForm((f) => ({ ...f, name_en: e.target.value }))} />
+                  <label className={LABEL_CLASS}>Item ID (optional)</label>
+                  <input className={INPUT_CLASS} type="number" value={form.item_id ?? ''} onChange={(e) => setForm((f) => ({ ...f, item_id: e.target.value }))} />
                 </div>
                 <div>
                   <label className={LABEL_CLASS}>Price</label>
@@ -213,6 +308,56 @@ export default function Products() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div>
+                  <label className={LABEL_CLASS}>Title (English)</label>
+                  <input className={INPUT_CLASS} value={form.name_en} onChange={(e) => setForm((f) => ({ ...f, name_en: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={LABEL_CLASS}>Title (Armenian)</label>
+                  <input className={INPUT_CLASS} value={form.name_am ?? ''} onChange={(e) => setForm((f) => ({ ...f, name_am: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={LABEL_CLASS}>Title (Russian)</label>
+                  <input className={INPUT_CLASS} value={form.name_ru ?? ''} onChange={(e) => setForm((f) => ({ ...f, name_ru: e.target.value }))} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div>
+                  <label className={LABEL_CLASS}>Short description (English)</label>
+                  <input className={INPUT_CLASS} value={form.short_description_en ?? ''} onChange={(e) => setForm((f) => ({ ...f, short_description_en: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={LABEL_CLASS}>Short description (Armenian)</label>
+                  <input className={INPUT_CLASS} value={form.short_description_am ?? ''} onChange={(e) => setForm((f) => ({ ...f, short_description_am: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={LABEL_CLASS}>Short description (Russian)</label>
+                  <input className={INPUT_CLASS} value={form.short_description_ru ?? ''} onChange={(e) => setForm((f) => ({ ...f, short_description_ru: e.target.value }))} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div>
+                  <label className={LABEL_CLASS}>Description (English)</label>
+                  <textarea className={INPUT_CLASS} rows={4} value={form.description_en ?? ''} onChange={(e) => setForm((f) => ({ ...f, description_en: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={LABEL_CLASS}>Description (Armenian)</label>
+                  <textarea className={INPUT_CLASS} rows={4} value={form.description_am ?? ''} onChange={(e) => setForm((f) => ({ ...f, description_am: e.target.value }))} />
+                </div>
+                <div>
+                  <label className={LABEL_CLASS}>Description (Russian)</label>
+                  <textarea className={INPUT_CLASS} rows={4} value={form.description_ru ?? ''} onChange={(e) => setForm((f) => ({ ...f, description_ru: e.target.value }))} />
+                </div>
+              </div>
+
+              <div>
+                <label className={LABEL_CLASS}>Ingredients / Composition (one per line or comma separated)</label>
+                <textarea className={INPUT_CLASS} rows={4} value={form.composition_input ?? ''} onChange={(e) => setForm((f) => ({ ...f, composition_input: e.target.value }))} />
               </div>
 
               <div>
@@ -294,7 +439,7 @@ export default function Products() {
                   <tr
                     key={p.id}
                     className="cursor-pointer transition-colors duration-200 hover:bg-slate-800/50"
-                    onClick={() => setForm({ ...p })}
+                    onClick={() => setForm({ ...emptyProductForm(), ...p, composition_input: compositionToInput(p.composition) })}
                   >
                     <td className="px-6 py-4">
                       <img
@@ -318,7 +463,7 @@ export default function Products() {
                           className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-950 text-slate-300 transition hover:border-indigo-500/60 hover:text-indigo-300"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setForm({ ...p });
+                            setForm({ ...emptyProductForm(), ...p, composition_input: compositionToInput(p.composition) });
                           }}
                         >
                           <Pencil size={15} />

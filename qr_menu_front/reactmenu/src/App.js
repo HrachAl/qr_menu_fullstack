@@ -5,7 +5,7 @@ import './desktop.css'
 import MainRec from './component/MainRec';
 import Menu from './component/Menu';
 import MenuList from './component/MenuList';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Product from './component/Product';
 import { CartProvider } from './CartContext';
 import Cart from './component/Cart';
@@ -18,18 +18,36 @@ import { WebSocketFormProvider } from './WebSocketProvider';
 import { ViewModeProvider } from './ViewModeContext';
 
 function App() {
-  const [showMenu, setShowMenu] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showProduct, setShowProduct] = useState(false);
   const [showOrdersHistory, setShowOrdersHistory] = useState(false);
   const [showCartPanel, setShowCartPanel] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.add('page-intro');
+    const introTimeout = window.setTimeout(() => {
+      document.body.classList.remove('page-intro');
+    }, 900);
+
+    return () => {
+      window.clearTimeout(introTimeout);
+      document.body.classList.remove('page-intro');
+    };
+  }, []);
 
   return (
     <ViewModeProvider>
       <LangProvider>
         <WebSocketFormProvider>
           <CartProvider>
-            <div className="App">
+            <div
+              className="App"
+              style={{
+                minHeight: '100vh',
+                background: 'var(--bg-primary)',
+                backgroundAttachment: 'fixed'
+              }}
+            >
               <TopBar
                 onOpenOrdersHistory={() => setShowOrdersHistory(true)}
                 onOpenCart={() => setShowCartPanel(true)}
@@ -37,9 +55,8 @@ function App() {
               <MainRec 
                 setSelectedProduct={setSelectedProduct} 
                 setShowProduct={setShowProduct}/>
-              <Menu showMenu = {showMenu} setShowMenu = {setShowMenu} />
+              <Menu />
               <MenuList 
-                showMenu={showMenu} 
                 setSelectedProduct={setSelectedProduct} 
                 setShowProduct={setShowProduct}
               />
