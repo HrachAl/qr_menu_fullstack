@@ -15,7 +15,11 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 @router.get("/me")
 def get_me(user=Depends(get_current_user)):
     """Current user info for customer UI (fullname, email)."""
-    return {"fullname": user.get("fullname") or "", "email": user.get("email") or ""}
+    return {
+        "fullname": user.get("fullname") or "",
+        "email": user.get("email") or "",
+        "access_level": user.get("access_level") or "user",
+    }
 
 
 @router.post("/login", response_model=Token)

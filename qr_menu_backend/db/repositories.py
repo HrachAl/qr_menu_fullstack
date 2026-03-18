@@ -321,3 +321,72 @@ def _row_to_dict(row) -> dict:
     if row is None:
         return {}
     return dict(zip(row.keys(), row))
+
+
+# ---------- Inventory ----------
+
+def inventory_list(conn: sqlite3.Connection) -> list[dict]:
+    rows = conn.execute(
+        "SELECT * FROM inventory_items ORDER BY name COLLATE NOCASE, id"
+    ).fetchall()
+    return [_row_to_dict(r) for r in rows]
+
+
+def inventory_get_by_id(conn: sqlite3.Connection, item_id: int) -> Optional[dict]:
+    row = conn.execute("SELECT * FROM inventory_items WHERE id = ?", (item_id,)).fetchone()
+    return _row_to_dict(row) if row else None
+
+
+def inventory_create(
+    conn: sqlite3.Connection,
+    name: str,
+    category: str,
+    quantity: float,
+    unit: str,
+    low_stock_threshold: float,
+) -> int:
+    now = _now()
+    cur = conn.execute(
+        """INSERT INTO inventory_items (name, category, quantity, unit, low_stock_threshold, last_updated)
+           VALUES (?, ?, ?, ?, ?, ?)""",
+        (name, category, float(quantity), unit, float(low_stock_threshold), now),
+    )
+    conn.commit()
+    return cur.lastrowid
+
+
+def inventory_delete(conn: sqlite3.Connection, item_id: int) -> None:
+    conn.execute("DELETE FROM inventory_items WHERE id = ?", (item_id,))
+    conn.commit()
+
+
+def inventory_adjust(
+    conn: sqlite3.Connection,
+    item_id: int,
+    action: str,
+    amount: float,
+    reason: str,
+) -> Optional[dict]:
+    current = inventory_get_by_id(conn, item_id)
+    if not current:
+        return None
+
+    current_qty = float(current.get("quantity") or 0)
+    delta = float(amount)
+    if action == "add":
+        next_qty = current_qty + delta
+    else:
+        next_qty = max(0.0, current_qty - delta)
+
+    now = _now()
+    conn.execute(
+        "UPDATE inventory_items SET quantity = ?, last_updated = ? WHERE id = ?",
+        (next_qty, now, item_id),
+    )
+    conn.execute(
+        """INSERT INTO inventory_adjustments (inventory_item_id, action, amount, reason, created_at)
+           VALUES (?, ?, ?, ?, ?)""",
+        (item_id, action, delta, reason, now),
+    )
+    conn.commit()
+    return inventory_get_by_id(conn, item_id)

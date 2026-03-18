@@ -55,3 +55,7 @@ export async function uploadFile(path, file) {
   if (!res.ok) throw new Error(await res.text().then(t => t || res.statusText));
   return res.json();
 }
+
+export async function getMe() {
+  return api('/api/auth/me');
+}

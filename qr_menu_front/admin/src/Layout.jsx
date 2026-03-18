@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Bell, ChevronRight, LayoutDashboard, LogOut, Menu, Package, ShoppingCart, Users, BarChart3, X } from 'lucide-react';
+import { Bell, ChevronRight, LayoutDashboard, LogOut, Menu, Package, ShoppingCart, Users, BarChart3, Boxes, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
@@ -8,6 +8,7 @@ const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/users', label: 'Users', icon: Users },
   { to: '/admin/products', label: 'Products', icon: Package },
+  { to: '/admin/inventory', label: 'Inventory', icon: Boxes },
   { to: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { to: '/admin/statistics', label: 'Statistics', icon: BarChart3 },
 ];

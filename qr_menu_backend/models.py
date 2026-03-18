@@ -1,6 +1,6 @@
 import json
 from pydantic import RootModel, BaseModel, Field, ConfigDict, field_validator
-from typing import Any, List, Optional
+from typing import Any, List, Literal, Optional
 from datetime import datetime
 
 class OpenAIRequest(BaseModel):
@@ -246,3 +246,63 @@ class Token(BaseModel):
 
 class OrderStatusUpdate(BaseModel):
     status: str
+
+
+# ----- Inventory -----
+InventoryCategory = Literal[
+    "Meat",
+    "Produce",
+    "Beverages",
+    "Alcohol",
+    "Sweets/Bakery",
+    "Dairy",
+    "Dry Goods",
+]
+
+
+class InventoryItemCreate(BaseModel):
+    name: str
+    category: InventoryCategory
+    quantity: float = 0.0
+    unit: str
+    low_stock_threshold: float = 0.0
+
+    @field_validator("name", "unit", mode="before")
+    @classmethod
+    def _strip_required_text(cls, value: Any):
+        text = str(value or "").strip()
+        if not text:
+            raise ValueError("Field cannot be empty")
+        return text
+
+
+class InventoryItemResponse(BaseModel):
+    id: int
+    name: str
+    category: InventoryCategory
+    quantity: float
+    unit: str
+    low_stock_threshold: float
+    last_updated: str
+
+
+class InventoryAdjustRequest(BaseModel):
+    action: Literal["add", "deduct"]
+    amount: float
+    reason: str
+
+    @field_validator("amount", mode="before")
+    @classmethod
+    def _positive_amount(cls, value: Any):
+        amount = float(value)
+        if amount <= 0:
+            raise ValueError("Amount must be greater than 0")
+        return amount
+
+    @field_validator("reason", mode="before")
+    @classmethod
+    def _strip_reason(cls, value: Any):
+        text = str(value or "").strip()
+        if not text:
+            raise ValueError("Reason is required")
+        return text
