@@ -7,6 +7,7 @@ import Users from './pages/Users';
 import Products from './pages/Products';
 import Orders from './pages/Orders';
 import Statistics from './pages/Statistics';
+import Inventory from './pages/Inventory';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -22,6 +23,7 @@ function AppRoutes() {
         <Route index element={<Dashboard />} />
         <Route path="users" element={<Users />} />
         <Route path="products" element={<Products />} />
+        <Route path="inventory" element={<Inventory />} />
         <Route path="orders" element={<Orders />} />
         <Route path="statistics" element={<Statistics />} />
       </Route>
