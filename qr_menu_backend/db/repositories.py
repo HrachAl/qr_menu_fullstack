@@ -4,6 +4,8 @@ All functions accept a sqlite3 connection as first argument.
 """
 import sqlite3
 import json
+import re
+import random
 from datetime import datetime, timezone
 from typing import Optional
 
@@ -194,9 +196,12 @@ def product_list_for_menu(
 
 def product_list_as_menu_dict(conn: sqlite3.Connection) -> dict:
     """Return dict keyed by item_id (or id if item_id null) for openai_service (same shape as old menu_am.json)."""
+    product_columns = {row["name"] for row in conn.execute("PRAGMA table_info(products)").fetchall()}
+    recipe_select = "recipe" if "recipe" in product_columns else "NULL AS recipe"
+    calories_select = "total_calories" if "total_calories" in product_columns else "0 AS total_calories"
     rows = conn.execute(
         "SELECT id, item_id, price, img_path, type, type_name, name_en AS name, description_en AS description, "
-        "short_description_en AS short_description, composition FROM products WHERE availability = 1"
+        f"short_description_en AS short_description, composition, {recipe_select}, {calories_select} FROM products WHERE availability = 1"
     ).fetchall()
     out = {}
     for r in rows:
@@ -219,6 +224,17 @@ def product_list_as_menu_dict(conn: sqlite3.Connection) -> dict:
                 d["composition"] = []
         else:
             d["composition"] = []
+        if d.get("recipe"):
+            try:
+                d["recipe"] = json.loads(d["recipe"]) if isinstance(d["recipe"], str) else d["recipe"]
+            except Exception:
+                d["recipe"] = []
+        else:
+            d["recipe"] = []
+        try:
+            d["total_calories"] = int(d.get("total_calories") or 0)
+        except Exception:
+            d["total_calories"] = 0
         out[item_id] = d
     return out
 
@@ -321,3 +337,437 @@ def _row_to_dict(row) -> dict:
     if row is None:
         return {}
     return dict(zip(row.keys(), row))
+
+
+# ---------- Inventory ----------
+
+INVENTORY_CATEGORIES = {
+    "Meat",
+    "Produce",
+    "Beverages",
+    "Alcohol",
+    "Sweets/Bakery",
+    "Dairy",
+    "Dry Goods",
+}
+
+INVENTORY_UNITS = {"kg", "L", "pcs", "bottles"}
+
+READY_MADE_KEYWORDS = {
+    "beverage": "Beverages",
+    "drink": "Beverages",
+    "alcohol": "Alcohol",
+    "wine": "Alcohol",
+    "beer": "Alcohol",
+    "cocktail": "Alcohol",
+    "dessert": "Sweets/Bakery",
+    "sweet": "Sweets/Bakery",
+    "cake": "Sweets/Bakery",
+    "pastry": "Sweets/Bakery",
+    "bread": "Sweets/Bakery",
+}
+
+INGREDIENT_CATEGORY_KEYWORDS = {
+    "Meat": {
+        "beef", "veal", "chicken", "duck", "turkey", "pork", "ham", "bacon", "sausage",
+        "lamb", "salmon", "trout", "tuna", "fish", "shrimp", "prawn", "mussel", "octopus",
+        "calamari", "seafood", "anchovy", "crab",
+    },
+    "Dairy": {
+        "milk", "cheese", "mozzarella", "parmesan", "gouda", "butter", "cream", "yogurt",
+        "sour cream", "curd", "feta",
+    },
+    "Dry Goods": {
+        "flour", "rice", "pasta", "spaghetti", "fettuccine", "salt", "sugar", "pepper", "spice",
+        "oregano", "basil", "yeast", "breadcrumbs", "lentil", "beans", "chickpea", "noodle",
+        "semolina", "cornstarch", "cocoa", "coffee", "tea", "chocolate",
+    },
+    "Produce": {
+        "tomato", "potato", "onion", "garlic", "pepper", "cucumber", "lettuce", "carrot", "mushroom",
+        "eggplant", "zucchini", "broccoli", "spinach", "avocado", "lemon", "lime", "apple", "banana",
+        "orange", "berry", "parsley", "cilantro", "mint", "cabbage", "olive", "pickle",
+    },
+}
+
+LIQUID_HINTS = {"oil", "milk", "cream", "water", "syrup", "sauce", "vinegar", "juice"}
+
+STRICT_ALCOHOL_KEYWORDS = {"ararat", "wine", "beer", "corona", "vodka"}
+STRICT_MEAT_KEYWORDS = {"anchovy", "beef", "chicken"}
+
+
+def inventory_list(conn: sqlite3.Connection) -> list[dict]:
+    rows = conn.execute(
+        "SELECT * FROM inventory_items ORDER BY name COLLATE NOCASE, id"
+    ).fetchall()
+    return [_row_to_dict(r) for r in rows]
+
+
+def inventory_get_by_id(conn: sqlite3.Connection, item_id: int) -> Optional[dict]:
+    row = conn.execute("SELECT * FROM inventory_items WHERE id = ?", (item_id,)).fetchone()
+    return _row_to_dict(row) if row else None
+
+
+def inventory_create(
+    conn: sqlite3.Connection,
+    name: str,
+    category: str,
+    quantity: float,
+    unit: str,
+    low_stock_threshold: float,
+    overstock_threshold: Optional[float] = None,
+) -> int:
+    if category not in INVENTORY_CATEGORIES:
+        raise ValueError("Invalid category")
+    if unit not in INVENTORY_UNITS:
+        raise ValueError("Invalid unit")
+    now = _now()
+    low_stock_threshold = float(max(0.0, low_stock_threshold))
+    overstock_threshold = float(max(0.0, overstock_threshold)) if overstock_threshold is not None else low_stock_threshold * 3.0
+    cur = conn.execute(
+        """INSERT INTO inventory_items (name, category, quantity, unit, low_stock_threshold, overstock_threshold, last_updated)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (name, category, float(max(0.0, quantity)), unit, low_stock_threshold, overstock_threshold, now),
+    )
+    conn.commit()
+    return cur.lastrowid
+
+
+def inventory_update(conn: sqlite3.Connection, item_id: int, **kwargs) -> Optional[dict]:
+    current = inventory_get_by_id(conn, item_id)
+    if not current:
+        return None
+
+    updates = []
+    values = []
+
+    if "name" in kwargs and kwargs["name"] is not None:
+        name = str(kwargs["name"]).strip()
+        if not name:
+            raise ValueError("Name is required")
+        updates.append("name = ?")
+        values.append(name)
+
+    if "category" in kwargs and kwargs["category"] is not None:
+        category = str(kwargs["category"])
+        if category not in INVENTORY_CATEGORIES:
+            raise ValueError("Invalid category")
+        updates.append("category = ?")
+        values.append(category)
+
+    if "quantity" in kwargs and kwargs["quantity"] is not None:
+        quantity = float(kwargs["quantity"])
+        if quantity < 0:
+            raise ValueError("Quantity must be non-negative")
+        updates.append("quantity = ?")
+        values.append(quantity)
+
+    if "unit" in kwargs and kwargs["unit"] is not None:
+        unit = str(kwargs["unit"])
+        if unit not in INVENTORY_UNITS:
+            raise ValueError("Invalid unit")
+        updates.append("unit = ?")
+        values.append(unit)
+
+    low_stock_value = None
+    if "low_stock_threshold" in kwargs and kwargs["low_stock_threshold"] is not None:
+        low_stock_value = float(kwargs["low_stock_threshold"])
+        if low_stock_value < 0:
+            raise ValueError("Low stock threshold must be non-negative")
+        updates.append("low_stock_threshold = ?")
+        values.append(low_stock_value)
+
+    if "overstock_threshold" in kwargs and kwargs["overstock_threshold"] is not None:
+        overstock_value = float(kwargs["overstock_threshold"])
+        if overstock_value < 0:
+            raise ValueError("Overstock threshold must be non-negative")
+        updates.append("overstock_threshold = ?")
+        values.append(overstock_value)
+    elif low_stock_value is not None:
+        updates.append("overstock_threshold = ?")
+        values.append(low_stock_value * 3.0)
+
+    if not updates:
+        return current
+
+    now = _now()
+    updates.append("last_updated = ?")
+    values.append(now)
+    values.append(item_id)
+
+    conn.execute(f"UPDATE inventory_items SET {', '.join(updates)} WHERE id = ?", tuple(values))
+    conn.commit()
+    return inventory_get_by_id(conn, item_id)
+
+
+def inventory_delete(conn: sqlite3.Connection, item_id: int) -> None:
+    conn.execute("DELETE FROM inventory_items WHERE id = ?", (item_id,))
+    conn.commit()
+
+
+def inventory_adjust(
+    conn: sqlite3.Connection,
+    item_id: int,
+    action: str,
+    amount: float,
+    reason: str,
+) -> Optional[dict]:
+    current = inventory_get_by_id(conn, item_id)
+    if not current:
+        return None
+    delta = float(amount)
+    if delta <= 0:
+        raise ValueError("Amount must be positive")
+    if action not in {"add", "deduct"}:
+        raise ValueError("Invalid action")
+
+    current_qty = float(current.get("quantity") or 0)
+    next_qty = current_qty + delta if action == "add" else max(0.0, current_qty - delta)
+
+    now = _now()
+    conn.execute(
+        "UPDATE inventory_items SET quantity = ?, last_updated = ? WHERE id = ?",
+        (next_qty, now, item_id),
+    )
+    conn.execute(
+        """INSERT INTO inventory_adjustments (inventory_item_id, action, amount, reason, created_at)
+           VALUES (?, ?, ?, ?, ?)""",
+        (item_id, action, delta, reason.strip(), now),
+    )
+    conn.commit()
+    return inventory_get_by_id(conn, item_id)
+
+
+def seed_inventory(conn: sqlite3.Connection) -> int:
+    existing = conn.execute("SELECT COUNT(*) AS c FROM inventory_items").fetchone()["c"]
+    if existing > 0:
+        return 0
+
+    products = product_list(conn, availability=1)
+    if not products:
+        return 0
+
+    entries: list[dict] = []
+    ingredient_names: set[str] = set()
+
+    for product in products:
+        ready_category = _ready_made_category(product)
+        if ready_category:
+            name = (product.get("name_en") or product.get("name_am") or product.get("name_ru") or "").strip()
+            if not name:
+                continue
+            category_override, unit_override = _category_unit_from_name(name)
+            effective_category = category_override or ready_category
+            qty, threshold, unit = _ready_made_defaults(effective_category)
+            if unit_override:
+                unit = unit_override
+            entries.append({
+                "name": name,
+                "category": effective_category,
+                "quantity": qty,
+                "unit": unit,
+                "low_stock_threshold": threshold,
+                "overstock_threshold": threshold * 3.0,
+                "source": "ready",
+            })
+            continue
+
+        for ingredient in _extract_ingredients(product.get("composition")):
+            ingredient_names.add(ingredient)
+
+    for ing in sorted(ingredient_names):
+        category, unit = _ingredient_category_and_unit(ing)
+        qty = 15.0 if unit == "L" else 20.0
+        threshold = 4.0 if unit == "L" else 5.0
+        entries.append({
+            "name": ing,
+            "category": category,
+            "quantity": qty,
+            "unit": unit,
+            "low_stock_threshold": threshold,
+            "overstock_threshold": threshold * 3.0,
+            "source": "raw",
+        })
+
+    unique_entries: list[dict] = []
+    seen = set()
+    for item in entries:
+        key = item["name"].strip().lower()
+        if not key or key in seen:
+            continue
+        seen.add(key)
+        unique_entries.append(item)
+
+    if not unique_entries:
+        return 0
+
+    _apply_seeded_quantities(unique_entries)
+    now = _now()
+    conn.executemany(
+        """INSERT INTO inventory_items (name, category, quantity, unit, low_stock_threshold, overstock_threshold, last_updated)
+           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        [
+            (
+                item["name"],
+                item["category"],
+                float(max(0.0, item["quantity"])),
+                item["unit"],
+                float(max(0.0, item["low_stock_threshold"])),
+                float(max(0.0, item["overstock_threshold"])),
+                now,
+            )
+            for item in unique_entries
+        ],
+    )
+    conn.commit()
+    return len(unique_entries)
+
+
+def _ready_made_category(product: dict) -> Optional[str]:
+    text = " ".join([
+        str(product.get("type") or ""),
+        str(product.get("type_name") or ""),
+        str(product.get("name_en") or ""),
+    ]).lower()
+    category_override, _ = _category_unit_from_name(text)
+    if category_override:
+        return category_override
+    for key, category in READY_MADE_KEYWORDS.items():
+        if key in text:
+            return category
+    return None
+
+
+def _ready_made_defaults(category: str) -> tuple[float, float, str]:
+    if category == "Alcohol":
+        return 24.0, 8.0, "bottles"
+    if category == "Beverages":
+        return 48.0, 12.0, "bottles"
+    if category == "Sweets/Bakery":
+        return 24.0, 8.0, "pcs"
+    return 20.0, 5.0, "pcs"
+
+
+def _extract_ingredients(composition_value) -> list[str]:
+    if not composition_value:
+        return []
+    raw_items: list[str]
+    if isinstance(composition_value, list):
+        raw_items = [str(v) for v in composition_value]
+    elif isinstance(composition_value, str):
+        text = composition_value.strip()
+        if not text:
+            return []
+        try:
+            parsed = json.loads(text)
+            if isinstance(parsed, list):
+                raw_items = [str(v) for v in parsed]
+            else:
+                raw_items = re.split(r"[,;\n]", text)
+        except Exception:
+            raw_items = re.split(r"[,;\n]", text)
+    else:
+        return []
+
+    out = []
+    for raw in raw_items:
+        cleaned = _normalize_ingredient_name(raw)
+        if cleaned:
+            out.append(cleaned)
+    return out
+
+
+def _normalize_ingredient_name(value: str) -> str:
+    text = str(value or "").strip().lower()
+    text = re.sub(r"\([^)]*\)", "", text)
+    text = re.sub(r"\b\d+[\d.,]*\s*(kg|g|gr|l|ml|pcs|piece|tbsp|tsp)\b", "", text)
+    text = re.sub(r"\s+", " ", text).strip(" ,.-")
+    if not text or len(text) < 2:
+        return ""
+    return " ".join(word.capitalize() for word in text.split())
+
+
+def _ingredient_category_and_unit(name: str) -> tuple[str, str]:
+    text = name.lower()
+    category_override, unit_override = _category_unit_from_name(text)
+    if category_override:
+        return category_override, unit_override or "kg"
+    for category, keywords in INGREDIENT_CATEGORY_KEYWORDS.items():
+        for word in keywords:
+            if word in text:
+                if category == "Dairy" and any(liq in text for liq in LIQUID_HINTS):
+                    return category, "L"
+                return category, "kg"
+    if any(liq in text for liq in LIQUID_HINTS):
+        return "Dry Goods", "L"
+    return "Produce", "kg"
+
+
+def _category_unit_from_name(name: str) -> tuple[Optional[str], Optional[str]]:
+    text = str(name or "").lower()
+    if any(keyword in text for keyword in STRICT_ALCOHOL_KEYWORDS):
+        return "Alcohol", "bottles"
+    if any(keyword in text for keyword in STRICT_MEAT_KEYWORDS):
+        return "Meat", "kg"
+    return None, None
+
+
+def _round_seed_quantity(value: float, unit: str) -> float:
+    if unit in {"pcs", "bottles"}:
+        return float(max(0, int(round(value))))
+    return round(max(0.0, value), 2)
+
+
+def _apply_seeded_quantities(entries: list[dict]) -> None:
+    rng = random.Random()
+    for item in entries:
+        threshold = float(max(0.1, item.get("low_stock_threshold") or 0.1))
+        overstock_threshold = threshold * 3.0
+        item["overstock_threshold"] = overstock_threshold
+        quantity = threshold * rng.uniform(0.55, 3.9)
+        item["quantity"] = _round_seed_quantity(quantity, item.get("unit") or "kg")
+
+    low_candidates = [item for item in entries if float(item.get("low_stock_threshold") or 0) > 0]
+    over_candidates = [item for item in entries if float(item.get("low_stock_threshold") or 0) > 0]
+
+    low_count = sum(
+        1 for item in entries
+        if float(item.get("quantity") or 0) <= float(item.get("low_stock_threshold") or 0)
+    )
+    over_count = sum(
+        1 for item in entries
+        if float(item.get("quantity") or 0) >= float(item.get("overstock_threshold") or 0)
+    )
+
+    rng.shuffle(low_candidates)
+    rng.shuffle(over_candidates)
+
+    for item in low_candidates:
+        if low_count >= 2:
+            break
+        threshold = float(item.get("low_stock_threshold") or 0)
+        if threshold <= 0:
+            continue
+        forced = threshold * rng.uniform(0.55, 0.9)
+        item["quantity"] = _round_seed_quantity(forced, item.get("unit") or "kg")
+        if float(item.get("quantity") or 0) >= threshold:
+            item["quantity"] = _round_seed_quantity(max(0.0, threshold - 0.1), item.get("unit") or "kg")
+        low_count = sum(
+            1 for row in entries
+            if float(row.get("quantity") or 0) <= float(row.get("low_stock_threshold") or 0)
+        )
+
+    for item in over_candidates:
+        if over_count >= 2:
+            break
+        threshold = float(item.get("low_stock_threshold") or 0)
+        overstock_threshold = float(item.get("overstock_threshold") or (threshold * 3.0))
+        if threshold <= 0:
+            continue
+        forced = threshold * rng.uniform(3.2, 4.0)
+        item["quantity"] = _round_seed_quantity(forced, item.get("unit") or "kg")
+        if float(item.get("quantity") or 0) < overstock_threshold:
+            item["quantity"] = _round_seed_quantity(overstock_threshold * 1.1, item.get("unit") or "kg")
+        over_count = sum(
+            1 for row in entries
+            if float(row.get("quantity") or 0) >= float(row.get("overstock_threshold") or 0)
+        )

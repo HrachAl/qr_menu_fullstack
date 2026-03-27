@@ -55,7 +55,8 @@ def init_schema(conn: sqlite3.Connection) -> None:
             short_description_en TEXT,
             short_description_am TEXT,
             short_description_ru TEXT,
-            composition TEXT
+            composition TEXT,
+            recipe TEXT
         );
         CREATE INDEX IF NOT EXISTS idx_products_type ON products(type);
         CREATE INDEX IF NOT EXISTS idx_products_availability ON products(availability);
@@ -82,8 +83,63 @@ def init_schema(conn: sqlite3.Connection) -> None:
         );
         CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
         CREATE INDEX IF NOT EXISTS idx_order_items_product_id ON order_items(product_id);
+
+        CREATE TABLE IF NOT EXISTS inventory_items (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            category TEXT NOT NULL CHECK(category IN ('Meat', 'Produce', 'Beverages', 'Alcohol', 'Sweets/Bakery', 'Dairy', 'Dry Goods')),
+            quantity REAL NOT NULL CHECK(quantity >= 0),
+            unit TEXT NOT NULL CHECK(unit IN ('kg', 'L', 'pcs', 'bottles')),
+            low_stock_threshold REAL NOT NULL CHECK(low_stock_threshold >= 0),
+            overstock_threshold REAL NOT NULL CHECK(overstock_threshold >= 0),
+            last_updated TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_inventory_items_name ON inventory_items(name);
+        CREATE INDEX IF NOT EXISTS idx_inventory_items_category ON inventory_items(category);
+
+        CREATE TABLE IF NOT EXISTS inventory_adjustments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            inventory_item_id INTEGER NOT NULL REFERENCES inventory_items(id) ON DELETE CASCADE,
+            action TEXT NOT NULL CHECK(action IN ('add', 'deduct')),
+            amount REAL NOT NULL CHECK(amount > 0),
+            reason TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        );
+        CREATE INDEX IF NOT EXISTS idx_inventory_adjustments_item_id ON inventory_adjustments(inventory_item_id);
+        CREATE INDEX IF NOT EXISTS idx_inventory_adjustments_created_at ON inventory_adjustments(created_at);
     """)
+    _migrate_products_schema(conn)
+    _migrate_inventory_schema(conn)
     conn.commit()
+
+
+def _migrate_products_schema(conn: sqlite3.Connection) -> None:
+    """Ensure recipe column exists in older DB files."""
+    columns = [row[1] for row in conn.execute("PRAGMA table_info(products)").fetchall()]
+    if "recipe" not in columns:
+        try:
+            conn.execute("ALTER TABLE products ADD COLUMN recipe TEXT")
+        except sqlite3.OperationalError:
+            # Ignore duplicate-column races or unsupported alteration edge cases.
+            pass
+
+
+def _migrate_inventory_schema(conn: sqlite3.Connection) -> None:
+    """Ensure new inventory columns exist in older DB files."""
+    columns = [row[1] for row in conn.execute("PRAGMA table_info(inventory_items)").fetchall()]
+    if "overstock_threshold" not in columns:
+        try:
+            conn.execute("ALTER TABLE inventory_items ADD COLUMN overstock_threshold REAL")
+        except sqlite3.OperationalError:
+            # Ignore duplicate-column races or unsupported alteration edge cases.
+            pass
+    conn.execute(
+        """
+        UPDATE inventory_items
+        SET overstock_threshold = low_stock_threshold * 3
+        WHERE overstock_threshold IS NULL
+        """
+    )
 
 
 def init_db(db_path: str | None = None) -> None:

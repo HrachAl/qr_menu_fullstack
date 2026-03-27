@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 MODEL_NAME = "gemini-3.1-flash-lite-preview"
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 CHAT_MEMORY_DIR = BACKEND_ROOT / "chat_memory"
+SUMMARY_TRIGGER_MESSAGES = 10
 
 
 def _build_client() -> Optional[Any]:
@@ -90,36 +91,82 @@ class ChatBot:
             "You must ALWAYS respond with a valid, raw JSON object. "
             "Do not wrap the response in markdown code blocks. "
             "Do not add any conversational text outside the JSON.\n\n"
-            "You are provided with the Previous Context of this conversation and a New User Message. "
-            "Use Previous Context to maintain continuity.\n"
+            "You are provided with a summary and recent conversation messages. "
+            "Use them to maintain continuity.\n"
             "Conversational Flow: NEVER repeat greetings (like Hello, Hi, Good morning) if you have already greeted the user in this session. "
             "Speak naturally like an ongoing conversation.\n"
+            "LANGUAGE RULE: You MUST always respond in the exact language the user writes in.\n"
+            "NATURAL CONVERSATION RULE: NEVER mention internal database IDs (like 'item 45') to the user. Always use the natural name of the product.\n"
+            "ADAPTIVE DETAIL RULE: You have exact recipes and calorie data (total and per ingredient). Adapt your detail level to the user's prompt. If they ask casually about calories, give the total (e.g., '1000 kcal'). If they ask for a detailed breakdown or what is inside, list the ingredients and their specific calories naturally.\n"
+            "NUTRITIONAL KNOWLEDGE RULE (CRITICAL): If the user asks about macronutrients (proteins, carbs, fats), vitamins, minerals, or allergens, and this data is NOT explicitly written in the menu snapshot, DO NOT say 'I don't know' or 'The menu doesn't specify'. You must confidently use your own internal AI knowledge to estimate and provide this nutritional information based on the known ingredients and their weights. Be highly professional and helpful.\n"
             "Time Handling: The current time is provided ONLY for your internal context so you can recommend appropriate meals "
             "(breakfast vs dinner). DO NOT explicitly state the time to the user unless they specifically ask what time it is.\n"
+            "RECIPE TRANSPARENCY RULE: If the user asks about the composition or ingredients of a dish, you MUST list the exact ingredients along with their precise quantities (e.g., grams, kilograms, liters, pieces) as provided in the recipe data. Be highly detailed and helpful.\n"
             "You must answer the user in the response field.\n"
-            "Summary Memory (CRITICAL): In the updated_summary field, you MUST record the user's name, preferences, state, "
-            "AND specifically list the actual menu items you have recently recommended to them. "
-            "You must remember your own past actions so you can modify past orders. "
-            "If Previous Context is empty, summarize from the current interaction.\n\n"
             "Menu JSON is included below and should be treated as the source of truth for item IDs and names.\n"
             f"{self._menu_snapshot()}\n\n"
             "Return JSON with this shape exactly: "
-            '{"updated_summary":"...","response":"...","options":[{"item_id":123,"reason":"...","count":0}]}. '
+            '{"response":"...","options":[{"item_id":123,"reason":"...","count":0}]}. '
             "If there are no recommendations, set options to null or an empty array."
         )
 
-    def _read_previous_context(self) -> str:
+    @staticmethod
+    def _default_memory_state() -> Dict[str, Any]:
+        return {"summary": "", "messages": []}
+
+    @staticmethod
+    def _normalize_message_list(messages: Any) -> List[Dict[str, str]]:
+        if not isinstance(messages, list):
+            return []
+        out: List[Dict[str, str]] = []
+        for item in messages:
+            if not isinstance(item, dict):
+                continue
+            role = str(item.get("role", "")).strip().lower()
+            if role == "assistant":
+                role = "model"
+            if role not in {"user", "model"}:
+                continue
+            text = str(item.get("text", "")).strip()
+            if not text:
+                continue
+            out.append({"role": role, "text": text})
+        return out
+
+    def _read_previous_context(self) -> Dict[str, Any]:
         try:
             if not self.memory_file_path.exists():
-                return ""
-            return self.memory_file_path.read_text(encoding="utf-8").strip()
+                return self._default_memory_state()
+
+            raw = self.memory_file_path.read_text(encoding="utf-8").strip()
+            if not raw:
+                return self._default_memory_state()
+
+            try:
+                parsed = json.loads(raw)
+            except json.JSONDecodeError:
+                # Backward compatibility for old plain-text summary files.
+                return {"summary": raw, "messages": []}
+
+            if not isinstance(parsed, dict):
+                return self._default_memory_state()
+
+            summary = str(parsed.get("summary", "") or "").strip()
+            messages = self._normalize_message_list(parsed.get("messages", []))
+            return {"summary": summary, "messages": messages}
         except Exception:
             logger.exception("Failed to read chat memory", extra={"session_id": self.session_id})
-            return ""
+            return self._default_memory_state()
 
-    def _write_updated_context(self, updated_summary: str) -> None:
+    def _write_updated_context(self, state: Dict[str, Any]) -> None:
         try:
-            self.memory_file_path.write_text(updated_summary.strip(), encoding="utf-8")
+            summary = str(state.get("summary", "") or "").strip()
+            messages = self._normalize_message_list(state.get("messages", []))
+            payload = {"summary": summary, "messages": messages}
+            self.memory_file_path.write_text(
+                json.dumps(payload, ensure_ascii=False),
+                encoding="utf-8",
+            )
         except Exception:
             logger.exception("Failed to write chat memory", extra={"session_id": self.session_id})
 
@@ -193,17 +240,16 @@ class ChatBot:
     def _coerce_response_payload(self, assistant_text: str) -> Dict[str, Any]:
         stripped = assistant_text.strip()
         if not stripped:
-            return {"updated_summary": "", "response": "", "options": None}
+            return {"response": "", "options": None}
 
         try:
             parsed = json.loads(stripped)
         except json.JSONDecodeError:
-            return {"updated_summary": "", "response": stripped, "options": None}
+            return {"response": stripped, "options": None}
 
         if isinstance(parsed, list):
             options = self._normalize_options(parsed)
             return {
-                "updated_summary": "",
                 "response": "",
                 "options": options if options else None,
             }
@@ -219,20 +265,19 @@ class ChatBot:
                 response_text = parsed.get("message", "")
             response_text = str(response_text) if response_text is not None else ""
 
-            updated_summary = parsed.get("updated_summary")
-            if updated_summary is None:
-                updated_summary = parsed.get("summary", "")
-            updated_summary = str(updated_summary) if updated_summary is not None else ""
-
             return {
-                "updated_summary": updated_summary,
                 "response": response_text,
                 "options": options if options else None,
             }
 
-        return {"updated_summary": "", "response": stripped, "options": None}
+        return {"response": stripped, "options": None}
 
-    async def _generate(self, user_input: str, current_time: str, previous_context: str) -> str:
+    async def _generate(
+        self,
+        current_time: str,
+        summary: str,
+        messages: List[Dict[str, str]],
+    ) -> str:
         if client is None:
             raise RuntimeError("GEMINI_API_KEY is missing. Set it in environment/.env.")
         if types is None:
@@ -244,8 +289,8 @@ class ChatBot:
         time_prompt = PROMPT_DICT.get(time_key, PROMPT_DICT.get("en_time", "Current time is {current_time}"))
         contextual_input = (
             f"{time_prompt.format(current_time=current_time)}\n\n"
-            f"Previous Context:\n{previous_context or '(empty)'}\n\n"
-            f"New User Message:\n{user_input}"
+            f"Previous Summary:\n{summary or '(empty)'}\n\n"
+            f"Recent Messages (JSON):\n{json.dumps(messages, ensure_ascii=False)}"
         )
 
         config_kwargs: Dict[str, Any] = {
@@ -283,6 +328,37 @@ class ChatBot:
 
         return ""
 
+    async def _summarize_messages(self, summary: str, messages: List[Dict[str, str]]) -> str:
+        if client is None:
+            raise RuntimeError("GEMINI_API_KEY is missing. Set it in environment/.env.")
+        if types is None:
+            raise RuntimeError("google-genai package is not installed.")
+        active_client = client
+        active_types = types
+
+        summarization_prompt = (
+            "You are an AI summarizer. "
+            f"Previous Summary: {summary}. "
+            f"Recent Messages: {json.dumps(messages, ensure_ascii=False)}. "
+            "Write a concise, comprehensive summary of the user's preferences, language, and ongoing order status. "
+            "Return ONLY the new summary text."
+        )
+
+        config_kwargs: Dict[str, Any] = {
+            "temperature": 0.2,
+        }
+
+        def _call_model() -> Any:
+            return active_client.models.generate_content(
+                model=MODEL_NAME,
+                contents=summarization_prompt,
+                config=active_types.GenerateContentConfig(**config_kwargs),
+            )
+
+        response = await asyncio.to_thread(_call_model)
+        text = getattr(response, "text", None)
+        return str(text or "").strip()
+
     async def ask(self, query: str, return_only_response: bool = False) -> Optional[GPT_Message]:
         try:
             payload_input: Any = {}
@@ -309,18 +385,38 @@ class ChatBot:
                 payload_input = {}
 
             self.user_message_times.append(current_time)
-            previous_context = self._read_previous_context()
+            state = self._read_previous_context()
+            summary = str(state.get("summary", "") or "").strip()
+            messages = self._normalize_message_list(state.get("messages", []))
+
+            if user_input.strip():
+                messages.append({"role": "user", "text": user_input.strip()})
+
             assistant_response = await self._generate(
-                user_input=user_input,
                 current_time=current_time,
-                previous_context=previous_context,
+                summary=summary,
+                messages=messages,
             )
 
             response_payload = self._coerce_response_payload(assistant_response)
-            updated_summary = str(response_payload.get("updated_summary", "")).strip()
-            if not updated_summary:
-                updated_summary = previous_context
-            self._write_updated_context(updated_summary)
+            model_text = str(response_payload.get("response", "") or "").strip()
+            if not model_text:
+                model_text = assistant_response.strip()
+
+            if model_text:
+                messages.append({"role": "model", "text": model_text})
+
+            if len(messages) >= SUMMARY_TRIGGER_MESSAGES:
+                latest_messages = messages[-SUMMARY_TRIGGER_MESSAGES:]
+                try:
+                    refreshed_summary = await self._summarize_messages(summary, latest_messages)
+                    if refreshed_summary:
+                        summary = refreshed_summary
+                except Exception:
+                    logger.exception("Failed to summarize chat memory", extra={"session_id": self.session_id})
+                messages = []
+
+            self._write_updated_context({"summary": summary, "messages": messages})
 
             client_payload = {
                 "response": response_payload.get("response", ""),

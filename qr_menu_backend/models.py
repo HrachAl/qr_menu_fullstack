@@ -1,6 +1,6 @@
 import json
 from pydantic import RootModel, BaseModel, Field, ConfigDict, field_validator
-from typing import Any, List, Optional
+from typing import Any, List, Literal, Optional
 from datetime import datetime
 
 class OpenAIRequest(BaseModel):
@@ -246,3 +246,106 @@ class Token(BaseModel):
 
 class OrderStatusUpdate(BaseModel):
     status: str
+
+
+# ----- Inventory -----
+InventoryCategory = Literal[
+    "Meat",
+    "Produce",
+    "Beverages",
+    "Alcohol",
+    "Sweets/Bakery",
+    "Dairy",
+    "Dry Goods",
+]
+
+InventoryUnit = Literal["kg", "L", "pcs", "bottles"]
+
+
+class InventoryItemCreate(BaseModel):
+    name: str
+    category: InventoryCategory
+    quantity: float
+    unit: InventoryUnit
+    low_stock_threshold: float
+    overstock_threshold: Optional[float] = None
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def _strip_name(cls, value: Any):
+        text = str(value or "").strip()
+        if not text:
+            raise ValueError("Name is required")
+        return text
+
+    @field_validator("quantity", "low_stock_threshold", "overstock_threshold", mode="before")
+    @classmethod
+    def _non_negative(cls, value: Any):
+        if value is None:
+            return None
+        num = float(value)
+        if num < 0:
+            raise ValueError("Value must be non-negative")
+        return num
+
+
+class InventoryItemResponse(BaseModel):
+    id: int
+    name: str
+    category: InventoryCategory
+    quantity: float
+    unit: InventoryUnit
+    low_stock_threshold: float
+    overstock_threshold: float
+    last_updated: str
+
+
+class InventoryItemUpdate(BaseModel):
+    name: Optional[str] = None
+    category: Optional[InventoryCategory] = None
+    quantity: Optional[float] = None
+    unit: Optional[InventoryUnit] = None
+    low_stock_threshold: Optional[float] = None
+    overstock_threshold: Optional[float] = None
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def _strip_optional_name(cls, value: Any):
+        if value is None:
+            return None
+        text = str(value).strip()
+        if not text:
+            raise ValueError("Name is required")
+        return text
+
+    @field_validator("quantity", "low_stock_threshold", "overstock_threshold", mode="before")
+    @classmethod
+    def _optional_non_negative(cls, value: Any):
+        if value is None:
+            return None
+        num = float(value)
+        if num < 0:
+            raise ValueError("Value must be non-negative")
+        return num
+
+
+class InventoryAdjustRequest(BaseModel):
+    action: Literal["add", "deduct"]
+    amount: float
+    reason: str
+
+    @field_validator("amount", mode="before")
+    @classmethod
+    def _positive_amount(cls, value: Any):
+        amount = float(value)
+        if amount <= 0:
+            raise ValueError("Amount must be greater than 0")
+        return amount
+
+    @field_validator("reason", mode="before")
+    @classmethod
+    def _strip_reason(cls, value: Any):
+        text = str(value or "").strip()
+        if not text:
+            raise ValueError("Reason is required")
+        return text

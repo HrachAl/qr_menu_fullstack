@@ -10,7 +10,20 @@ from db.database import get_db
 from db import repositories
 from auth.deps import require_admin, require_superadmin, get_current_user
 from auth.service import hash_password
-from models import UserCreate, UserUpdate, UserResponse, ProductCreate, ProductUpdate, ProductResponse, OrderResponse, OrderStatusUpdate
+from models import (
+    UserCreate,
+    UserUpdate,
+    UserResponse,
+    ProductCreate,
+    ProductUpdate,
+    ProductResponse,
+    OrderResponse,
+    OrderStatusUpdate,
+    InventoryItemCreate,
+    InventoryItemUpdate,
+    InventoryItemResponse,
+    InventoryAdjustRequest,
+)
 from config import UPLOAD_DIR
 from services import stats_service
 
@@ -247,6 +260,86 @@ def admin_delete_product(product_id: int, conn: sqlite3.Connection = Depends(get
     if not p:
         raise HTTPException(status_code=404, detail="Product not found")
     repositories.product_delete(conn, product_id)
+
+
+# ---------- Inventory ----------
+@router.get("/inventory", response_model=list[InventoryItemResponse])
+def admin_list_inventory(conn: sqlite3.Connection = Depends(get_db), user=Depends(require_admin)):
+    return repositories.inventory_list(conn)
+
+
+@router.post("/inventory", response_model=InventoryItemResponse)
+def admin_create_inventory_item(
+    data: InventoryItemCreate,
+    conn: sqlite3.Connection = Depends(get_db),
+    user=Depends(require_admin),
+):
+    item_id = repositories.inventory_create(
+        conn,
+        name=data.name.strip(),
+        category=data.category,
+        quantity=float(data.quantity),
+        unit=data.unit,
+        low_stock_threshold=float(data.low_stock_threshold),
+        overstock_threshold=float(data.overstock_threshold) if data.overstock_threshold is not None else None,
+    )
+    return repositories.inventory_get_by_id(conn, item_id)
+
+
+@router.patch("/inventory/{item_id}", response_model=InventoryItemResponse)
+def admin_update_inventory_item(
+    item_id: int,
+    data: InventoryItemUpdate,
+    conn: sqlite3.Connection = Depends(get_db),
+    user=Depends(require_admin),
+):
+    item = repositories.inventory_get_by_id(conn, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Inventory item not found")
+
+    payload = data.model_dump(exclude_unset=True)
+    if "name" in payload and payload["name"] is not None:
+        payload["name"] = str(payload["name"]).strip()
+
+    updated = repositories.inventory_update(conn, item_id, **payload)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Inventory item not found")
+    return updated
+
+
+@router.patch("/inventory/{item_id}/adjust", response_model=InventoryItemResponse)
+def admin_adjust_inventory_item(
+    item_id: int,
+    data: InventoryAdjustRequest,
+    conn: sqlite3.Connection = Depends(get_db),
+    user=Depends(require_admin),
+):
+    item = repositories.inventory_get_by_id(conn, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Inventory item not found")
+
+    updated = repositories.inventory_adjust(
+        conn,
+        item_id=item_id,
+        action=data.action,
+        amount=float(data.amount),
+        reason=data.reason.strip(),
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="Inventory item not found")
+    return updated
+
+
+@router.delete("/inventory/{item_id}", status_code=204)
+def admin_delete_inventory_item(
+    item_id: int,
+    conn: sqlite3.Connection = Depends(get_db),
+    user=Depends(require_admin),
+):
+    item = repositories.inventory_get_by_id(conn, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Inventory item not found")
+    repositories.inventory_delete(conn, item_id)
 
 
 # ---------- Image upload ----------

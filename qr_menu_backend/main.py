@@ -35,6 +35,9 @@ async def lifespan(app: FastAPI):
     conn = get_connection()
     try:
         app.state.menu = repositories.product_list_as_menu_dict(conn)
+        seeded_inventory = repositories.seed_inventory(conn)
+        if seeded_inventory:
+            logger.info("Seeded inventory with %s items", seeded_inventory)
         # Create default superadmin if no users exist (from env)
         if repositories.user_list(conn):
             pass

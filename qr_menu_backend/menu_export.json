@@ -1,0 +1,3342 @@
+[
+  {
+    "id": 1,
+    "name_en": "Beef Steak",
+    "composition": [
+      "beef",
+      "potatoes",
+      "carrots",
+      "broccoli",
+      "garlic",
+      "butter",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "beef",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "potatoes",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "carrots",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "broccoli",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name_en": "Chicken Fillet",
+    "composition": [
+      "chicken breast",
+      "rice",
+      "basil",
+      "thyme",
+      "garlic",
+      "olive oil",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "chicken breast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "rice",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "basil",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "thyme",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "name_en": "Caviar Snack",
+    "composition": [
+      "caviar",
+      "cream cheese",
+      "cucumber",
+      "carrots",
+      "crackers",
+      "green onion",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "caviar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "cream cheese",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 200
+      },
+      {
+        "ingredient": "cucumber",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "carrots",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "crackers",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "green onion",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name_en": "Cheese Snack",
+    "composition": [
+      "cheese",
+      "honey",
+      "walnuts",
+      "olive oil",
+      "basil",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "honey",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "walnuts",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "basil",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "name_en": "Greek Salad",
+    "composition": [
+      "tomato",
+      "cucumber",
+      "red onion",
+      "feta cheese",
+      "olives",
+      "olive oil",
+      "lemon juice",
+      "oregano",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "cucumber",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "red onion",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "feta cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "olives",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "lemon juice",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 20
+      },
+      {
+        "ingredient": "oregano",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "name_en": "Caesar Salad",
+    "composition": [
+      "chicken breast",
+      "lettuce",
+      "Parmesan cheese",
+      "croutons",
+      "mayonnaise",
+      "garlic",
+      "lemon juice",
+      "anchovy",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "chicken breast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "lettuce",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "Parmesan cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "croutons",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "mayonnaise",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "lemon juice",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 20
+      },
+      {
+        "ingredient": "anchovy",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "name_en": "Orange Juice",
+    "composition": [
+      "orange"
+    ],
+    "recipe": [
+      {
+        "ingredient": "orange",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 80
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "name_en": "Lemon Lemonade",
+    "composition": [
+      "water",
+      "lemon extract",
+      "sugar"
+    ],
+    "recipe": [
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "lemon extract",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 80
+      },
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "name_en": "Espresso",
+    "composition": [
+      "coffee beans",
+      "water"
+    ],
+    "recipe": [
+      {
+        "ingredient": "coffee beans",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 200
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "name_en": "Cappuccino",
+    "composition": [
+      "coffee beans",
+      "water",
+      "milk"
+    ],
+    "recipe": [
+      {
+        "ingredient": "coffee beans",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 200
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "milk",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "name_en": "Karasi Red Wine",
+    "composition": [
+      "grapes"
+    ],
+    "recipe": [
+      {
+        "ingredient": "grapes",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "name_en": "Kilikia Beer",
+    "composition": [
+      "barley",
+      "water",
+      "hops",
+      "yeast"
+    ],
+    "recipe": [
+      {
+        "ingredient": "barley",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "hops",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "yeast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "name_en": "Tomato Sauce",
+    "composition": [
+      "tomato",
+      "garlic",
+      "olive oil",
+      "basil",
+      "oregano",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "basil",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "oregano",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 15,
+    "name_en": "Mushroom Sauce",
+    "composition": [
+      "mushrooms",
+      "cream",
+      "Parmesan cheese",
+      "garlic",
+      "butter",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "mushrooms",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "cream",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "Parmesan cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "name_en": "Chocolate Cake",
+    "composition": [
+      "chocolate",
+      "sugar",
+      "egg",
+      "butter",
+      "walnuts",
+      "cream"
+    ],
+    "recipe": [
+      {
+        "ingredient": "chocolate",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "egg",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 78
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "walnuts",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "cream",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "name_en": "Vanilla Ice Cream",
+    "composition": [
+      "milk",
+      "sugar",
+      "vanilla",
+      "blueberries",
+      "strawberries"
+    ],
+    "recipe": [
+      {
+        "ingredient": "milk",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "vanilla",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "blueberries",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "strawberries",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "name_en": "French Baguette",
+    "composition": [
+      "water",
+      "yeast",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "yeast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 19,
+    "name_en": "Croissant",
+    "composition": [
+      "butter",
+      "sugar",
+      "egg",
+      "yeast"
+    ],
+    "recipe": [
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "egg",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 78
+      },
+      {
+        "ingredient": "yeast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 20,
+    "name_en": "Pepperoni Pizza",
+    "composition": [
+      "tomato",
+      "mozzarella cheese",
+      "pepperoni",
+      "olive oil",
+      "oregano"
+    ],
+    "recipe": [
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mozzarella cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "pepperoni",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "oregano",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 21,
+    "name_en": "Vegetarian Pizza",
+    "composition": [
+      "tomato",
+      "mozzarella cheese",
+      "zucchini",
+      "mushrooms",
+      "bell pepper",
+      "oregano"
+    ],
+    "recipe": [
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mozzarella cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "zucchini",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mushrooms",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "bell pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "oregano",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 22,
+    "name_en": "Salmon Sushi",
+    "composition": [
+      "salmon",
+      "rice",
+      "nori",
+      "vinegar",
+      "sugar",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "salmon",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "rice",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "nori",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "vinegar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "name_en": "Shrimp Roll",
+    "composition": [
+      "shrimp",
+      "rice",
+      "nori",
+      "avocado",
+      "cucumber",
+      "vinegar",
+      "sugar"
+    ],
+    "recipe": [
+      {
+        "ingredient": "shrimp",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "rice",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "nori",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "avocado",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "cucumber",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "vinegar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      }
+    ]
+  },
+  {
+    "id": 24,
+    "name_en": "Spaghetti Marinara",
+    "composition": [
+      "spaghetti",
+      "tomato",
+      "Parmesan cheese",
+      "garlic",
+      "olive oil",
+      "basil",
+      "oregano"
+    ],
+    "recipe": [
+      {
+        "ingredient": "spaghetti",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "Parmesan cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "basil",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "oregano",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "name_en": "Lasagna",
+    "composition": [
+      "lasagna sheets",
+      "beef",
+      "tomato",
+      "mozzarella cheese",
+      "milk",
+      "butter",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "lasagna sheets",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "beef",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mozzarella cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "milk",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 26,
+    "name_en": "Cheeseburger",
+    "composition": [
+      "beef",
+      "burger bun",
+      "cheddar cheese",
+      "tomato",
+      "lettuce",
+      "red onion",
+      "mayonnaise",
+      "ketchup"
+    ],
+    "recipe": [
+      {
+        "ingredient": "beef",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "burger bun",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 150
+      },
+      {
+        "ingredient": "cheddar cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "lettuce",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "red onion",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mayonnaise",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "ketchup",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "name_en": "Chicken Burger",
+    "composition": [
+      "chicken breast",
+      "burger bun",
+      "lettuce",
+      "tomato",
+      "mayonnaise",
+      "cheese",
+      "breadcrumbs",
+      "olive oil",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "chicken breast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "burger bun",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 150
+      },
+      {
+        "ingredient": "lettuce",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mayonnaise",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "breadcrumbs",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 28,
+    "name_en": "Chicken Sandwich",
+    "composition": [
+      "chicken breast",
+      "toasted bread",
+      "lettuce",
+      "tomato",
+      "cucumber",
+      "mayonnaise",
+      "cheese"
+    ],
+    "recipe": [
+      {
+        "ingredient": "chicken breast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "toasted bread",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "lettuce",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "cucumber",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mayonnaise",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      }
+    ]
+  },
+  {
+    "id": 29,
+    "name_en": "BLT Sandwich",
+    "composition": [
+      "bacon",
+      "toasted bread",
+      "lettuce",
+      "tomato",
+      "mayonnaise"
+    ],
+    "recipe": [
+      {
+        "ingredient": "bacon",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "toasted bread",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "lettuce",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mayonnaise",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      }
+    ]
+  },
+  {
+    "id": 30,
+    "name_en": "Borscht",
+    "composition": [
+      "beets",
+      "cabbage",
+      "potatoes",
+      "carrots",
+      "tomato",
+      "garlic",
+      "sour cream",
+      "green onion",
+      "salt",
+      "water",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "beets",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "cabbage",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "potatoes",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "carrots",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "sour cream",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "green onion",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 31,
+    "name_en": "Chicken Soup",
+    "composition": [
+      "chicken meat",
+      "potatoes",
+      "carrots",
+      "onion",
+      "basil",
+      "salt",
+      "pepper",
+      "water",
+      "chicken breast"
+    ],
+    "recipe": [
+      {
+        "ingredient": "chicken meat",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "potatoes",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "carrots",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "onion",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "basil",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "chicken breast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      }
+    ]
+  },
+  {
+    "id": 32,
+    "name_en": "Spinach Quiche",
+    "composition": [
+      "spinach",
+      "cheese",
+      "egg",
+      "cream",
+      "butter",
+      "salt",
+      "pepper",
+      "oil"
+    ],
+    "recipe": [
+      {
+        "ingredient": "spinach",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "egg",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 78
+      },
+      {
+        "ingredient": "cream",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      }
+    ]
+  },
+  {
+    "id": 33,
+    "name_en": "Mushroom Quiche",
+    "composition": [
+      "mushrooms",
+      "cheese",
+      "egg",
+      "cream",
+      "garlic",
+      "basil",
+      "salt",
+      "oil",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "mushrooms",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "egg",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 78
+      },
+      {
+        "ingredient": "cream",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "basil",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 34,
+    "name_en": "French Fries",
+    "composition": [
+      "potatoes",
+      "oil",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "potatoes",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 35,
+    "name_en": "Chicken Nuggets",
+    "composition": [
+      "chicken breast",
+      "breadcrumbs",
+      "egg",
+      "oil",
+      "garlic",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "chicken breast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "breadcrumbs",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "egg",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 78
+      },
+      {
+        "ingredient": "oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 36,
+    "name_en": "Chicken Wings",
+    "composition": [
+      "chicken wings",
+      "tomato",
+      "honey",
+      "garlic",
+      "soy sauce",
+      "pepper",
+      "oil",
+      "salt",
+      "chicken breast"
+    ],
+    "recipe": [
+      {
+        "ingredient": "chicken wings",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "honey",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "soy sauce",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "chicken breast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      }
+    ]
+  },
+  {
+    "id": 37,
+    "name_en": "Grilled Vegetables",
+    "composition": [
+      "zucchini",
+      "mushrooms",
+      "bell pepper",
+      "onion",
+      "olive oil",
+      "oregano",
+      "salt",
+      "lemon juice"
+    ],
+    "recipe": [
+      {
+        "ingredient": "zucchini",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mushrooms",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "bell pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "onion",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "oregano",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "lemon juice",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 38,
+    "name_en": "Shrimp with Garlic",
+    "composition": [
+      "shrimp",
+      "garlic",
+      "butter",
+      "lemon juice",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "shrimp",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "lemon juice",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 39,
+    "name_en": "Calamari",
+    "composition": [
+      "calamari",
+      "breadcrumbs",
+      "egg",
+      "oil",
+      "lemon juice",
+      "mayonnaise",
+      "garlic",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "calamari",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "breadcrumbs",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "egg",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 78
+      },
+      {
+        "ingredient": "oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "lemon juice",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 20
+      },
+      {
+        "ingredient": "mayonnaise",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 40,
+    "name_en": "Stuffed Beef",
+    "composition": [
+      "beef",
+      "bell pepper",
+      "mushrooms",
+      "onion",
+      "cheese",
+      "garlic",
+      "olive oil",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "beef",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "bell pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mushrooms",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "onion",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 41,
+    "name_en": "Grilled Fish",
+    "composition": [
+      "fish",
+      "lemon",
+      "olive oil",
+      "garlic",
+      "salt",
+      "pepper",
+      "lemon juice"
+    ],
+    "recipe": [
+      {
+        "ingredient": "fish",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "lemon",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 80
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "lemon juice",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 42,
+    "name_en": "Bruschetta",
+    "composition": [
+      "toasted bread",
+      "tomato",
+      "basil",
+      "garlic",
+      "olive oil",
+      "salt",
+      "oil",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "toasted bread",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "basil",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 43,
+    "name_en": "Seafood Salad",
+    "composition": [
+      "shrimp",
+      "calamari",
+      "lettuce",
+      "tomato",
+      "olives",
+      "olive oil",
+      "lemon juice",
+      "oregano",
+      "salt",
+      "cucumber"
+    ],
+    "recipe": [
+      {
+        "ingredient": "shrimp",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "calamari",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "lettuce",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "olives",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "lemon juice",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 20
+      },
+      {
+        "ingredient": "oregano",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "cucumber",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 45,
+    "name_en": "Latte",
+    "composition": [
+      "coffee beans",
+      "water",
+      "milk",
+      "chocolate"
+    ],
+    "recipe": [
+      {
+        "ingredient": "coffee beans",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 200
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "milk",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "chocolate",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 46,
+    "name_en": "Mojito",
+    "composition": [
+      "rum",
+      "lime",
+      "mint",
+      "sugar",
+      "soda",
+      "water"
+    ],
+    "recipe": [
+      {
+        "ingredient": "rum",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "lime",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 80
+      },
+      {
+        "ingredient": "mint",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "soda",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 47,
+    "name_en": "Mustard Sauce",
+    "composition": [
+      "mustard",
+      "honey",
+      "olive oil",
+      "lemon juice",
+      "garlic",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "mustard",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "honey",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "lemon juice",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 20
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 48,
+    "name_en": "Tiramisu",
+    "composition": [
+      "mascarpone cheese",
+      "coffee",
+      "sugar",
+      "egg",
+      "cocoa",
+      "butter"
+    ],
+    "recipe": [
+      {
+        "ingredient": "mascarpone cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "coffee",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "egg",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 78
+      },
+      {
+        "ingredient": "cocoa",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      }
+    ]
+  },
+  {
+    "id": 49,
+    "name_en": "Chocolate Donut",
+    "composition": [
+      "sugar",
+      "egg",
+      "butter",
+      "chocolate",
+      "flour"
+    ],
+    "recipe": [
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "egg",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 78
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "chocolate",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "flour",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      }
+    ]
+  },
+  {
+    "id": 50,
+    "name_en": "Seafood Pizza",
+    "composition": [
+      "tomato",
+      "mozzarella cheese",
+      "shrimp",
+      "calamari",
+      "oregano",
+      "olive oil",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mozzarella cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "shrimp",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "calamari",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "oregano",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 51,
+    "name_en": "Tuna Sushi",
+    "composition": [
+      "tuna",
+      "rice",
+      "nori",
+      "vinegar",
+      "sugar",
+      "olive oil",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "tuna",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "rice",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "nori",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "vinegar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 52,
+    "name_en": "Fettuccine",
+    "composition": [
+      "fettuccine",
+      "cream",
+      "Parmesan cheese",
+      "garlic",
+      "butter",
+      "pepper",
+      "olive oil",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "fettuccine",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "cream",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "Parmesan cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 53,
+    "name_en": "Vegetarian Burger",
+    "composition": [
+      "plant-based meat",
+      "burger bun",
+      "lettuce",
+      "tomato",
+      "cucumber",
+      "mayonnaise",
+      "olive oil",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "plant-based meat",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "burger bun",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 150
+      },
+      {
+        "ingredient": "lettuce",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "cucumber",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "mayonnaise",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 54,
+    "name_en": "Egg Sandwich",
+    "composition": [
+      "egg",
+      "toasted bread",
+      "cheese",
+      "mayonnaise",
+      "butter",
+      "lettuce",
+      "tomato"
+    ],
+    "recipe": [
+      {
+        "ingredient": "egg",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 78
+      },
+      {
+        "ingredient": "toasted bread",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "mayonnaise",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "lettuce",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "tomato",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 55,
+    "name_en": "Mushroom Soup",
+    "composition": [
+      "mushrooms",
+      "cream",
+      "potatoes",
+      "onion",
+      "garlic",
+      "pepper",
+      "water",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "mushrooms",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "cream",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "potatoes",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "onion",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 56,
+    "name_en": "Bacon Quiche",
+    "composition": [
+      "bacon",
+      "cheese",
+      "egg",
+      "cream",
+      "pepper",
+      "oil",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "bacon",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "cheese",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "egg",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 78
+      },
+      {
+        "ingredient": "cream",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 57,
+    "name_en": "Xorovac",
+    "composition": [
+      "barley",
+      "water",
+      "hops",
+      "yeast"
+    ],
+    "recipe": [
+      {
+        "ingredient": "barley",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "hops",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "yeast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 58,
+    "name_en": "Grilled Salmon",
+    "composition": [
+      "salmon",
+      "lemon",
+      "olive oil",
+      "garlic",
+      "pepper",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "salmon",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "lemon",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 80
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 59,
+    "name_en": "Mussels with Wine",
+    "composition": [
+      "mussels",
+      "white wine",
+      "garlic",
+      "butter",
+      "lemon juice",
+      "olive oil",
+      "salt",
+      "pepper",
+      "grapes"
+    ],
+    "recipe": [
+      {
+        "ingredient": "mussels",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "white wine",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "garlic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "lemon juice",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 20
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "grapes",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 60,
+    "name_en": "Vegetable Patty",
+    "composition": [
+      "rice",
+      "carrots",
+      "onion",
+      "breadcrumbs",
+      "olive oil",
+      "pepper",
+      "salt"
+    ],
+    "recipe": [
+      {
+        "ingredient": "rice",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "carrots",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "onion",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "breadcrumbs",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 61,
+    "name_en": "Apple Pastry",
+    "composition": [
+      "apple",
+      "sugar",
+      "cinnamon",
+      "butter",
+      "flour"
+    ],
+    "recipe": [
+      {
+        "ingredient": "apple",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 80
+      },
+      {
+        "ingredient": "sugar",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "cinnamon",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "butter",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 900
+      },
+      {
+        "ingredient": "flour",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      }
+    ]
+  },
+  {
+    "id": 62,
+    "name_en": "Gin Tonic",
+    "composition": [
+      "gin",
+      "tonic",
+      "lime",
+      "water"
+    ],
+    "recipe": [
+      {
+        "ingredient": "gin",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "tonic",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "lime",
+        "amount": 1.0,
+        "unit": "pcs",
+        "calories": 80
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 64,
+    "name_en": "TEST PRODUCT",
+    "composition": [
+      "olive oil",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "olive oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 65,
+    "name_en": "French Fries",
+    "composition": [
+      "potatoes",
+      "oil",
+      "salt",
+      "pepper"
+    ],
+    "recipe": [
+      {
+        "ingredient": "potatoes",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 200
+      },
+      {
+        "ingredient": "oil",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 900
+      },
+      {
+        "ingredient": "salt",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "pepper",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 20
+      }
+    ]
+  },
+  {
+    "id": 66,
+    "name_en": "Karasi White Wine",
+    "composition": [
+      "grapes",
+      "water"
+    ],
+    "recipe": [
+      {
+        "ingredient": "grapes",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      }
+    ]
+  },
+  {
+    "id": 67,
+    "name_en": "Ararat",
+    "composition": [
+      "barley",
+      "water",
+      "hops",
+      "yeast"
+    ],
+    "recipe": [
+      {
+        "ingredient": "barley",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "water",
+        "amount": 100.0,
+        "unit": "ml",
+        "calories": 90
+      },
+      {
+        "ingredient": "hops",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      },
+      {
+        "ingredient": "yeast",
+        "amount": 100.0,
+        "unit": "g",
+        "calories": 90
+      }
+    ]
+  }
+]
