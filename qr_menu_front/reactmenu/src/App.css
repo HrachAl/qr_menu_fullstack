@@ -1787,6 +1787,13 @@ font-size: 10px;
 .botChat-recommendBox .botChat-recommend .backRec_sub .backItem_add button.min {
   translate: 0px -2px;
 }
+.chatBox .Chat .message.received.options-description-bubble {
+  margin-top: 8px;
+}
+
+.chatBox .Chat .message.received.options-description-bubble .messageBox p {
+  white-space: pre-wrap;
+}
 .dragBg {
   width: 100%;
   height: 100vh;

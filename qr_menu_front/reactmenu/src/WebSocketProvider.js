@@ -79,18 +79,20 @@ export const WebSocketFormProvider = ({ children }) => {
             const messagesArray = Array.isArray(history) ? history : [history]; 
 
             messagesArray.forEach((message) => {
-                const {response, options } = message;
+              const { response, message: fallbackMessage, options, options_description } = message;
+              const responseText = String(response ?? fallbackMessage ?? "").trim();
                 const id = Date.now() + Math.random();
 
                     const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-                    if (typeof message === 'object' && message !== null && response) {
+                    if (typeof message === 'object' && message !== null && responseText) {
                         const newMessage = {
                             id,
-                            text: response,
+                        text: responseText,
                             type: "received",
                             time,
                             menuItem: Array.isArray(options) ? options : [],
+                        options_description: typeof options_description === "string" ? options_description : "",
                         };
 
                         setMessages((prev) => {
@@ -106,9 +108,10 @@ export const WebSocketFormProvider = ({ children }) => {
                     } else if (typeof message === 'string') {
                         const newMessage = {
                             id,
-                            text: response,
+                        text: String(message),
                             type: "received",
                             time,
+                        options_description: "",
                         };
                         setMessages((prev) => {
                             if (!prev.some((msg) => msg.id === id)) {

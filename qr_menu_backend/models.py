@@ -215,6 +215,8 @@ class ProductResponse(BaseModel):
     short_description_am: Optional[str] = None
     short_description_ru: Optional[str] = None
     composition: Optional[str] = None
+    recipe: Optional[Any] = None
+    total_calories: Optional[int] = 0
 
 
 # ----- Orders -----
@@ -269,6 +271,9 @@ class InventoryItemCreate(BaseModel):
     unit: InventoryUnit
     low_stock_threshold: float
     overstock_threshold: Optional[float] = None
+    kcal_per_unit: Optional[float] = 0
+    protein_per_unit: Optional[float] = 0
+    fat_per_unit: Optional[float] = 0
 
     @field_validator("name", mode="before")
     @classmethod
@@ -278,7 +283,15 @@ class InventoryItemCreate(BaseModel):
             raise ValueError("Name is required")
         return text
 
-    @field_validator("quantity", "low_stock_threshold", "overstock_threshold", mode="before")
+    @field_validator(
+        "quantity",
+        "low_stock_threshold",
+        "overstock_threshold",
+        "kcal_per_unit",
+        "protein_per_unit",
+        "fat_per_unit",
+        mode="before",
+    )
     @classmethod
     def _non_negative(cls, value: Any):
         if value is None:
@@ -297,6 +310,9 @@ class InventoryItemResponse(BaseModel):
     unit: InventoryUnit
     low_stock_threshold: float
     overstock_threshold: float
+    kcal_per_unit: float
+    protein_per_unit: float
+    fat_per_unit: float
     last_updated: str
 
 
@@ -307,6 +323,9 @@ class InventoryItemUpdate(BaseModel):
     unit: Optional[InventoryUnit] = None
     low_stock_threshold: Optional[float] = None
     overstock_threshold: Optional[float] = None
+    kcal_per_unit: Optional[float] = None
+    protein_per_unit: Optional[float] = None
+    fat_per_unit: Optional[float] = None
 
     @field_validator("name", mode="before")
     @classmethod
@@ -318,7 +337,15 @@ class InventoryItemUpdate(BaseModel):
             raise ValueError("Name is required")
         return text
 
-    @field_validator("quantity", "low_stock_threshold", "overstock_threshold", mode="before")
+    @field_validator(
+        "quantity",
+        "low_stock_threshold",
+        "overstock_threshold",
+        "kcal_per_unit",
+        "protein_per_unit",
+        "fat_per_unit",
+        mode="before",
+    )
     @classmethod
     def _optional_non_negative(cls, value: Any):
         if value is None:

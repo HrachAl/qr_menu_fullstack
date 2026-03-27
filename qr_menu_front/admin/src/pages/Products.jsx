@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { ArrowUpDown, Pencil, Plus, Search, Trash2, Upload, X } from 'lucide-react';
+import { ArrowUpDown, Flame, Pencil, Plus, Search, Trash2, Upload, X } from 'lucide-react';
 import { api, uploadFile, productImageUrl } from '../api';
 
 const CURRENCY = 'AMD';
@@ -56,6 +56,32 @@ function parseCompositionInput(value) {
 function normalizeOptionalText(value) {
   const trimmed = String(value ?? '').trim();
   return trimmed || null;
+}
+
+function parseRecipe(product) {
+  if (!product || !product.recipe) return [];
+  let recipeList = [];
+  try {
+    recipeList = typeof product.recipe === 'string' ? JSON.parse(product.recipe) : product.recipe;
+  } catch (_) {
+    recipeList = [];
+  }
+  if (!Array.isArray(recipeList)) return [];
+  return recipeList
+    .map((row) => {
+      if (!row || typeof row !== 'object') return null;
+      const name = String(row.name || '').trim();
+      if (!name) return null;
+      return {
+        name,
+        quantity: Number(row.quantity || 0),
+        unit: String(row.unit || '').trim() || 'unit',
+        kcal: Number(row.kcal || 0),
+        protein: Number(row.protein || 0),
+        fat: Number(row.fat || 0),
+      };
+    })
+    .filter(Boolean);
 }
 
 function buildProductPayload(form, isUpdate = false) {
@@ -121,6 +147,7 @@ export default function Products() {
   const [sortKey, setSortKey] = useState('id');
   const [sortDir, setSortDir] = useState('asc');
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewProduct, setViewProduct] = useState(null);
 
   const load = () => api('/api/admin/products').then(setList).catch(e => setError(e.message));
 
@@ -439,7 +466,7 @@ export default function Products() {
                   <tr
                     key={p.id}
                     className="cursor-pointer transition-colors duration-200 hover:bg-slate-800/50"
-                    onClick={() => setForm({ ...emptyProductForm(), ...p, composition_input: compositionToInput(p.composition) })}
+                    onClick={() => setViewProduct(p)}
                   >
                     <td className="px-6 py-4">
                       <img
@@ -488,6 +515,121 @@ export default function Products() {
           </table>
         </div>
       </section>
+
+      {viewProduct && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/80 p-4 backdrop-blur sm:items-center" onClick={() => setViewProduct(null)}>
+          <div
+            className="max-h-[92vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-slate-700/70 bg-slate-900/80 p-6 shadow-2xl backdrop-blur"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <img
+                  src={productImageUrl(viewProduct.img_path)}
+                  alt={viewProduct.name_en || 'Product'}
+                  className="h-20 w-20 rounded-xl border border-slate-700 object-cover"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-100">{viewProduct.name_en || viewProduct.name_am || viewProduct.name_ru || 'Untitled product'}</h3>
+                  <p className="mt-1 text-sm text-slate-400">
+                    SKU: {viewProduct.item_id != null ? String(viewProduct.item_id) : `#${viewProduct.id}`} | {viewProduct.type_name || 'Uncategorized'}
+                  </p>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center rounded-full bg-indigo-500/15 px-2.5 py-1 text-xs font-medium text-indigo-300 ring-1 ring-indigo-500/30">
+                      {formatPrice(viewProduct.price)}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-slate-800 px-2.5 py-1 text-xs font-medium text-slate-300 ring-1 ring-slate-700">
+                      {viewProduct.access_level || 'No access restriction'}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 px-2.5 py-1 text-xs font-medium text-rose-300 ring-1 ring-rose-500/30">
+                      <Flame size={12} />
+                      {Number(viewProduct?.total_calories || 0)} kcal
+                    </span>
+                    <StockBadge availability={viewProduct.availability} />
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-950 text-slate-400 transition hover:text-slate-100"
+                onClick={() => setViewProduct(null)}
+                title="Close"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">English</p>
+                <p className="mt-2 text-sm text-slate-200">{viewProduct.description_en || viewProduct.short_description_en || 'No English description'}</p>
+              </div>
+              <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Armenian</p>
+                <p className="mt-2 text-sm text-slate-200">{viewProduct.description_am || viewProduct.short_description_am || 'No Armenian description'}</p>
+              </div>
+              <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Russian</p>
+                <p className="mt-2 text-sm text-slate-200">{viewProduct.description_ru || viewProduct.short_description_ru || 'No Russian description'}</p>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+              <p className="text-sm font-semibold text-slate-100">Recipe Details</p>
+              {parseRecipe(viewProduct).length === 0 ? (
+                <p className="mt-3 text-sm text-slate-400">No structured recipe found for this product.</p>
+              ) : (
+                <div className="mt-3 overflow-x-auto">
+                  <table className="min-w-full text-sm text-slate-200">
+                    <thead className="border-b border-slate-800 text-xs uppercase tracking-wide text-slate-500">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Ingredient</th>
+                        <th className="px-3 py-2 text-left">Qty</th>
+                        <th className="px-3 py-2 text-right">kcal</th>
+                        <th className="px-3 py-2 text-right">Protein</th>
+                        <th className="px-3 py-2 text-right">Fat</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-800">
+                      {parseRecipe(viewProduct).map((row) => (
+                        <tr key={`${row.name}-${row.unit}-${row.quantity}`}>
+                          <td className="px-3 py-2 text-slate-200">{row.name}</td>
+                          <td className="px-3 py-2 text-slate-300">{Number(row.quantity).toLocaleString()} {row.unit}</td>
+                          <td className="px-3 py-2 text-right tabular-nums text-slate-300">{Number(row.kcal).toLocaleString()}</td>
+                          <td className="px-3 py-2 text-right tabular-nums text-slate-300">{Number(row.protein).toLocaleString()}</td>
+                          <td className="px-3 py-2 text-right tabular-nums text-slate-300">{Number(row.fat).toLocaleString()}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 flex items-center gap-3">
+              <button
+                type="button"
+                className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500"
+                onClick={() => {
+                  setForm({ ...emptyProductForm(), ...viewProduct, composition_input: compositionToInput(viewProduct.composition) });
+                  setViewProduct(null);
+                }}
+              >
+                Edit Product
+              </button>
+              <button
+                type="button"
+                className="rounded-xl border border-slate-700 bg-slate-950 px-4 py-2.5 text-sm font-medium text-slate-200 transition hover:bg-slate-800"
+                onClick={() => setViewProduct(null)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

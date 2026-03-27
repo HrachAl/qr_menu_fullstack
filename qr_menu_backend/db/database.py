@@ -92,6 +92,9 @@ def init_schema(conn: sqlite3.Connection) -> None:
             unit TEXT NOT NULL CHECK(unit IN ('kg', 'L', 'pcs', 'bottles')),
             low_stock_threshold REAL NOT NULL CHECK(low_stock_threshold >= 0),
             overstock_threshold REAL NOT NULL CHECK(overstock_threshold >= 0),
+            kcal_per_unit REAL NOT NULL DEFAULT 0 CHECK(kcal_per_unit >= 0),
+            protein_per_unit REAL NOT NULL DEFAULT 0 CHECK(protein_per_unit >= 0),
+            fat_per_unit REAL NOT NULL DEFAULT 0 CHECK(fat_per_unit >= 0),
             last_updated TEXT NOT NULL
         );
         CREATE INDEX IF NOT EXISTS idx_inventory_items_name ON inventory_items(name);
@@ -122,6 +125,11 @@ def _migrate_products_schema(conn: sqlite3.Connection) -> None:
         except sqlite3.OperationalError:
             # Ignore duplicate-column races or unsupported alteration edge cases.
             pass
+    if "total_calories" not in columns:
+        try:
+            conn.execute("ALTER TABLE products ADD COLUMN total_calories REAL NOT NULL DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
 
 
 def _migrate_inventory_schema(conn: sqlite3.Connection) -> None:
@@ -140,6 +148,21 @@ def _migrate_inventory_schema(conn: sqlite3.Connection) -> None:
         WHERE overstock_threshold IS NULL
         """
     )
+    if "kcal_per_unit" not in columns:
+        try:
+            conn.execute("ALTER TABLE inventory_items ADD COLUMN kcal_per_unit REAL NOT NULL DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+    if "protein_per_unit" not in columns:
+        try:
+            conn.execute("ALTER TABLE inventory_items ADD COLUMN protein_per_unit REAL NOT NULL DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+    if "fat_per_unit" not in columns:
+        try:
+            conn.execute("ALTER TABLE inventory_items ADD COLUMN fat_per_unit REAL NOT NULL DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
 
 
 def init_db(db_path: str | None = None) -> None:

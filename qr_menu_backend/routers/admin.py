@@ -88,6 +88,26 @@ def _normalize_composition(value):
     return json.dumps(parts) if parts else None
 
 
+def _normalize_product_response_payload(product: dict) -> dict:
+    out = dict(product or {})
+    out["recipe"] = out.get("recipe")
+    try:
+        out["total_calories"] = int(float(out.get("total_calories") or 0))
+    except Exception:
+        out["total_calories"] = 0
+    return out
+
+
+def _normalize_inventory_response_payload(item: dict) -> dict:
+    out = dict(item or {})
+    for key in ("kcal_per_unit", "protein_per_unit", "fat_per_unit"):
+        try:
+            out[key] = float(out.get(key) or 0)
+        except Exception:
+            out[key] = 0.0
+    return out
+
+
 def _normalize_product_payload(data: dict, existing: dict | None = None, *, for_create: bool = False) -> dict:
     out = dict(data)
 
@@ -201,7 +221,8 @@ def admin_delete_user(user_id: int, conn: sqlite3.Connection = Depends(get_db), 
 # ---------- Products (admin or superadmin) ----------
 @router.get("/products", response_model=list[ProductResponse])
 def admin_list_products(conn: sqlite3.Connection = Depends(get_db), user=Depends(require_admin)):
-    return repositories.product_list(conn)
+    products = repositories.product_list(conn)
+    return [_normalize_product_response_payload(p) for p in products]
 
 
 @router.post("/products", response_model=ProductResponse)
@@ -238,7 +259,7 @@ def admin_get_product(product_id: int, conn: sqlite3.Connection = Depends(get_db
     p = repositories.product_get_by_id(conn, product_id)
     if not p:
         raise HTTPException(status_code=404, detail="Product not found")
-    return p
+    return _normalize_product_response_payload(p)
 
 
 @router.patch("/products/{product_id}", response_model=ProductResponse)
@@ -251,7 +272,7 @@ def admin_update_product(product_id: int, data: ProductUpdate, conn: sqlite3.Con
         repositories.product_update(conn, product_id, **kwargs)
     except sqlite3.IntegrityError as exc:
         raise HTTPException(status_code=400, detail=f"Invalid product update: {exc}") from exc
-    return repositories.product_get_by_id(conn, product_id)
+    return _normalize_product_response_payload(repositories.product_get_by_id(conn, product_id))
 
 
 @router.delete("/products/{product_id}", status_code=204)
@@ -265,7 +286,8 @@ def admin_delete_product(product_id: int, conn: sqlite3.Connection = Depends(get
 # ---------- Inventory ----------
 @router.get("/inventory", response_model=list[InventoryItemResponse])
 def admin_list_inventory(conn: sqlite3.Connection = Depends(get_db), user=Depends(require_admin)):
-    return repositories.inventory_list(conn)
+    items = repositories.inventory_list(conn)
+    return [_normalize_inventory_response_payload(i) for i in items]
 
 
 @router.post("/inventory", response_model=InventoryItemResponse)
@@ -282,8 +304,11 @@ def admin_create_inventory_item(
         unit=data.unit,
         low_stock_threshold=float(data.low_stock_threshold),
         overstock_threshold=float(data.overstock_threshold) if data.overstock_threshold is not None else None,
+        kcal_per_unit=float(data.kcal_per_unit or 0),
+        protein_per_unit=float(data.protein_per_unit or 0),
+        fat_per_unit=float(data.fat_per_unit or 0),
     )
-    return repositories.inventory_get_by_id(conn, item_id)
+    return _normalize_inventory_response_payload(repositories.inventory_get_by_id(conn, item_id))
 
 
 @router.patch("/inventory/{item_id}", response_model=InventoryItemResponse)
@@ -304,7 +329,7 @@ def admin_update_inventory_item(
     updated = repositories.inventory_update(conn, item_id, **payload)
     if not updated:
         raise HTTPException(status_code=404, detail="Inventory item not found")
-    return updated
+    return _normalize_inventory_response_payload(updated)
 
 
 @router.patch("/inventory/{item_id}/adjust", response_model=InventoryItemResponse)
@@ -327,7 +352,7 @@ def admin_adjust_inventory_item(
     )
     if not updated:
         raise HTTPException(status_code=404, detail="Inventory item not found")
-    return updated
+    return _normalize_inventory_response_payload(updated)
 
 
 @router.delete("/inventory/{item_id}", status_code=204)

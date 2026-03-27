@@ -293,6 +293,13 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
                                         </div>
                                     </div>
                                 )}
+                                {(msg.type === 'received' && msg.menuItem.length > 0 && msg.options_description) && (
+                                    <div className="message received options-description-bubble">
+                                        <div className="messageBox">
+                                            <p>{msg.options_description}</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         ))}
                     </div>

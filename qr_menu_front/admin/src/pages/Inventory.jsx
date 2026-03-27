@@ -37,6 +37,9 @@ function emptyForm() {
     unit: 'kg',
     low_stock_threshold: '',
     overstock_threshold: '',
+    kcal_per_unit: '',
+    protein_per_unit: '',
+    fat_per_unit: '',
   };
 }
 
@@ -57,8 +60,36 @@ function getSortableValue(item, key) {
   return '';
 }
 
+function parseStructuredRecipe(value) {
+  if (!value) return [];
+  let parsed = value;
+  if (typeof value === 'string') {
+    try {
+      parsed = JSON.parse(value);
+    } catch (_) {
+      return [];
+    }
+  }
+  if (!Array.isArray(parsed)) return [];
+  return parsed
+    .map((row) => String((row && row.name) || '').trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function formatDateTime(value) {
+  if (!value) return '-';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toLocaleString();
+}
+
+function roundOneDecimal(value) {
+  return Number(value || 0).toFixed(1);
+}
+
 export default function Inventory() {
   const [list, setList] = useState([]);
+  const [products, setProducts] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
 
@@ -69,6 +100,7 @@ export default function Inventory() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [addForm, setAddForm] = useState(emptyForm());
   const [saving, setSaving] = useState(false);
+  const [viewItem, setViewItem] = useState(null);
 
   const [adjustModal, setAdjustModal] = useState({
     open: false,
@@ -83,8 +115,12 @@ export default function Inventory() {
     setLoading(true);
     setError('');
     try {
-      const items = await api('/api/admin/inventory');
+      const [items, productList] = await Promise.all([
+        api('/api/admin/inventory'),
+        api('/api/admin/products').catch(() => []),
+      ]);
       setList(Array.isArray(items) ? items : []);
+      setProducts(Array.isArray(productList) ? productList : []);
     } catch (err) {
       setError(err.message || 'Failed to load inventory');
     } finally {
@@ -142,6 +178,27 @@ export default function Inventory() {
     return sortConfig.direction === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />;
   }
 
+  const usedInProducts = useMemo(() => {
+    if (!viewItem) return [];
+    const needle = String(viewItem.name || '').trim().toLowerCase();
+    if (!needle) return [];
+
+    return products.filter((product) => {
+      if (!product.recipe) return false;
+      let recipeList = [];
+      try {
+        recipeList = typeof product.recipe === 'string' ? JSON.parse(product.recipe) : product.recipe;
+      } catch (_) {
+        return false;
+      }
+      if (!Array.isArray(recipeList)) return false;
+      return recipeList.some((r) => {
+        const ingredient = String((r && (r.ingredient || r.name)) || '').toLowerCase();
+        return ingredient.includes(needle);
+      });
+    });
+  }, [products, viewItem]);
+
   async function handleCreateItem(e) {
     e.preventDefault();
     setSaving(true);
@@ -154,6 +211,9 @@ export default function Inventory() {
         unit: addForm.unit,
         low_stock_threshold: Number(addForm.low_stock_threshold || 0),
         overstock_threshold: Number(addForm.overstock_threshold || 0),
+        kcal_per_unit: Number(addForm.kcal_per_unit || 0),
+        protein_per_unit: Number(addForm.protein_per_unit || 0),
+        fat_per_unit: Number(addForm.fat_per_unit || 0),
       };
       const created = await api('/api/admin/inventory', {
         method: 'POST',
@@ -339,7 +399,11 @@ export default function Inventory() {
                       : '';
 
                   return (
-                    <tr key={item.id} className={`transition-colors hover:bg-slate-800/50 ${rowStateClass}`}>
+                    <tr
+                      key={item.id}
+                      className={`cursor-pointer transition-colors hover:bg-slate-800/50 ${rowStateClass}`}
+                      onClick={() => setViewItem(item)}
+                    >
                       <td className="px-6 py-4 font-medium text-slate-100">{item.name}</td>
                       <td className="px-6 py-4 text-slate-300">{item.category}</td>
                       <td className="px-6 py-4">
@@ -364,7 +428,10 @@ export default function Inventory() {
                             type="button"
                             title="Stock In"
                             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-emerald-500/30 bg-emerald-500/15 text-emerald-300 transition hover:bg-emerald-500/25"
-                            onClick={() => openAdjust(item, 'add')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAdjust(item, 'add');
+                            }}
                           >
                             <ArrowUp size={15} />
                           </button>
@@ -372,7 +439,10 @@ export default function Inventory() {
                             type="button"
                             title="Stock Out"
                             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-amber-500/30 bg-amber-500/15 text-amber-300 transition hover:bg-amber-500/25"
-                            onClick={() => openAdjust(item, 'deduct')}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openAdjust(item, 'deduct');
+                            }}
                           >
                             <ArrowDown size={15} />
                           </button>
@@ -380,7 +450,10 @@ export default function Inventory() {
                             type="button"
                             title="Delete item"
                             className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-950 text-slate-300 transition hover:border-red-500/60 hover:text-red-300"
-                            onClick={() => handleDeleteItem(item.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteItem(item.id);
+                            }}
                           >
                             <Trash2 size={15} />
                           </button>
@@ -493,6 +566,44 @@ export default function Inventory() {
                 />
               </div>
 
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div>
+                  <label className={LABEL_CLASS}>kcal / unit</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className={INPUT_CLASS}
+                    value={addForm.kcal_per_unit}
+                    onChange={(e) => setAddForm((prev) => ({ ...prev, kcal_per_unit: e.target.value }))}
+                  />
+                </div>
+
+                <div>
+                  <label className={LABEL_CLASS}>protein / unit</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className={INPUT_CLASS}
+                    value={addForm.protein_per_unit}
+                    onChange={(e) => setAddForm((prev) => ({ ...prev, protein_per_unit: e.target.value }))}
+                  />
+                </div>
+
+                <div>
+                  <label className={LABEL_CLASS}>fat / unit</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className={INPUT_CLASS}
+                    value={addForm.fat_per_unit}
+                    onChange={(e) => setAddForm((prev) => ({ ...prev, fat_per_unit: e.target.value }))}
+                  />
+                </div>
+              </div>
+
               <div className="flex items-center gap-3 pt-2">
                 <button
                   type="submit"
@@ -510,6 +621,82 @@ export default function Inventory() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {viewItem && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-slate-950/80 p-4 backdrop-blur sm:items-center" onClick={() => setViewItem(null)}>
+          <div
+            className="w-full max-w-3xl rounded-2xl border border-slate-700/70 bg-slate-900/80 p-6 shadow-2xl backdrop-blur"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-6 flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-xl font-semibold text-slate-100">{viewItem.name}</h3>
+                <p className="mt-1 text-sm text-slate-400">{viewItem.category} | Unit: {viewItem.unit}</p>
+              </div>
+              <button
+                type="button"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-700 bg-slate-950 text-slate-400 transition hover:text-slate-100"
+                onClick={() => setViewItem(null)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Current Stock</p>
+                <p className="mt-2 text-lg font-semibold text-slate-100">{formatQuantity(viewItem.quantity)} {viewItem.unit}</p>
+              </div>
+              <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Low Threshold</p>
+                <p className="mt-2 text-lg font-semibold text-amber-300">{formatQuantity(viewItem.low_stock_threshold)} {viewItem.unit}</p>
+              </div>
+              <div className="rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+                <p className="text-xs uppercase tracking-wide text-slate-500">Overstock Threshold</p>
+                <p className="mt-2 text-lg font-semibold text-cyan-300">{formatQuantity(viewItem.overstock_threshold)} {viewItem.unit}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+              <p className="text-sm font-semibold text-slate-100">Nutritional Values (Per 1g / 1ml / 1pc)</p>
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">kcal</p>
+                  <p className="mt-1 text-base font-semibold text-rose-300">{roundOneDecimal(viewItem.kcal_per_unit)}</p>
+                </div>
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">protein</p>
+                  <p className="mt-1 text-base font-semibold text-emerald-300">{roundOneDecimal(viewItem.protein_per_unit)}</p>
+                </div>
+                <div className="rounded-lg border border-slate-800 bg-slate-900/70 p-3">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">fat</p>
+                  <p className="mt-1 text-base font-semibold text-amber-300">{roundOneDecimal(viewItem.fat_per_unit)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/80 p-4">
+              <p className="text-sm font-semibold text-slate-100">Used In</p>
+              {usedInProducts.length === 0 ? (
+                <p className="mt-2 text-sm text-slate-400">No products currently reference this item in recipe/composition fields.</p>
+              ) : (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {usedInProducts.map((product) => (
+                    <span
+                      key={product.id}
+                      className="inline-flex items-center rounded-full border border-indigo-500/30 bg-indigo-500/15 px-3 py-1 text-xs font-medium text-indigo-300"
+                    >
+                      {product.name_en || product.name_am || product.name_ru || `Product #${product.id}`}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <p className="mt-4 text-xs text-slate-500">Last updated: {formatDateTime(viewItem.last_updated)}</p>
           </div>
         </div>
       )}

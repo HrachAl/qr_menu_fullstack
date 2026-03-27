@@ -415,6 +415,9 @@ def inventory_create(
     unit: str,
     low_stock_threshold: float,
     overstock_threshold: Optional[float] = None,
+    kcal_per_unit: float = 0.0,
+    protein_per_unit: float = 0.0,
+    fat_per_unit: float = 0.0,
 ) -> int:
     if category not in INVENTORY_CATEGORIES:
         raise ValueError("Invalid category")
@@ -423,10 +426,35 @@ def inventory_create(
     now = _now()
     low_stock_threshold = float(max(0.0, low_stock_threshold))
     overstock_threshold = float(max(0.0, overstock_threshold)) if overstock_threshold is not None else low_stock_threshold * 3.0
+    kcal_per_unit = float(max(0.0, kcal_per_unit))
+    protein_per_unit = float(max(0.0, protein_per_unit))
+    fat_per_unit = float(max(0.0, fat_per_unit))
     cur = conn.execute(
-        """INSERT INTO inventory_items (name, category, quantity, unit, low_stock_threshold, overstock_threshold, last_updated)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
-        (name, category, float(max(0.0, quantity)), unit, low_stock_threshold, overstock_threshold, now),
+        """INSERT INTO inventory_items (
+            name,
+            category,
+            quantity,
+            unit,
+            low_stock_threshold,
+            overstock_threshold,
+            kcal_per_unit,
+            protein_per_unit,
+            fat_per_unit,
+            last_updated
+        )
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (
+            name,
+            category,
+            float(max(0.0, quantity)),
+            unit,
+            low_stock_threshold,
+            overstock_threshold,
+            kcal_per_unit,
+            protein_per_unit,
+            fat_per_unit,
+            now,
+        ),
     )
     conn.commit()
     return cur.lastrowid
@@ -485,6 +513,27 @@ def inventory_update(conn: sqlite3.Connection, item_id: int, **kwargs) -> Option
     elif low_stock_value is not None:
         updates.append("overstock_threshold = ?")
         values.append(low_stock_value * 3.0)
+
+    if "kcal_per_unit" in kwargs and kwargs["kcal_per_unit"] is not None:
+        kcal_per_unit = float(kwargs["kcal_per_unit"])
+        if kcal_per_unit < 0:
+            raise ValueError("kcal_per_unit must be non-negative")
+        updates.append("kcal_per_unit = ?")
+        values.append(kcal_per_unit)
+
+    if "protein_per_unit" in kwargs and kwargs["protein_per_unit"] is not None:
+        protein_per_unit = float(kwargs["protein_per_unit"])
+        if protein_per_unit < 0:
+            raise ValueError("protein_per_unit must be non-negative")
+        updates.append("protein_per_unit = ?")
+        values.append(protein_per_unit)
+
+    if "fat_per_unit" in kwargs and kwargs["fat_per_unit"] is not None:
+        fat_per_unit = float(kwargs["fat_per_unit"])
+        if fat_per_unit < 0:
+            raise ValueError("fat_per_unit must be non-negative")
+        updates.append("fat_per_unit = ?")
+        values.append(fat_per_unit)
 
     if not updates:
         return current
@@ -603,8 +652,19 @@ def seed_inventory(conn: sqlite3.Connection) -> int:
     _apply_seeded_quantities(unique_entries)
     now = _now()
     conn.executemany(
-        """INSERT INTO inventory_items (name, category, quantity, unit, low_stock_threshold, overstock_threshold, last_updated)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        """INSERT INTO inventory_items (
+            name,
+            category,
+            quantity,
+            unit,
+            low_stock_threshold,
+            overstock_threshold,
+            kcal_per_unit,
+            protein_per_unit,
+            fat_per_unit,
+            last_updated
+        )
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         [
             (
                 item["name"],
@@ -613,6 +673,9 @@ def seed_inventory(conn: sqlite3.Connection) -> int:
                 item["unit"],
                 float(max(0.0, item["low_stock_threshold"])),
                 float(max(0.0, item["overstock_threshold"])),
+                0.0,
+                0.0,
+                0.0,
                 now,
             )
             for item in unique_entries
