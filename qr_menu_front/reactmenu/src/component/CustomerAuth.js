@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useLang } from "../LangContext";
 import { HiOutlineUserCircle } from "react-icons/hi2";
 
@@ -145,10 +146,13 @@ export default function CustomerAuth({ onOpenOrdersHistory, onOpenCart }) {
       >
         Register
       </button>
-      {show && (
+      {show && createPortal(
         <div className="customer-auth-modal" onClick={() => setShow(false)}>
           <div className="customer-auth-modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>{mode === "login" ? "Login" : "Register"}</h3>
+            <h3>{mode === "login" ? "Welcome back" : "Create account"}</h3>
+            <p className="customer-auth-modal-subtitle">
+              {mode === "login" ? "Sign in to your account" : "Join us to start ordering"}
+            </p>
             <form onSubmit={handleSubmit} className="customer-auth-form">
               {mode === "register" && (
                 <input
@@ -160,7 +164,7 @@ export default function CustomerAuth({ onOpenOrdersHistory, onOpenCart }) {
               )}
               <input
                 type="email"
-                placeholder="Email"
+                placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -173,24 +177,27 @@ export default function CustomerAuth({ onOpenOrdersHistory, onOpenCart }) {
                 required
               />
               {error && <p className="customer-auth-error">{error}</p>}
-              <button type="submit" disabled={loading} className="customer-auth-submit">
-                {loading ? "..." : mode === "login" ? "Login" : "Register"}
-              </button>
-              <button type="button" onClick={() => setShow(false)} className="customer-auth-cancel">
-                Cancel
-              </button>
+              <div className="customer-auth-form-actions">
+                <button type="submit" disabled={loading} className="customer-auth-submit">
+                  {loading ? "Please wait..." : mode === "login" ? "Sign in" : "Create account"}
+                </button>
+                <button type="button" onClick={() => setShow(false)} className="customer-auth-cancel">
+                  Cancel
+                </button>
+              </div>
             </form>
             <p className="customer-auth-switch">
-              {mode === "login" ? "No account? " : "Have an account? "}
+              {mode === "login" ? "Don't have an account?" : "Already have an account?"}
               <button
                 type="button"
                 onClick={() => { setMode(mode === "login" ? "register" : "login"); setError(""); }}
               >
-                {mode === "login" ? "Register" : "Login"}
+                {mode === "login" ? "Register" : "Sign in"}
               </button>
             </p>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

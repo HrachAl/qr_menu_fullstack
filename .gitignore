@@ -18,3 +18,12 @@
 **/.DS_Store
 **/.idea/
 **/.vscode/
+
+# Build output (generated, not source)
+qr_menu_backend/build/static/
+qr_menu_backend/build/asset-manifest.json
+qr_menu_backend/build/index.html
+
+# Runtime data
+qr_menu_backend/chat_memory/
+qr_menu_backend/menu.db

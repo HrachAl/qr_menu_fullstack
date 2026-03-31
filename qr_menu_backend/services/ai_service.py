@@ -5,6 +5,7 @@ import asyncio
 import json
 import logging
 import re
+import threading
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -28,6 +29,8 @@ CHAT_MEMORY_DIR = BACKEND_ROOT / "chat_memory"
 SUMMARY_TRIGGER_MESSAGES = 10
 PERSONA_MIN = 0
 PERSONA_MAX = 10
+DAILY_MESSAGE_LIMIT = 500
+STREAM_MARKER = "<<<JSON>>>"
 
 
 def _build_client() -> Optional[Any]:
@@ -130,50 +133,49 @@ class ChatBot:
         elif analytical_detail <= 6:
             detail_rule = "Provide standard, appetizing food descriptions."
         else:
-            detail_rule = "You are an expert, confident nutritionist. Confidently suggest a combination of compatible dishes to hit the user's macro/calorie goals. DO NOT apologize or say it is 'difficult with a single dish'. DO NOT use robotic phrases like 'I did a mathematical calculation', 'our menu is standardized', or 'technical compromise'. Just elegantly present the combined meal, state the total macros and calories seamlessly (allowing 5-10% deviation), and explain why they pair well together in 2-3 flowing, natural sentences."
+            detail_rule = "You are an expert, confident nutritionist. Confidently suggest a combination of compatible dishes to hit the user's macro/calorie goals. DO NOT apologize or say it is 'difficult with a single dish'. Just elegantly present the combined meal, state the total macros and calories seamlessly."
 
         return (
             f"{language_prompt}\n\n"
-            "You must ALWAYS respond with a valid, raw JSON object. "
-            "Do not wrap the response in markdown code blocks. "
-            "Do not add any conversational text outside the JSON.\n\n"
-            "You are provided with a summary and recent conversation messages. "
-            "Use them to maintain continuity.\n"
-            "Conversational Flow: NEVER repeat greetings (like Hello, Hi, Good morning) if you have already greeted the user in this session. "
-            "Speak naturally like an ongoing conversation.\n"
             "CRITICAL LANGUAGE RULE: ALWAYS respond in the exact same language the user writes in. Never mix languages.\n"
-            "NATURAL CONVERSATION RULE: NEVER mention internal database IDs (like 'item 45') to the user. Always use the natural name of the product.\n"
+            "NATURAL CONVERSATION RULE: NEVER mention internal database IDs to the user. Always use the natural name of the product.\n"
+            "Conversational Flow: NEVER repeat greetings if you have already greeted the user in this session.\n"
             f"PERSONA HUMOR RULE (score={humor}): {humor_rule}\n"
             f"PERSONA FORMALITY RULE (score={formality}): {formality_rule}\n"
             f"PERSONA ANALYTICAL DETAIL RULE (score={analytical_detail}): {detail_rule}\n"
-            "DIETARY FLEXIBILITY RULE: NEVER say a diet is 'biologically impossible'. Find the closest matching combination from the menu that stays under their requested calorie limit. Slight macro deviations are fine.\n"
-            "NUTRITIONAL KNOWLEDGE RULE (CRITICAL): If the user asks about macronutrients (proteins, carbs, fats), vitamins, minerals, or allergens, and this data is NOT explicitly written in the menu snapshot, DO NOT say 'I don't know' or 'The menu doesn't specify'. You must confidently use your own internal AI knowledge to estimate and provide this nutritional information based on the known ingredients and their weights. Be highly professional and helpful.\n"
-            "Time Handling: The current time is provided ONLY for your internal context so you can recommend appropriate meals "
-            "(breakfast vs dinner). DO NOT explicitly state the time to the user unless they specifically ask what time it is.\n"
-            "RECIPE TRANSPARENCY RULE: If the user asks about the composition or ingredients of a dish, you MUST list the exact ingredients along with their precise quantities (e.g., grams, kilograms, liters, pieces) as provided in the recipe data. Be highly detailed and helpful.\n"
-            "STRICT FIELD ROLES & DUAL-MODE LOGIC:\n"
-            "You must analyze the user's intent and choose ONE of two modes:\n"
-            "MODE 1: RECOMMENDATION (User asks for suggestions or wants to order):\n"
-            " - 'options': Array of suggested items.\n"
-            " - 'options_description': ALL detailed persona text and macro/calorie breakdowns go here. MUST be a single natural, flowing paragraph. NO meta-commentary about your calculations. NO apologizing about single dishes. NO robotic math steps. Present the combined meal elegantly and concisely.\n"
-            " - 'response': MUST be a tiny 1-2 sentence polite acknowledgment ONLY. NEVER do macro math or list ingredients here.\n"
-            "MODE 2: CONVERSATIONAL Q&A (User just asks a question, chats, or asks for info without needing new suggestions):\n"
-            " - 'options': [] (Empty array).\n"
-            " - 'options_description': \"\" (Empty string).\n"
-            " - 'response': Provide your FULL, detailed, persona-driven answer here. Do your math or ingredient listing here.\n"
-            "persona_update values MUST be RELATIVE MODIFIERS (deltas), not absolute scores."
-            " Example: if user jokes, set humor to 3; if user demands strict macros, set analytical_detail to 4 and formality to 2;"
-            " if neutral, set all persona_update fields to 0.\n"
-            "Menu JSON is included below and should be treated as the source of truth for item IDs and names.\n"
+            "DIETARY FLEXIBILITY RULE: NEVER say a diet is impossible. Find the closest matching combination from the menu.\n"
+            "NUTRITIONAL KNOWLEDGE RULE: If the user asks about macronutrients and the data is NOT in the menu, use your internal AI knowledge to estimate confidently.\n"
+            "Time Handling: Current time is for internal context only. DO NOT state the time to the user unless asked.\n"
+            "RECIPE TRANSPARENCY RULE: If asked about ingredients, list them with precise quantities.\n"
+            "STRICT FIELD ROLES:\n"
+            "MODE 1 — RECOMMENDATION (user asks for suggestions/wants to order):\n"
+            " - PART 1 text: short 1-2 sentence polite acknowledgment only.\n"
+            " - <<<JSON>>> options: array of recommended items.\n"
+            " - <<<JSON>>> options_description: detailed description, macros, calories in natural flowing sentences.\n"
+            "MODE 2 — CONVERSATIONAL Q&A (user asks a question or chats):\n"
+            " - PART 1 text: your full detailed answer.\n"
+            " - <<<JSON>>> options: []\n"
+            " - <<<JSON>>> options_description: \"\"\n"
+            "persona_update values MUST be RELATIVE MODIFIERS (deltas), not absolute scores.\n"
+            "Menu JSON is included below as the source of truth for item IDs and names.\n"
             f"{self._menu_snapshot()}\n\n"
-            "Return JSON with this shape exactly: "
-            '{"response":"...","options":[{"item_id":123,"count":1}],"options_description":"...","persona_update":{"humor":0,"formality":0,"analytical_detail":0}}. '
-            "If there are no recommendations, set options to null or an empty array."
+            "OUTPUT FORMAT — You MUST use this exact two-part structure:\n"
+            "PART 1: Write ONLY the plain conversational response text. No JSON, no code blocks, no brackets.\n"
+            f"PART 2: On a new line write {STREAM_MARKER} then immediately the JSON object:\n"
+            f'{STREAM_MARKER}{{"options":[{{"item_id":123,"count":1}}],"options_description":"...","persona_update":{{"humor":0,"formality":0,"analytical_detail":0}},"suggestions":["short follow-up 1","short follow-up 2","short follow-up 3"]}}\n'
+            "suggestions: 3 short follow-up questions in the SAME language as the user. Max 6 words each. Make them contextually relevant.\n"
+            "If no recommendations, set options to [] and options_description to \"\".\n"
+            "IMPORTANT: The <<<JSON>>> marker must appear on its own line. No text after the JSON.\n"
         )
 
     @staticmethod
     def _default_memory_state() -> Dict[str, Any]:
-        return {"summary": "", "messages": [], "persona": ChatBot._default_persona()}
+        return {
+            "summary": "",
+            "messages": [],
+            "persona": ChatBot._default_persona(),
+            "daily": {"date": "", "count": 0},
+        }
 
     @staticmethod
     def _normalize_persona_update(update: Any) -> Dict[str, int]:
@@ -210,24 +212,22 @@ class ChatBot:
         try:
             if not self.memory_file_path.exists():
                 return self._default_memory_state()
-
             raw = self.memory_file_path.read_text(encoding="utf-8").strip()
             if not raw:
                 return self._default_memory_state()
-
             try:
                 parsed = json.loads(raw)
             except json.JSONDecodeError:
-                # Backward compatibility for old plain-text summary files.
-                return {"summary": raw, "messages": [], "persona": self._default_persona()}
-
+                return {"summary": raw, "messages": [], "persona": self._default_persona(), "daily": {"date": "", "count": 0}}
             if not isinstance(parsed, dict):
                 return self._default_memory_state()
-
             summary = str(parsed.get("summary", "") or "").strip()
             messages = self._normalize_message_list(parsed.get("messages", []))
             persona = self._normalize_persona_scores(parsed.get("persona"))
-            return {"summary": summary, "messages": messages, "persona": persona}
+            daily = parsed.get("daily", {"date": "", "count": 0})
+            if not isinstance(daily, dict):
+                daily = {"date": "", "count": 0}
+            return {"summary": summary, "messages": messages, "persona": persona, "daily": daily}
         except Exception:
             logger.exception("Failed to read chat memory", extra={"session_id": self.session_id})
             return self._default_memory_state()
@@ -237,7 +237,8 @@ class ChatBot:
             summary = str(state.get("summary", "") or "").strip()
             messages = self._normalize_message_list(state.get("messages", []))
             persona = self._normalize_persona_scores(state.get("persona"))
-            payload = {"summary": summary, "messages": messages, "persona": persona}
+            daily = state.get("daily", {"date": "", "count": 0})
+            payload = {"summary": summary, "messages": messages, "persona": persona, "daily": daily}
             self.memory_file_path.write_text(
                 json.dumps(payload, ensure_ascii=False),
                 encoding="utf-8",
@@ -245,33 +246,14 @@ class ChatBot:
         except Exception:
             logger.exception("Failed to write chat memory", extra={"session_id": self.session_id})
 
-    @staticmethod
-    def _looks_like_recommendation_request(user_input: str) -> bool:
-        lowered = user_input.lower()
-        json_signals = [
-            "recommend",
-            "recommendation",
-            "рекоменд",
-            "խորհուրդ",
-            "options",
-            "3+",
-            "order",
-            "заказ",
-            "պատվեր",
-        ]
-        return any(signal in lowered for signal in json_signals)
-
     def _normalize_options(self, options: Any) -> List[Dict[str, Any]]:
         if not isinstance(options, list):
             return []
-
         normalized_options: List[Dict[str, Any]] = []
         normalized_item_ids: List[int] = []
-
         for rec in options:
             if not isinstance(rec, dict):
                 continue
-
             raw_item_id = rec.get("item_id")
             if raw_item_id is None:
                 continue
@@ -279,10 +261,8 @@ class ChatBot:
                 item_id = int(raw_item_id)
             except (ValueError, TypeError):
                 continue
-
             if self.menu_by_id and item_id not in self.menu_by_id:
                 continue
-
             reason = str(rec.get("reason", "")).strip()
             count = rec.get("count", 0)
             if not isinstance(count, int):
@@ -290,16 +270,8 @@ class ChatBot:
                     count = int(count)
                 except (ValueError, TypeError):
                     count = 0
-
-            normalized_options.append(
-                {
-                    "item_id": item_id,
-                    "reason": reason,
-                    "count": count,
-                }
-            )
+            normalized_options.append({"item_id": item_id, "reason": reason, "count": count})
             normalized_item_ids.append(item_id)
-
         if normalized_item_ids and self.menu_by_id:
             types_unique = {
                 self.menu_by_id[item_id].get("type")
@@ -309,97 +281,51 @@ class ChatBot:
             if len(types_unique) <= 2:
                 for rec in normalized_options:
                     rec["count"] = 0
-
         return normalized_options
 
-    def _coerce_response_payload(self, assistant_text: str) -> Dict[str, Any]:
-        stripped = assistant_text.strip()
-        if not stripped:
-            return {
-                "response": "",
-                "options": None,
-                "options_description": "",
-                "persona_update": self._normalize_persona_update(None),
-            }
+    def _parse_split_response(self, accumulated: str) -> Dict[str, Any]:
+        """Parse the split format: text <<<JSON>>> {...}"""
+        if STREAM_MARKER in accumulated:
+            parts = accumulated.split(STREAM_MARKER, 1)
+            text_part = parts[0].strip()
+            json_raw = parts[1].strip()
+        else:
+            # Fallback: try to parse entire thing as JSON (old format compat)
+            text_part = ""
+            json_raw = accumulated.strip()
 
-        try:
-            parsed = json.loads(stripped)
-        except json.JSONDecodeError:
-            return {
-                "response": stripped,
-                "options": None,
-                "options_description": "",
-                "persona_update": self._normalize_persona_update(None),
-            }
+        # Parse JSON part
+        options: List[Dict[str, Any]] = []
+        options_description = ""
+        persona_update: Dict[str, int] = {"humor": 0, "formality": 0, "analytical_detail": 0}
+        suggestions: List[str] = []
 
-        if isinstance(parsed, list):
-            options = self._normalize_options(parsed)
-            return {
-                "response": "",
-                "options": options if options else None,
-                "options_description": "",
-                "persona_update": self._normalize_persona_update(None),
-            }
-
-        if isinstance(parsed, dict):
-            raw_options = parsed.get("options")
-            if raw_options is None and isinstance(parsed.get("recommendations"), list):
-                raw_options = parsed.get("recommendations")
-            options = self._normalize_options(raw_options)
-
-            response_text = parsed.get("response")
-            if response_text is None:
-                response_text = parsed.get("message", "")
-            response_text = str(response_text) if response_text is not None else ""
-            options_description = str(parsed.get("options_description", "") or "").strip()
-            persona_update = self._normalize_persona_update(parsed.get("persona_update"))
-
-            return {
-                "response": response_text,
-                "options": options if options else None,
-                "options_description": options_description,
-                "persona_update": persona_update,
-            }
+        if json_raw:
+            try:
+                parsed = json.loads(json_raw)
+                if isinstance(parsed, dict):
+                    options = self._normalize_options(parsed.get("options", []))
+                    options_description = str(parsed.get("options_description", "") or "").strip()
+                    persona_update = self._normalize_persona_update(parsed.get("persona_update"))
+                    raw_suggestions = parsed.get("suggestions", [])
+                    if isinstance(raw_suggestions, list):
+                        suggestions = [str(s).strip() for s in raw_suggestions if str(s).strip()][:4]
+                    # Fallback if text_part is empty but JSON has response field
+                    if not text_part:
+                        text_part = str(parsed.get("response", "") or "").strip()
+            except json.JSONDecodeError:
+                # JSON didn't parse — treat everything as text
+                if not text_part:
+                    text_part = accumulated.strip()
 
         return {
-            "response": stripped,
-            "options": None,
-            "options_description": "",
-            "persona_update": self._normalize_persona_update(None),
+            "response": text_part,
+            "options": options if options else None,
+            "options_description": options_description,
+            "persona_update": persona_update,
+            "suggestions": suggestions,
+            "_raw_text": accumulated,
         }
-
-    @staticmethod
-    def _split_sentences(text: str) -> List[str]:
-        cleaned = str(text or "").strip()
-        if not cleaned:
-            return []
-        parts = re.split(r"(?<=[.!?])\s+", cleaned)
-        return [p.strip() for p in parts if p.strip()]
-
-    def _enforce_response_field_roles(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        options = payload.get("options")
-        has_options = isinstance(options, list) and len(options) > 0
-
-        response_text = str(payload.get("response", "") or "").strip()
-        options_description = str(payload.get("options_description", "") or "").strip()
-
-        if not has_options:
-            payload["response"] = response_text
-            payload["options_description"] = options_description
-            return payload
-
-        response_sentences = self._split_sentences(response_text)
-        short_response = " ".join(response_sentences[:2]).strip() if response_sentences else response_text
-        overflow = " ".join(response_sentences[2:]).strip() if len(response_sentences) > 2 else ""
-
-        if not options_description:
-            options_description = overflow or response_text
-        elif overflow:
-            options_description = f"{overflow}\n{options_description}".strip()
-
-        payload["response"] = short_response
-        payload["options_description"] = options_description
-        return payload
 
     async def _generate(
         self,
@@ -412,8 +338,6 @@ class ChatBot:
             raise RuntimeError("GEMINI_API_KEY is missing. Set it in environment/.env.")
         if types is None:
             raise RuntimeError("google-genai package is not installed.")
-        active_client = client
-        active_types = types
 
         time_key = f"{self.language}_time"
         time_prompt = PROMPT_DICT.get(time_key, PROMPT_DICT.get("en_time", "Current time is {current_time}"))
@@ -426,52 +350,66 @@ class ChatBot:
         config_kwargs: Dict[str, Any] = {
             "temperature": 0.4,
             "system_instruction": self._system_instruction(persona),
-            "response_mime_type": "application/json",
+            # No response_mime_type — using <<<JSON>>> split format for streaming
         }
 
-        def _call_model() -> Any:
-            return active_client.models.generate_content(
-                model=MODEL_NAME,
-                contents=contextual_input,
-                config=active_types.GenerateContentConfig(**config_kwargs),
-            )
+        loop = asyncio.get_event_loop()
+        queue: asyncio.Queue = asyncio.Queue()
 
-        response = await asyncio.to_thread(_call_model)
-        text = getattr(response, "text", None)
-        if text:
-            payload = self._coerce_response_payload(text)
-            payload["_raw_text"] = text
-            return payload
+        def _producer() -> None:
+            try:
+                stream = client.models.generate_content_stream(
+                    model=MODEL_NAME,
+                    contents=contextual_input,
+                    config=types.GenerateContentConfig(**config_kwargs),
+                )
+                for chunk in stream:
+                    text = getattr(chunk, "text", None)
+                    if text:
+                        loop.call_soon_threadsafe(queue.put_nowait, text)
+            except Exception as exc:
+                loop.call_soon_threadsafe(queue.put_nowait, exc)
+            finally:
+                loop.call_soon_threadsafe(queue.put_nowait, None)
 
-        # Fallback for edge cases where SDK does not populate .text.
-        candidates = getattr(response, "candidates", None)
-        if candidates:
-            for candidate in candidates:
-                content = getattr(candidate, "content", None)
-                parts = getattr(content, "parts", None) if content else None
-                if parts:
-                    collected = []
-                    for part in parts:
-                        part_text = getattr(part, "text", None)
-                        if part_text:
-                            collected.append(part_text)
-                    if collected:
-                        recovered = "\n".join(collected)
-                        payload = self._coerce_response_payload(recovered)
-                        payload["_raw_text"] = recovered
-                        return payload
+        threading.Thread(target=_producer, daemon=True).start()
 
-        empty_payload = self._coerce_response_payload("")
-        empty_payload["_raw_text"] = ""
-        return empty_payload
+        accumulated = ""
+        sent_text_length = 0
+        marker_found = False
+
+        while True:
+            item = await queue.get()
+            if item is None:
+                break
+            if isinstance(item, Exception):
+                raise item
+
+            accumulated += item
+
+            if not marker_found:
+                if STREAM_MARKER in accumulated:
+                    marker_found = True
+                    text_before_marker = accumulated.split(STREAM_MARKER, 1)[0]
+                    # Send any remaining text before the marker
+                    unsent = text_before_marker[sent_text_length:]
+                    if unsent.strip() and self.connection:
+                        await self.connection.send_json({"chunk": unsent, "streaming": True})
+                    sent_text_length = len(text_before_marker)
+                else:
+                    # Stream text chunks to frontend
+                    unsent = accumulated[sent_text_length:]
+                    if unsent and self.connection:
+                        await self.connection.send_json({"chunk": unsent, "streaming": True})
+                    sent_text_length = len(accumulated)
+
+        return self._parse_split_response(accumulated)
 
     async def _summarize_messages(self, summary: str, messages: List[Dict[str, str]]) -> str:
         if client is None:
-            raise RuntimeError("GEMINI_API_KEY is missing. Set it in environment/.env.")
+            raise RuntimeError("GEMINI_API_KEY is missing.")
         if types is None:
             raise RuntimeError("google-genai package is not installed.")
-        active_client = client
-        active_types = types
 
         summarization_prompt = (
             "You are an AI summarizer. "
@@ -481,15 +419,11 @@ class ChatBot:
             "Return ONLY the new summary text."
         )
 
-        config_kwargs: Dict[str, Any] = {
-            "temperature": 0.2,
-        }
-
         def _call_model() -> Any:
-            return active_client.models.generate_content(
+            return client.models.generate_content(
                 model=MODEL_NAME,
                 contents=summarization_prompt,
-                config=active_types.GenerateContentConfig(**config_kwargs),
+                config=types.GenerateContentConfig(temperature=0.2),
             )
 
         response = await asyncio.to_thread(_call_model)
@@ -498,7 +432,6 @@ class ChatBot:
 
     async def ask(self, query: str, return_only_response: bool = False) -> Optional[GPT_Message]:
         try:
-            payload_input: Any = {}
             user_input = query
             current_time = datetime.now().strftime("%H:%M")
 
@@ -516,16 +449,25 @@ class ChatBot:
                         if next_session_id != self.session_id:
                             self.session_id = next_session_id
                             self.memory_file_path = self._build_memory_file_path(self.session_id)
-                else:
-                    payload_input = {}
             except json.JSONDecodeError:
-                payload_input = {}
+                pass
 
             self.user_message_times.append(current_time)
             state = self._read_previous_context()
             summary = str(state.get("summary", "") or "").strip()
             messages = self._normalize_message_list(state.get("messages", []))
             persona = self._normalize_persona_scores(state.get("persona"))
+
+            # Daily message counter
+            daily = state.get("daily", {"date": "", "count": 0})
+            if not isinstance(daily, dict):
+                daily = {"date": "", "count": 0}
+            today = datetime.now().strftime("%Y-%m-%d")
+            if daily.get("date") != today:
+                daily = {"date": today, "count": 0}
+            daily["count"] = int(daily.get("count", 0)) + 1
+            messages_today = daily["count"]
+            messages_remaining = max(0, DAILY_MESSAGE_LIMIT - messages_today)
 
             if user_input.strip():
                 messages.append({"role": "user", "text": user_input.strip()})
@@ -536,22 +478,22 @@ class ChatBot:
                 messages=messages,
                 persona=persona,
             )
-            response_payload = self._enforce_response_field_roles(response_payload)
 
-            model_text = str(response_payload.get("response", "") or "").strip()
-            if not model_text:
-                model_text = str(response_payload.get("_raw_text", "") or "").strip()
-
+            response_text = str(response_payload.get("response", "") or "").strip()
+            options = response_payload.get("options")
             options_description = str(response_payload.get("options_description", "") or "").strip()
-            if options_description:
-                model_text = f"{model_text}\n{options_description}".strip()
-
+            suggestions = response_payload.get("suggestions", [])
             persona_update = self._normalize_persona_update(response_payload.get("persona_update"))
+
             persona = {
                 "humor": max(PERSONA_MIN, min(PERSONA_MAX, int(persona.get("humor", 5)) + int(persona_update.get("humor", 0)))),
                 "formality": max(PERSONA_MIN, min(PERSONA_MAX, int(persona.get("formality", 5)) + int(persona_update.get("formality", 0)))),
                 "analytical_detail": max(PERSONA_MIN, min(PERSONA_MAX, int(persona.get("analytical_detail", 5)) + int(persona_update.get("analytical_detail", 0)))),
             }
+
+            model_text = response_text
+            if options_description:
+                model_text = f"{response_text}\n{options_description}".strip()
 
             if model_text:
                 messages.append({"role": "model", "text": model_text})
@@ -566,36 +508,43 @@ class ChatBot:
                     logger.exception("Failed to summarize chat memory", extra={"session_id": self.session_id})
                 messages = []
 
-            self._write_updated_context({"summary": summary, "messages": messages, "persona": persona})
+            self._write_updated_context({
+                "summary": summary,
+                "messages": messages,
+                "persona": persona,
+                "daily": daily,
+            })
 
+            # Send final complete structured response to frontend
             client_payload = {
-                "response": response_payload.get("response", ""),
-                "message": response_payload.get("response", ""),
-                "options": response_payload.get("options"),
-                "options_description": response_payload.get("options_description", ""),
+                "response": response_text,
+                "message": response_text,
+                "options": options,
+                "options_description": options_description,
+                "suggestions": suggestions,
+                "messages_today": messages_today,
+                "messages_remaining": messages_remaining,
+                "streaming_done": True,
             }
-
-            gpt_message = GPT_Message(
-                response=client_payload.get("response", ""),
-                options=client_payload.get("options"),
-            )
 
             if self.connection:
                 await self.connection.send_json(client_payload)
 
+            gpt_message = GPT_Message(
+                response=response_text,
+                options=options,
+            )
             return gpt_message
 
         except Exception as e:
             logger.exception("Error in chat processing")
             error_payload = {
-                "error": {
-                    "message": str(e),
-                    "type": e.__class__.__name__,
-                }
+                "error": str(e),
+                "error_type": e.__class__.__name__,
+                "streaming_done": True,
             }
-            error_response = {"role": "assistant", "content": json.dumps(error_payload)}
             if self.connection:
-                await self.connection.send_json([error_response])
+                await self.connection.send_json(error_payload)
             if return_only_response:
                 return GPT_Message(response=f"Error: {str(e)}", options=None)
             return None

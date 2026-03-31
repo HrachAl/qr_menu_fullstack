@@ -149,6 +149,16 @@ async def log_chat_history(chat_history: ChatHistory):
     logger.info(f"Chat history received: {chat_history.root}")
     return {"status": "success", "received": chat_history.root}
 
+@app.post("/chat/reset")
+async def reset_chat(session_id: str):
+    from services.ai_service import CHAT_MEMORY_DIR, ChatBot
+    safe_id = ChatBot._sanitize_session_id(session_id)
+    memory_file = CHAT_MEMORY_DIR / f"{safe_id}.txt"
+    if memory_file.exists():
+        memory_file.unlink()
+    logger.info(f"Chat memory reset for session: {safe_id}")
+    return {"status": "ok", "session_id": safe_id}
+
 @app.get("/recommend/time", response_model=List[Recommendation])
 async def recommend_by_time(request: Request, language: str = "en", session_id: str = "default_session"):
     language = language.lower()

@@ -1,24 +1,42 @@
 import {useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { SlActionRedo } from "react-icons/sl";
+import { HiOutlineChatBubbleLeftRight, HiOutlineMicrophone, HiStop } from "react-icons/hi2";
 import { useLang } from "../LangContext";
 import { useWebSocketForm } from "../WebSocketProvider";
 import { useCart } from "../CartContext";
 import { menuImageUrl } from "../imageUrl";
 
 export default function Draq({setSelectedProduct, setShowProduct, show}) {
-    const { write, langItems, add, tot, amd, addAll } = useLang()
+    const { write, langItems, add, tot, amd, addAll, lang } = useLang()
     const position = useRef({ x: 5, y: 241 });
     const [dragging, setDragging] = useState(false);
     const offset = useRef({ x: 0, y: 0 });
     const divRef = useRef(null);
+    const scrollRef = useRef(null);
     const [active, setActive] = useState(false);
     const wasDragged = useRef(false);
     const [delayedActive, setDelayedActive] = useState(false);
     const timeoutRef = useRef(null);
-    const {messages,sendMessage, connectChat, disconnectChat, setMessages} = useWebSocketForm()
+    const {
+        messages, sendMessage, connectChat, disconnectChat, setMessages,
+        streamingText, isStreaming,
+        suggestions, setSuggestions,
+        messagesInfo, resetChat,
+        switchToSession, getSavedSessions, saveSessionToHistory,
+    } = useWebSocketForm()
     const [input, setInput] = useState("");
     const {addAllToCart} = useCart()
     const [click, setClick] = useState(false)
+
+    // Voice input
+    const recognitionRef = useRef(null);
+    const [isListening, setIsListening] = useState(false);
+
+    // Chat history — only for logged-in users
+    const isLoggedIn = !!localStorage.getItem('customer_token');
+    const [showHistory, setShowHistory] = useState(false);
+    const [savedSessions, setSavedSessions] = useState([]);
 
     const handleStart = (e) => {
         setDragging(true);
@@ -34,11 +52,16 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
 
     useEffect(() => {
         connectChat();
-      
         return () => {
           disconnectChat();
         };
-      }, []);
+    }, []);
+
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages, streamingText]);
 
     useEffect(() => {
         const isIOS = /iP(ad|hone|od)/.test(navigator.userAgent);
@@ -151,6 +174,45 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
 
 
 
+    const toggleVoice = () => {
+        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SR) return;
+        if (isListening) {
+            recognitionRef.current?.stop();
+            setIsListening(false);
+            return;
+        }
+        const speechLang = lang === 'AM' ? 'hy-AM' : lang === 'RU' ? 'ru-RU' : 'en-US';
+        const recognition = new SR();
+        recognitionRef.current = recognition;
+        recognition.lang = speechLang;
+        recognition.interimResults = true;
+        recognition.continuous = false;
+        recognition.onstart = () => setIsListening(true);
+        recognition.onend = () => setIsListening(false);
+        recognition.onerror = () => setIsListening(false);
+        recognition.onresult = (e) => {
+            const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
+            setInput(transcript);
+            if (e.results[e.results.length - 1].isFinal) recognition.stop();
+        };
+        try { recognition.start(); } catch {}
+    };
+
+    const openHistory = () => {
+        setSavedSessions(getSavedSessions());
+        setShowHistory(true);
+    };
+
+    const handleSwitchSession = (session) => {
+        switchToSession(session);
+        setShowHistory(false);
+    };
+
+    const handleNewChat = () => {
+        resetChat();
+    };
+
     const detectLanguage = (text) => {
         if (/^[a-zA-Z0-9.,!?()\s]+$/.test(text)) return "en";
         if (/^[а-яА-ЯёЁ0-9.,!?()\s]+$/.test(text)) return "ru";
@@ -159,10 +221,11 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
     };
     
 
-    const handleSend = () => {
-        if (input.trim() !== "") {
-            const lang = detectLanguage(input);
-            sendMessage(input, lang);
+    const handleSend = (text) => {
+        const msg = typeof text === "string" ? text : input;
+        if (msg.trim() !== "") {
+            const lang = detectLanguage(msg);
+            sendMessage(msg, lang);
             setInput("");
             setClick(false)
         }
@@ -202,7 +265,7 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
     }
     
 
-    return (
+    return createPortal(
         <>
             {active && <div className="dragBg" onClick={handleClick}></div>}
             <div
@@ -226,9 +289,51 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
             </div>
 
             <div className={`chatBox ${delayedActive ? 'activeChat' : ''}`}>
+                <div className="chatHeader">
+                    <div className="chatHeader-counter">
+                        <span className="chatHeader-counter-dot" style={{background: messagesInfo.remaining > 50 ? '#4caf50' : messagesInfo.remaining > 10 ? '#ff9800' : '#f44336'}}></span>
+                        <span>{messagesInfo.remaining} / 500</span>
+                    </div>
+                    <div className="chatHeader-actions">
+                        {isLoggedIn && (
+                            <button className="chatHeader-history-btn" onClick={openHistory} title="Chat history">
+                                &#9776;
+                            </button>
+                        )}
+                        <button className="chatHeader-reset" onClick={handleNewChat}>
+                            <HiOutlineChatBubbleLeftRight />
+                            <span>New Chat</span>
+                        </button>
+                    </div>
+                </div>
+
+                {showHistory && (
+                    <div className="chatHistory-panel">
+                        <div className="chatHistory-header">
+                            <span>Chat History</span>
+                            <button className="chatHistory-close" onClick={() => setShowHistory(false)}>✕</button>
+                        </div>
+                        <div className="chatHistory-list">
+                            {savedSessions.length === 0 ? (
+                                <p className="chatHistory-empty">No saved chats yet</p>
+                            ) : savedSessions.map((s) => (
+                                <button key={s.id} className="chatHistory-item" onClick={() => handleSwitchSession(s)}>
+                                    <span className="chatHistory-item-time">
+                                        {new Date(s.timestamp).toLocaleDateString([], {month:'short', day:'numeric'})}
+                                        {' '}
+                                        {new Date(s.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}
+                                    </span>
+                                    <span className="chatHistory-item-preview">{s.preview || 'Empty chat'}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
                 <div className="Chat">
-                    <div className="ChatScrollBox">
-                        {messages.map((msg, index) => (
+                    <div className="ChatScrollBox" ref={scrollRef}>
+                        {messages.map((msg, index) => {
+                            const isLast = index === messages.length - 1;
+                            return (
                             <div className="smallBox" key={index}>
                                 <div className={`message ${msg.type}`}>
                                     <div className="messageBox">
@@ -287,7 +392,7 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
                                                 <div>{addAll}</div>
                                             </div>
                                         </>) : (<div>{addAll}</div>)}
-                                                
+
                                             </button>
                                             <div className="handle" style={{scale: click ? '1' : '0'}}></div>
                                         </div>
@@ -300,10 +405,29 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
                                         </div>
                                     </div>
                                 )}
+                                {isLast && !isStreaming && suggestions.length > 0 && msg.type === 'received' && (
+                                    <div className="chat-suggestions">
+                                        {suggestions.map((s, i) => (
+                                            <button key={i} className="chat-suggestion-chip" onClick={() => handleSend(s)}>
+                                                {s}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
-                        ))}
+                            );
+                        })}
+                        {isStreaming && (
+                            <div className="smallBox">
+                                <div className="message received streaming-bubble">
+                                    <div className="messageBox">
+                                        <p>{streamingText}<span className="streaming-cursor">▋</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                    {messages.length % 2 === 1 ?
+                    {!isStreaming && messages.length % 2 === 1 ?
                         (<div className="chatWait">
                             <div className="circle first"></div>
                             <div className="circle second"></div>
@@ -314,19 +438,28 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
                 </div>
                 <div className="chatInput">
                     <form onSubmit={(e) => e.preventDefault()}>
+                        <button
+                            type="button"
+                            className={`chatInput-mic ${isListening ? 'listening' : ''}`}
+                            onClick={toggleVoice}
+                            title={isListening ? 'Stop listening' : 'Voice input'}
+                        >
+                            {isListening ? <HiStop /> : <HiOutlineMicrophone />}
+                        </button>
                         <input
                             type="text"
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                            placeholder={write}
+                            placeholder={isListening ? '...' : write}
                         />
-                        <button onClick={handleSend} type="button">
+                        <button onClick={() => handleSend()} type="button">
                             <SlActionRedo />
                         </button>
                     </form>
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 }

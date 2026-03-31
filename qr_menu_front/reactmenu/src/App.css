@@ -303,21 +303,32 @@ main .checkBox .check.active {
   align-items: center;
 }
 .customer-auth .customer-auth-btn {
-  padding: 6px 14px;
-  margin-right: 8px;
-  font-size: 14px;
+  padding: 7px 16px;
+  margin-right: 6px;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  border-radius: 8px;
-  border: 1px solid var(--border-card);
-  background: var(--bg-card);
+  border-radius: 10px;
+  border: 1.5px solid var(--border-card);
+  background: transparent;
   color: var(--text-primary);
-  transition: background 0.2s, border-color 0.2s;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+  letter-spacing: 0.1px;
 }
-.customer-auth .customer-auth-btn:last-of-type { margin-right: 0; }
+.customer-auth .customer-auth-btn:last-of-type {
+  margin-right: 0;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
 .customer-auth .customer-auth-btn:hover {
   background: var(--accent);
   border-color: var(--accent);
-  color: var(--text-white);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.customer-auth .customer-auth-btn:last-of-type:hover {
+  filter: brightness(1.1);
 }
 .customer-auth-fullname {
   font-size: 13px;
@@ -380,89 +391,144 @@ main .checkBox .check.active {
 .customer-auth-dropdown button:hover {
   background: var(--bg-primary);
 }
+/* ===== Auth Modal ===== */
 .customer-auth-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1001;
+  z-index: 9999;
+  padding: 20px;
 }
 .customer-auth-modal-content {
   background: var(--bg-card);
   color: var(--text-primary);
-  padding: 24px;
-  border-radius: 14px;
-  min-width: 320px;
-  max-width: 90vw;
-  box-shadow: var(--shadow-card);
-  border: 1px solid var(--border-card);
+  padding: 36px 32px 28px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 440px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 .customer-auth-modal-content h3 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
+  margin: 0 0 8px 0;
+  font-size: 26px;
+  font-weight: 700;
   color: var(--text-primary);
+  letter-spacing: -0.3px;
+}
+.customer-auth-modal-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 24px 0;
+}
+.customer-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 .customer-auth-form input {
   width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 10px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
   box-sizing: border-box;
-  border-radius: 8px;
-  border: 1px solid var(--border-card);
+  border-radius: 12px;
+  border: 1.5px solid var(--border-card);
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 15px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.customer-auth-form input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(255,138,0,0.15);
 }
 .customer-auth-form input::placeholder {
   color: var(--text-secondary);
-  opacity: 0.8;
+  opacity: 0.7;
 }
 .customer-auth-form .customer-auth-error {
-  color: #e57373;
+  color: #ff6b6b;
   font-size: 13px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  background: rgba(255,107,107,0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255,107,107,0.25);
+}
+.customer-auth-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 4px;
 }
 .customer-auth-form .customer-auth-submit {
-  padding: 10px 20px;
-  margin-right: 8px;
-  border-radius: 8px;
+  flex: 1;
+  padding: 14px 20px;
+  border-radius: 12px;
   border: none;
   background: var(--accent);
-  color: var(--text-white);
+  color: #fff;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  transition: filter 0.2s, transform 0.15s;
 }
 .customer-auth-form .customer-auth-submit:hover:not(:disabled) {
-  filter: brightness(1.1);
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+.customer-auth-form .customer-auth-submit:active:not(:disabled) {
+  transform: translateY(0);
+  filter: brightness(0.95);
+}
+.customer-auth-form .customer-auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .customer-auth-form .customer-auth-cancel {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: 1px solid var(--border-card);
+  padding: 14px 20px;
+  border-radius: 12px;
+  border: 1.5px solid var(--border-card);
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  transition: background 0.2s, border-color 0.2s;
 }
 .customer-auth-form .customer-auth-cancel:hover {
   background: var(--bg-primary);
+  border-color: var(--text-secondary);
 }
 .customer-auth-switch {
-  font-size: 12px;
-  margin-top: 14px;
+  font-size: 14px;
+  margin-top: 20px;
   margin-bottom: 0;
   color: var(--text-secondary);
+  text-align: center;
 }
 .customer-auth-switch button {
   background: none;
   border: none;
   cursor: pointer;
-  text-decoration: underline;
+  text-decoration: none;
   color: var(--accent);
+  font-weight: 600;
+  font-size: 14px;
   padding: 0;
-  margin-left: 2px;
+  margin-left: 4px;
+  transition: opacity 0.2s;
+}
+.customer-auth-switch button:hover {
+  opacity: 0.8;
 }
 
 /* Order history panel */
@@ -1574,7 +1640,7 @@ main .checkBox .check.active {
   background: var(--accent);
   cursor: pointer;
   position: fixed;
-  z-index: 90;
+  z-index: 1001;
   border-radius: 50%;
   transition: .1s;
 }
@@ -1588,9 +1654,9 @@ main .checkBox .check.active {
   transition: .3s;
 }
 .chatBox .Chat {
-  padding: 10px 5px 10px 5px;
-  margin-top: 20px;
-  height: 80%;
+  padding: 10px 5px 4px 5px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   display: flex;
   flex-direction: column-reverse;
@@ -1801,7 +1867,7 @@ font-size: 10px;
   top: 0;
   left: 0;
   background: var(--bg-overlay-light);
-  z-index: 90;
+  z-index: 999;
   cursor: pointer;
 }
 .chatBox{
@@ -1813,7 +1879,9 @@ font-size: 10px;
   height: 500px;
   background: var(--bg-chat-box);
   transition: .3s;
-  z-index: 90;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
   clip-path: polygon(0 0, 100% 0, 100% 0, 0 0);
   opacity: 0;
   border-radius: 25px;
@@ -1822,32 +1890,277 @@ font-size: 10px;
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
   opacity: 1;
 }
+/* ===== Chat header (counter + reset) ===== */
+.chatBox .chatHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid rgba(128,128,128,0.12);
+  flex-shrink: 0;
+}
+.chatBox .chatHeader-counter {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(128,128,128,0.1);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--text-primary);
+  font-family: var(--pon-family);
+  font-weight: 500;
+}
+.chatBox .chatHeader-counter-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.chatBox .chatHeader-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chatBox .chatHeader-history-btn {
+  background: rgba(128,128,128,0.12);
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+.chatBox .chatHeader-history-btn:hover {
+  background: rgba(128,128,128,0.22);
+}
+.chatBox .chatHeader-reset {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-family: var(--pon-family);
+  transition: opacity 0.2s, transform 0.15s;
+  letter-spacing: 0.01em;
+}
+.chatBox .chatHeader-reset svg {
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.chatBox .chatHeader-reset:hover {
+  opacity: 0.85;
+  transform: scale(1.04);
+}
+
+/* ===== Chat History Panel ===== */
+.chatHistory-panel {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--bg-chat-box);
+  border-radius: 0 0 25px 25px;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  animation: slideDown 0.2s ease;
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.chatHistory-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(128,128,128,0.12);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-primary);
+  font-family: var(--pon-family);
+}
+.chatHistory-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: 16px;
+  opacity: 0.6;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: opacity 0.2s;
+}
+.chatHistory-close:hover { opacity: 1; }
+.chatHistory-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.chatHistory-empty {
+  text-align: center;
+  color: var(--text-primary);
+  opacity: 0.45;
+  font-size: 13px;
+  margin-top: 30px;
+  font-family: var(--pon-family);
+}
+.chatHistory-item {
+  background: rgba(128,128,128,0.07);
+  border: 1px solid rgba(128,128,128,0.1);
+  border-radius: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.15s;
+  width: 100%;
+}
+.chatHistory-item:hover {
+  background: rgba(128,128,128,0.15);
+}
+.chatHistory-item-time {
+  font-size: 10px;
+  color: var(--text-primary);
+  opacity: 0.5;
+  font-family: var(--pon-family);
+}
+.chatHistory-item-preview {
+  font-size: 12px;
+  color: var(--text-primary);
+  font-family: var(--pon-family);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== Streaming bubble ===== */
+.chatBox .Chat .message.streaming-bubble .messageBox {
+  background: var(--bg-chat-received);
+  border-radius: 10px 10px 10px 0px;
+}
+.streaming-cursor {
+  display: inline-block;
+  animation: blink-cursor 0.7s step-start infinite;
+  margin-left: 1px;
+  font-size: 0.9em;
+  vertical-align: middle;
+}
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* ===== Quick-reply suggestion chips ===== */
+.chat-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px 4px 2px;
+}
+.chat-suggestion-chip {
+  background: transparent;
+  border: 1px solid var(--border-input, #ccc);
+  color: var(--text-primary);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-family: var(--pon-family);
+}
+.chat-suggestion-chip:hover {
+  background: var(--accent, #d4a017);
+  color: #fff;
+  border-color: var(--accent, #d4a017);
+}
+
 .chatBox .chatInput {
   width:100%;
   height: 70px;
-  position: absolute;
-  bottom: 5%;
+  flex-shrink: 0;
   display: flex;
   justify-content: center;
-  align-items: end;
+  align-items: center;
+  padding-bottom: 6px;
 }
 .chatBox .chatInput form {
-  width: 90%;
+  width: 94%;
   height: 70%;
   display: flex;
+  gap: 0;
+}
+.chatBox .chatInput-mic {
+  width: 40px;
+  height: 100%;
+  flex-shrink: 0;
+  background: transparent;
+  border: .5px solid var(--border-input);
+  border-right: none;
+  border-radius: 15px 0 0 15px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  opacity: 0.65;
+  transition: opacity 0.2s, background 0.2s, color 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.chatBox .chatInput-mic:hover {
+  opacity: 1;
+  background: rgba(128,128,128,0.08);
+}
+.chatBox .chatInput-mic.listening {
+  opacity: 1;
+  color: #ef5350;
+  background: rgba(239, 83, 80, 0.08);
+}
+.chatBox .chatInput-mic.listening::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 15px 0 0 15px;
+  box-shadow: inset 0 0 0 1.5px rgba(239,83,80,0.5);
+  animation: pulse-mic-ring 1.2s ease-in-out infinite;
+}
+@keyframes pulse-mic-ring {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.03); }
 }
 .chatBox .chatInput form input {
   background: transparent;
   color: var(--text-primary);
   border: .5px solid var(--border-input);
   border-right: none;
-  padding-left: 20px;
-  width: 80%;
+  border-left: none;
+  padding-left: 10px;
+  flex: 1;
   height: 100%;
-  border-radius: 15px 0 0 15px;
+  border-radius: 0;
   outline: none;
 }
-.chatBox .chatInput form button {
+.chatBox .chatInput form button[type="button"]:last-child {
   width: 15%;
   display: flex;
   justify-content: center;

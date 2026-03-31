@@ -20,9 +20,7 @@ const generateSessionId = () => {
 const getOrCreateSessionId = () => {
   const storageKey = buildSessionKey();
   const existing = window.localStorage.getItem(storageKey);
-  if (existing) {
-    return existing;
-  }
+  if (existing) return existing;
   const next = generateSessionId();
   window.localStorage.setItem(storageKey, next);
   return next;
@@ -31,17 +29,30 @@ const getOrCreateSessionId = () => {
 export const WebSocketFormProvider = ({ children }) => {
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8000";
   const WS_BASE_URL = process.env.REACT_APP_WS_BASE_URL || API_BASE_URL.replace(/^http(s)?:\/\//, (m) => (m === "https://" ? "wss://" : "ws://"));
+
   const ws = useRef(null);
-  const [sessionId] = useState(() => getOrCreateSessionId());
+  const [sessionId, setSessionId] = useState(() => getOrCreateSessionId());
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
+
+  // Streaming state
+  const [streamingText, setStreamingText] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+
+  // Quick replies / suggestions
+  const [suggestions, setSuggestions] = useState([]);
+
+  // Message counter
+  const [messagesInfo, setMessagesInfo] = useState({ today: 0, remaining: 500 });
+
+  // Recommend states
   const [chatHistoryResponse, setChatHistoryResponse] = useState(null);
   const [recommendTimeResponse, setRecommendTimeResponse] = useState([]);
   const [recommendTimeLoading, setRecommendTimeLoading] = useState(false);
   const [recommendTimeError, setRecommendTimeError] = useState(null);
   const [recommendOrdersResponse, setRecommendOrdersResponse] = useState([]);
-  const [recResponse, setRecResponse] = useState()
+  const [recResponse, setRecResponse] = useState();
 
   const submitChatHistory = async (data) => {
     try {
@@ -61,82 +72,130 @@ export const WebSocketFormProvider = ({ children }) => {
 
   const connectChat = () => {
     if (socket) {
-        socket.close();
-        setSocket(null);
+      socket.close();
+      setSocket(null);
     }
-
-    if (ws.current) {
-      return;
-    }
+    if (ws.current) return;
 
     ws.current = new WebSocket(`${WS_BASE_URL}/chat`);
 
     ws.current.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
 
-        try {
-            const history = JSON.parse(event.data);
-
-            const messagesArray = Array.isArray(history) ? history : [history]; 
-
-            messagesArray.forEach((message) => {
-              const { response, message: fallbackMessage, options, options_description } = message;
-              const responseText = String(response ?? fallbackMessage ?? "").trim();
-                const id = Date.now() + Math.random();
-
-                    const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-                    if (typeof message === 'object' && message !== null && responseText) {
-                        const newMessage = {
-                            id,
-                        text: responseText,
-                            type: "received",
-                            time,
-                            menuItem: Array.isArray(options) ? options : [],
-                        options_description: typeof options_description === "string" ? options_description : "",
-                        };
-
-                        setMessages((prev) => {
-                            if (!prev.some((msg) => msg.id === id)) {
-                                return [...prev, newMessage];
-                            }
-                            return prev;
-                        });
-
-                        if (Array.isArray(options)) {
-                            setMenuItems(options);
-                        }
-                    } else if (typeof message === 'string') {
-                        const newMessage = {
-                            id,
-                        text: String(message),
-                            type: "received",
-                            time,
-                        options_description: "",
-                        };
-                        setMessages((prev) => {
-                            if (!prev.some((msg) => msg.id === id)) {
-                                return [...prev, newMessage];
-                            }
-                            return prev;
-                        });
-                    }
-            });
-
-        } catch (error) {
-            console.error("parsing error", error);
+        // --- Streaming chunk ---
+        if (data.streaming === true && data.chunk !== undefined) {
+          setIsStreaming(true);
+          setStreamingText(prev => prev + data.chunk);
+          return;
         }
+
+        // --- Error from backend ---
+        if (data.error && data.streaming_done) {
+          setIsStreaming(false);
+          setStreamingText("");
+          const id = Date.now() + Math.random();
+          const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          setMessages(prev => [...prev, {
+            id,
+            text: "Something went wrong. Please try again.",
+            type: "received",
+            time,
+            menuItem: [],
+            options_description: "",
+            isError: true,
+          }]);
+          return;
+        }
+
+        // --- Final structured response (streaming_done or direct) ---
+        if (data.streaming_done === true || data.response !== undefined) {
+          setIsStreaming(false);
+          setStreamingText("");
+
+          // Update message counter
+          if (data.messages_today !== undefined) {
+            setMessagesInfo({
+              today: data.messages_today,
+              remaining: data.messages_remaining ?? (500 - data.messages_today),
+            });
+          }
+
+          // Update suggestions
+          if (Array.isArray(data.suggestions)) {
+            setSuggestions(data.suggestions);
+          }
+
+          const responseText = String(data.response ?? data.message ?? "").trim();
+          const options = data.options;
+          const options_description = typeof data.options_description === "string" ? data.options_description : "";
+
+          if (responseText) {
+            const id = Date.now() + Math.random();
+            const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            setMessages(prev => {
+              if (prev.some(m => m.id === id)) return prev;
+              return [...prev, {
+                id,
+                text: responseText,
+                type: "received",
+                time,
+                menuItem: Array.isArray(options) ? options : [],
+                options_description,
+              }];
+            });
+            if (Array.isArray(options)) setMenuItems(options);
+          }
+          return;
+        }
+
+        // --- Legacy array format fallback ---
+        const messagesArray = Array.isArray(data) ? data : [data];
+        messagesArray.forEach((message) => {
+          const { response, message: fallbackMessage, options, options_description } = message;
+          const responseText = String(response ?? fallbackMessage ?? "").trim();
+          if (!responseText) return;
+          const id = Date.now() + Math.random();
+          const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+          setMessages(prev => {
+            if (prev.some(m => m.id === id)) return prev;
+            return [...prev, {
+              id,
+              text: responseText,
+              type: "received",
+              time,
+              menuItem: Array.isArray(options) ? options : [],
+              options_description: typeof options_description === "string" ? options_description : "",
+            }];
+          });
+          if (Array.isArray(options)) setMenuItems(options);
+        });
+
+      } catch (error) {
+        console.error("WebSocket parse error:", error);
+      }
     };
 
     ws.current.onerror = (error) => {
-        console.error("WebSocket error:", error);
+      console.error("WebSocket error:", error);
+    };
+
+    ws.current.onclose = () => {
+      // Auto-reconnect after 3 seconds
+      ws.current = null;
+      setSocket(null);
+      setIsStreaming(false);
+      setTimeout(() => {
+        if (!ws.current) connectChat();
+      }, 3000);
     };
 
     setSocket(ws.current);
-};
-
+  };
 
   const disconnectChat = () => {
     if (ws.current) {
+      ws.current.onclose = null; // prevent auto-reconnect on intentional disconnect
       ws.current.close();
       ws.current = null;
     }
@@ -144,14 +203,74 @@ export const WebSocketFormProvider = ({ children }) => {
 
   const sendMessage = (messageText, lang) => {
     if (socket && socket.readyState === WebSocket.OPEN && messageText.trim() !== "") {
-        const id = Date.now();
-        const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
-        const messageData = { id, text: messageText, type: "sent", time };
-        setMessages((prev) => [...prev, messageData]);
+      const id = Date.now();
+      const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      setMessages(prev => [...prev, { id, text: messageText, type: "sent", time }]);
+      setSuggestions([]); // clear suggestions when user sends a message
       socket.send(JSON.stringify({ id, message: messageText, lang, session_id: sessionId }));
     }
-};
+  };
+
+  // Returns a user-specific history key, or null for guests
+  const _historyKey = () => {
+    try {
+      const token = localStorage.getItem('customer_token');
+      if (!token) return null;
+      const sub = JSON.parse(atob(token.split('.')[1])).sub;
+      return sub ? `chat_sessions_history_${sub}` : null;
+    } catch { return null; }
+  };
+
+  const saveSessionToHistory = (id, msgs) => {
+    const key = _historyKey();
+    if (!key || !msgs || msgs.length === 0) return;
+    try {
+      const existing = JSON.parse(localStorage.getItem(key) || '[]');
+      const preview = (msgs.find(m => m.type === 'received')?.text || msgs[0]?.text || '').slice(0, 60);
+      const entry = { id, timestamp: Date.now(), preview, messages: msgs };
+      const idx = existing.findIndex(s => s.id === id);
+      if (idx >= 0) existing[idx] = entry;
+      else existing.unshift(entry);
+      localStorage.setItem(key, JSON.stringify(existing.slice(0, 30)));
+    } catch {}
+  };
+
+  const getSavedSessions = () => {
+    const key = _historyKey();
+    if (!key) return [];
+    try { return JSON.parse(localStorage.getItem(key) || '[]'); }
+    catch { return []; }
+  };
+
+  const switchToSession = (session) => {
+    saveSessionToHistory(sessionId, messages);
+    setSessionId(session.id);
+    setMessages(session.messages || []);
+    setStreamingText('');
+    setIsStreaming(false);
+    setSuggestions([]);
+    setMessagesInfo({ today: 0, remaining: 500 });
+  };
+
+  const resetChat = async () => {
+    saveSessionToHistory(sessionId, messages);
+    try {
+      await fetch(`${API_BASE_URL}/chat/reset?session_id=${encodeURIComponent(sessionId)}`, {
+        method: 'POST',
+      });
+    } catch (e) {
+      console.error("Reset chat error:", e);
+    }
+    const newId = generateSessionId();
+    const storageKey = buildSessionKey();
+    localStorage.setItem(storageKey, newId);
+    setSessionId(newId);
+    setMessages([]);
+    setStreamingText("");
+    setIsStreaming(false);
+    setSuggestions([]);
+    setMessagesInfo({ today: 0, remaining: 500 });
+  };
 
   const requestRecommendTime = async (language) => {
     try {
@@ -160,7 +279,6 @@ export const WebSocketFormProvider = ({ children }) => {
       const response = await fetch(`${API_BASE_URL}/recommend/time?language=${language}&session_id=${encodeURIComponent(sessionId)}`);
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const data = await response.json();
-      console.log(data)
       setRecommendTimeResponse(Array.isArray(data) ? data : []);
     } catch (error) {
       setRecommendTimeResponse([]);
@@ -180,7 +298,7 @@ export const WebSocketFormProvider = ({ children }) => {
       });
       if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
       const responseData = await response.json();
-      setRecResponse(responseData.response)
+      setRecResponse(responseData.response);
       setRecommendOrdersResponse(responseData.options);
     } catch (error) {
       setRecommendOrdersResponse({ error: error.message });
@@ -188,25 +306,37 @@ export const WebSocketFormProvider = ({ children }) => {
   };
 
   return (
-    <WebSocketFormContext.Provider
-      value={{
-        messages,
-        setMessages,
-        menuItems,
-        chatHistoryResponse,
-        recommendTimeResponse,
-        recommendTimeLoading,
-        recommendTimeError,
-        recommendOrdersResponse,
-        recResponse,
-        submitChatHistory,
-        connectChat,
-        disconnectChat,
-        sendMessage,
-        requestRecommendTime,
-        requestRecommendOrders,
-        sessionId
-      }}
+    <WebSocketFormContext.Provider value={{
+      messages,
+      setMessages,
+      menuItems,
+      chatHistoryResponse,
+      recommendTimeResponse,
+      recommendTimeLoading,
+      recommendTimeError,
+      recommendOrdersResponse,
+      recResponse,
+      // Streaming
+      streamingText,
+      isStreaming,
+      // Suggestions
+      suggestions,
+      setSuggestions,
+      // Message counter
+      messagesInfo,
+      // Functions
+      submitChatHistory,
+      connectChat,
+      disconnectChat,
+      sendMessage,
+      resetChat,
+      switchToSession,
+      getSavedSessions,
+      saveSessionToHistory,
+      requestRecommendTime,
+      requestRecommendOrders,
+      sessionId,
+    }}
     >
       {children}
     </WebSocketFormContext.Provider>
