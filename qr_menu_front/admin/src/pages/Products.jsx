@@ -26,6 +26,7 @@ function emptyProductForm() {
     short_description_am: '',
     short_description_ru: '',
     composition_input: '',
+    cooking_time: '',
   };
 }
 
@@ -105,6 +106,7 @@ function buildProductPayload(form, isUpdate = false) {
     short_description_am: normalizeOptionalText(form.short_description_am) ?? undefined,
     short_description_ru: normalizeOptionalText(form.short_description_ru) ?? undefined,
     composition: composition.length ? composition : undefined,
+    cooking_time: form.cooking_time !== '' ? Number(form.cooking_time) || null : undefined,
   };
 
   if (!Number.isFinite(payload.price)) delete payload.price;
@@ -385,6 +387,11 @@ export default function Products() {
               <div>
                 <label className={LABEL_CLASS}>Ingredients / Composition (one per line or comma separated)</label>
                 <textarea className={INPUT_CLASS} rows={4} value={form.composition_input ?? ''} onChange={(e) => setForm((f) => ({ ...f, composition_input: e.target.value }))} />
+              </div>
+
+              <div>
+                <label className={LABEL_CLASS}>Cooking time (minutes)</label>
+                <input type="number" min="0" className={INPUT_CLASS} value={form.cooking_time ?? ''} placeholder="e.g. 15" onChange={(e) => setForm((f) => ({ ...f, cooking_time: e.target.value }))} />
               </div>
 
               <div>

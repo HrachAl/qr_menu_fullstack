@@ -44,6 +44,10 @@ def _build_client() -> Optional[Any]:
 client = _build_client()
 
 
+SESSION_MAX_AGE_DAYS = 30
+SESSION_MAX_PER_USER = 50
+
+
 class ChatBot:
     def __init__(
         self,
@@ -51,11 +55,17 @@ class ChatBot:
         prompt_language: str = "am",
         menu: Optional[Dict[Any, Any]] = None,
         session_id: Optional[str] = None,
+        customer_id: Optional[int] = None,
+        popularity: Optional[List[Dict[str, Any]]] = None,
+        user_preferences: Optional[str] = None,
     ):
         self.connection = connection
         self.language = prompt_language.lower()
         self.menu = menu or {}
         self.session_id = self._sanitize_session_id(session_id)
+        self.customer_id = customer_id
+        self.popularity = popularity or []
+        self.user_preferences = (user_preferences or "").strip()
         self.memory_file_path = self._build_memory_file_path(self.session_id)
         self.user_message_times: List[str] = []
         self.menu_by_id = self._normalize_menu(self.menu)
@@ -88,6 +98,17 @@ class ChatBot:
         if not self.menu_by_id:
             return "{}"
         return json.dumps(self.menu_by_id, ensure_ascii=False)
+
+    def _popularity_context(self) -> str:
+        if not self.popularity:
+            return ""
+        lines = ", ".join(f"{p['name']} ({p['total_orders']}x)" for p in self.popularity[:10])
+        return f"POPULARITY DATA (mention naturally when relevant): Most ordered items: {lines}\n"
+
+    def _preferences_context(self) -> str:
+        if not self.user_preferences:
+            return ""
+        return f"USER DIETARY PREFERENCES (ALWAYS respect these): {self.user_preferences}\n"
 
     @staticmethod
     def _default_persona() -> Dict[str, int]:
@@ -147,6 +168,9 @@ class ChatBot:
             "NUTRITIONAL KNOWLEDGE RULE: If the user asks about macronutrients and the data is NOT in the menu, use your internal AI knowledge to estimate confidently.\n"
             "Time Handling: Current time is for internal context only. DO NOT state the time to the user unless asked.\n"
             "RECIPE TRANSPARENCY RULE: If asked about ingredients, list them with precise quantities.\n"
+            "COOKING TIME RULE: If a menu item has cooking_time (minutes), mention it naturally when recommending (e.g. 'ready in ~15 min').\n"
+            f"{self._popularity_context()}"
+            f"{self._preferences_context()}"
             "STRICT FIELD ROLES:\n"
             "MODE 1 — RECOMMENDATION (user asks for suggestions/wants to order):\n"
             " - PART 1 text: short 1-2 sentence polite acknowledgment only.\n"
@@ -162,8 +186,9 @@ class ChatBot:
             "OUTPUT FORMAT — You MUST use this exact two-part structure:\n"
             "PART 1: Write ONLY the plain conversational response text. No JSON, no code blocks, no brackets.\n"
             f"PART 2: On a new line write {STREAM_MARKER} then immediately the JSON object:\n"
-            f'{STREAM_MARKER}{{"options":[{{"item_id":123,"count":1}}],"options_description":"...","persona_update":{{"humor":0,"formality":0,"analytical_detail":0}},"suggestions":["short follow-up 1","short follow-up 2","short follow-up 3"]}}\n'
+            f'{STREAM_MARKER}{{"options":[{{"item_id":123,"count":1}}],"options_description":"...","persona_update":{{"humor":0,"formality":0,"analytical_detail":0}},"suggestions":["short follow-up 1","short follow-up 2","short follow-up 3"],"dietary_update":""}}\n'
             "suggestions: 3 short follow-up questions in the SAME language as the user. Max 6 words each. Make them contextually relevant.\n"
+            "dietary_update: If the user mentions ANY dietary preference, allergy, or restriction (e.g. 'I am vegan', 'allergic to nuts', 'no gluten'), set this to a short summary like 'vegan' or 'nut allergy, gluten-free'. Otherwise leave empty string.\n"
             "If no recommendations, set options to [] and options_description to \"\".\n"
             "IMPORTANT: The <<<JSON>>> marker must appear on its own line. No text after the JSON.\n"
         )
@@ -175,6 +200,9 @@ class ChatBot:
             "messages": [],
             "persona": ChatBot._default_persona(),
             "daily": {"date": "", "count": 0},
+            "customer_id": None,
+            "created_at": "",
+            "updated_at": "",
         }
 
     @staticmethod
@@ -227,7 +255,13 @@ class ChatBot:
             daily = parsed.get("daily", {"date": "", "count": 0})
             if not isinstance(daily, dict):
                 daily = {"date": "", "count": 0}
-            return {"summary": summary, "messages": messages, "persona": persona, "daily": daily}
+            customer_id = parsed.get("customer_id")
+            created_at = str(parsed.get("created_at", "") or "")
+            updated_at = str(parsed.get("updated_at", "") or "")
+            return {
+                "summary": summary, "messages": messages, "persona": persona, "daily": daily,
+                "customer_id": customer_id, "created_at": created_at, "updated_at": updated_at,
+            }
         except Exception:
             logger.exception("Failed to read chat memory", extra={"session_id": self.session_id})
             return self._default_memory_state()
@@ -238,7 +272,13 @@ class ChatBot:
             messages = self._normalize_message_list(state.get("messages", []))
             persona = self._normalize_persona_scores(state.get("persona"))
             daily = state.get("daily", {"date": "", "count": 0})
-            payload = {"summary": summary, "messages": messages, "persona": persona, "daily": daily}
+            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            created_at = state.get("created_at") or now
+            customer_id = self.customer_id or state.get("customer_id")
+            payload = {
+                "summary": summary, "messages": messages, "persona": persona, "daily": daily,
+                "customer_id": customer_id, "created_at": created_at, "updated_at": now,
+            }
             self.memory_file_path.write_text(
                 json.dumps(payload, ensure_ascii=False),
                 encoding="utf-8",
@@ -299,6 +339,7 @@ class ChatBot:
         options_description = ""
         persona_update: Dict[str, int] = {"humor": 0, "formality": 0, "analytical_detail": 0}
         suggestions: List[str] = []
+        dietary_update = ""
 
         if json_raw:
             try:
@@ -310,6 +351,7 @@ class ChatBot:
                     raw_suggestions = parsed.get("suggestions", [])
                     if isinstance(raw_suggestions, list):
                         suggestions = [str(s).strip() for s in raw_suggestions if str(s).strip()][:4]
+                    dietary_update = str(parsed.get("dietary_update", "") or "").strip()
                     # Fallback if text_part is empty but JSON has response field
                     if not text_part:
                         text_part = str(parsed.get("response", "") or "").strip()
@@ -324,6 +366,7 @@ class ChatBot:
             "options_description": options_description,
             "persona_update": persona_update,
             "suggestions": suggestions,
+            "dietary_update": dietary_update,
             "_raw_text": accumulated,
         }
 
@@ -483,7 +526,25 @@ class ChatBot:
             options = response_payload.get("options")
             options_description = str(response_payload.get("options_description", "") or "").strip()
             suggestions = response_payload.get("suggestions", [])
+            dietary_update = str(response_payload.get("dietary_update", "") or "").strip()
             persona_update = self._normalize_persona_update(response_payload.get("persona_update"))
+
+            # Save dietary preferences to DB if detected and user is logged in
+            if dietary_update and self.customer_id:
+                try:
+                    from db.database import get_connection
+                    from db import repositories as repo
+                    db_conn = get_connection()
+                    try:
+                        existing = repo.user_get_preferences(db_conn, int(self.customer_id))
+                        merged = f"{existing}, {dietary_update}".strip(", ") if existing else dietary_update
+                        repo.user_set_preferences(db_conn, int(self.customer_id), merged)
+                        self.user_preferences = merged
+                        logger.info("Saved dietary preference '%s' for user %s", dietary_update, self.customer_id)
+                    finally:
+                        db_conn.close()
+                except Exception:
+                    logger.exception("Failed to save dietary preference")
 
             persona = {
                 "humor": max(PERSONA_MIN, min(PERSONA_MAX, int(persona.get("humor", 5)) + int(persona_update.get("humor", 0)))),
@@ -548,3 +609,144 @@ class ChatBot:
             if return_only_response:
                 return GPT_Message(response=f"Error: {str(e)}", options=None)
             return None
+
+    # ── Cleanup & Analytics (static) ──────────────────────────
+
+    @staticmethod
+    def cleanup_old_sessions() -> Dict[str, int]:
+        """Delete sessions older than SESSION_MAX_AGE_DAYS and enforce per-user limit."""
+        import time
+        if not CHAT_MEMORY_DIR.exists():
+            return {"deleted_expired": 0, "deleted_over_limit": 0}
+
+        cutoff = time.time() - (SESSION_MAX_AGE_DAYS * 86400)
+        deleted_expired = 0
+        deleted_over_limit = 0
+
+        # Pass 1: delete expired files
+        user_files: Dict[Any, List[Dict[str, Any]]] = {}
+        for f in CHAT_MEMORY_DIR.glob("*.txt"):
+            if f.stat().st_mtime < cutoff:
+                f.unlink(missing_ok=True)
+                deleted_expired += 1
+                continue
+            try:
+                data = json.loads(f.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            cid = data.get("customer_id")
+            if cid is not None:
+                user_files.setdefault(cid, []).append({"path": f, "updated": data.get("updated_at", "")})
+
+        # Pass 2: enforce per-user limit (keep newest SESSION_MAX_PER_USER)
+        for cid, files in user_files.items():
+            if len(files) <= SESSION_MAX_PER_USER:
+                continue
+            files.sort(key=lambda x: x["updated"], reverse=True)
+            for entry in files[SESSION_MAX_PER_USER:]:
+                entry["path"].unlink(missing_ok=True)
+                deleted_over_limit += 1
+
+        logger.info("Cleanup: deleted %d expired, %d over limit", deleted_expired, deleted_over_limit)
+        return {"deleted_expired": deleted_expired, "deleted_over_limit": deleted_over_limit}
+
+    @staticmethod
+    def get_analytics() -> Dict[str, Any]:
+        """Scan all session files and return aggregated analytics."""
+        if not CHAT_MEMORY_DIR.exists():
+            return {"total_sessions": 0}
+
+        total_sessions = 0
+        total_messages = 0
+        sessions_by_date: Dict[str, int] = {}
+        messages_by_date: Dict[str, int] = {}
+        item_mentions: Dict[int, int] = {}
+        user_sessions: Dict[Any, int] = {}
+        guest_sessions = 0
+        all_sessions: List[Dict[str, Any]] = []
+
+        for f in CHAT_MEMORY_DIR.glob("*.txt"):
+            try:
+                data = json.loads(f.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            total_sessions += 1
+            msgs = data.get("messages", [])
+            msg_count = len(msgs)
+            total_messages += msg_count
+
+            created = str(data.get("created_at", "") or "")[:10]
+            updated = str(data.get("updated_at", "") or "")[:10]
+            # Fallback to file modification time if no timestamps stored
+            if not created and not updated:
+                date_key = datetime.fromtimestamp(f.stat().st_mtime).strftime("%Y-%m-%d")
+            else:
+                date_key = updated or created
+            if date_key:
+                sessions_by_date[date_key] = sessions_by_date.get(date_key, 0) + 1
+                messages_by_date[date_key] = messages_by_date.get(date_key, 0) + msg_count
+
+            cid = data.get("customer_id")
+            if cid:
+                user_sessions[cid] = user_sessions.get(cid, 0) + 1
+            else:
+                guest_sessions += 1
+
+            # Count item_id mentions in model responses
+            for m in msgs:
+                if m.get("role") != "model":
+                    continue
+                for match in re.findall(r'"item_id"\s*:\s*(\d+)', m.get("text", "")):
+                    iid = int(match)
+                    item_mentions[iid] = item_mentions.get(iid, 0) + 1
+
+            file_date = datetime.fromtimestamp(f.stat().st_mtime).strftime("%Y-%m-%d %H:%M:%S")
+            all_sessions.append({
+                "session_id": f.stem,
+                "customer_id": cid,
+                "message_count": msg_count,
+                "created_at": data.get("created_at") or file_date,
+                "updated_at": data.get("updated_at") or file_date,
+                "daily_count": data.get("daily", {}).get("count", 0),
+                "preview": (msgs[-1]["text"][:80] if msgs else data.get("summary", "")[:80]),
+            })
+
+        # Sort popular items
+        popular_items = sorted(item_mentions.items(), key=lambda x: x[1], reverse=True)[:20]
+
+        return {
+            "total_sessions": total_sessions,
+            "total_messages": total_messages,
+            "guest_sessions": guest_sessions,
+            "user_sessions_count": len(user_sessions),
+            "sessions_by_date": dict(sorted(sessions_by_date.items())[-30:]),
+            "messages_by_date": dict(sorted(messages_by_date.items())[-30:]),
+            "popular_items": [{"item_id": iid, "mentions": cnt} for iid, cnt in popular_items],
+            "sessions": sorted(all_sessions, key=lambda x: x.get("updated_at", ""), reverse=True),
+        }
+
+    @staticmethod
+    def export_session(session_id: str) -> Optional[Dict[str, Any]]:
+        """Export full conversation for a single session."""
+        safe_id = ChatBot._sanitize_session_id(session_id)
+        fpath = CHAT_MEMORY_DIR / f"{safe_id}.txt"
+        if not fpath.exists():
+            return None
+        try:
+            data = json.loads(fpath.read_text(encoding="utf-8"))
+            data["session_id"] = safe_id
+            return data
+        except Exception:
+            return None
+
+    @staticmethod
+    def delete_all_sessions() -> Dict[str, int]:
+        """Delete ALL chat memory files."""
+        if not CHAT_MEMORY_DIR.exists():
+            return {"deleted": 0}
+        count = 0
+        for f in CHAT_MEMORY_DIR.glob("*.txt"):
+            f.unlink(missing_ok=True)
+            count += 1
+        logger.info("Deleted all %d chat sessions", count)
+        return {"deleted": count}

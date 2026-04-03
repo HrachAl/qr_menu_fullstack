@@ -1,11 +1,12 @@
 """
-Admin API: users (superadmin), products, orders, statistics.
+Admin API: users (superadmin), products, orders, statistics, chat analytics.
 """
 import json
 import sqlite3
 import os
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from services.ai_service import ChatBot
 from db.database import get_db
 from db import repositories
 from auth.deps import require_admin, require_superadmin, get_current_user
@@ -451,3 +452,31 @@ def admin_stats_dashboard(conn: sqlite3.Connection = Depends(get_db), user=Depen
         "top_users_price": stats_service.top_users_by_order_price(conn, 5),
         "hourly": stats_service.hourly_orders(conn),
     }
+
+
+# ---------- Chat Analytics ----------
+@router.get("/chat/analytics")
+def admin_chat_analytics(user=Depends(require_admin)):
+    """Full chat analytics: sessions, messages per day, popular items."""
+    return ChatBot.get_analytics()
+
+
+@router.get("/chat/export/{session_id}")
+def admin_chat_export(session_id: str, user=Depends(require_admin)):
+    """Export full conversation for a single session."""
+    data = ChatBot.export_session(session_id)
+    if data is None:
+        raise HTTPException(status_code=404, detail="Session not found")
+    return data
+
+
+@router.post("/chat/cleanup")
+def admin_chat_cleanup(user=Depends(require_admin)):
+    """Manually trigger cleanup of old/over-limit sessions."""
+    return ChatBot.cleanup_old_sessions()
+
+
+@router.delete("/chat/sessions")
+def admin_chat_delete_all(user=Depends(require_admin)):
+    """Delete ALL chat sessions."""
+    return ChatBot.delete_all_sessions()

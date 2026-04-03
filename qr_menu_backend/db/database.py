@@ -112,6 +112,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_inventory_adjustments_created_at ON inventory_adjustments(created_at);
     """)
     _migrate_products_schema(conn)
+    _migrate_users_schema(conn)
     _migrate_inventory_schema(conn)
     conn.commit()
 
@@ -128,6 +129,21 @@ def _migrate_products_schema(conn: sqlite3.Connection) -> None:
     if "total_calories" not in columns:
         try:
             conn.execute("ALTER TABLE products ADD COLUMN total_calories REAL NOT NULL DEFAULT 0")
+        except sqlite3.OperationalError:
+            pass
+    if "cooking_time" not in columns:
+        try:
+            conn.execute("ALTER TABLE products ADD COLUMN cooking_time INTEGER")
+        except sqlite3.OperationalError:
+            pass
+
+
+def _migrate_users_schema(conn: sqlite3.Connection) -> None:
+    """Ensure preferences column exists in older DB files."""
+    columns = [row[1] for row in conn.execute("PRAGMA table_info(users)").fetchall()]
+    if "preferences" not in columns:
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN preferences TEXT DEFAULT ''")
         except sqlite3.OperationalError:
             pass
 

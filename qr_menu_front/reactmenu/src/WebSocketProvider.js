@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef, useState } from 'react';
+import React, { createContext, useContext, useRef, useState, useEffect, useCallback } from 'react';
 
 const WebSocketFormContext = createContext();
 
@@ -33,8 +33,65 @@ export const WebSocketFormProvider = ({ children }) => {
   const ws = useRef(null);
   const [sessionId, setSessionId] = useState(() => getOrCreateSessionId());
   const [socket, setSocket] = useState(null);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    // Restore current session messages from localStorage on reload
+    try {
+      const saved = localStorage.getItem('chat_active_messages');
+      if (saved) {
+        const { id, msgs } = JSON.parse(saved);
+        if (id === getOrCreateSessionId() && Array.isArray(msgs) && msgs.length > 0) return msgs;
+      }
+    } catch {}
+    return [];
+  });
   const [menuItems, setMenuItems] = useState([]);
+
+  // Save current session to localStorage on every message change & before unload
+  const messagesRef = useRef(messages);
+  messagesRef.current = messages;
+  const sessionIdRef = useRef(sessionId);
+  sessionIdRef.current = sessionId;
+
+  const persistMessages = useCallback(() => {
+    try {
+      const msgs = messagesRef.current;
+      if (msgs.length > 0) {
+        localStorage.setItem('chat_active_messages', JSON.stringify({ id: sessionIdRef.current, msgs }));
+      }
+      // Also save to history for logged-in users
+      const token = localStorage.getItem('customer_token');
+      if (token && msgs.length > 0) {
+        try {
+          const sub = JSON.parse(atob(token.split('.')[1])).sub;
+          if (sub) {
+            const key = `chat_sessions_history_${sub}`;
+            const existing = JSON.parse(localStorage.getItem(key) || '[]');
+            const preview = (msgs.find(m => m.type === 'received')?.text || msgs[0]?.text || '').slice(0, 60);
+            const entry = { id: sessionIdRef.current, timestamp: Date.now(), preview, messages: msgs };
+            const idx = existing.findIndex(s => s.id === sessionIdRef.current);
+            if (idx >= 0) existing[idx] = entry;
+            else existing.unshift(entry);
+            localStorage.setItem(key, JSON.stringify(existing.slice(0, 30)));
+          }
+        } catch {}
+      }
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const onBeforeUnload = () => persistMessages();
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, [persistMessages]);
+
+  // Auto-save messages periodically (every message change)
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        localStorage.setItem('chat_active_messages', JSON.stringify({ id: sessionId, msgs: messages }));
+      } catch {}
+    }
+  }, [messages, sessionId]);
 
   // Streaming state
   const [streamingText, setStreamingText] = useState("");
@@ -207,7 +264,8 @@ export const WebSocketFormProvider = ({ children }) => {
       const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
       setMessages(prev => [...prev, { id, text: messageText, type: "sent", time }]);
       setSuggestions([]); // clear suggestions when user sends a message
-      socket.send(JSON.stringify({ id, message: messageText, lang, session_id: sessionId }));
+      const token = localStorage.getItem('customer_token') || undefined;
+      socket.send(JSON.stringify({ id, message: messageText, lang, session_id: sessionId, token }));
     }
   };
 
@@ -266,6 +324,7 @@ export const WebSocketFormProvider = ({ children }) => {
     localStorage.setItem(storageKey, newId);
     setSessionId(newId);
     setMessages([]);
+    localStorage.removeItem('chat_active_messages');
     setStreamingText("");
     setIsStreaming(false);
     setSuggestions([]);

@@ -199,9 +199,10 @@ def product_list_as_menu_dict(conn: sqlite3.Connection) -> dict:
     product_columns = {row["name"] for row in conn.execute("PRAGMA table_info(products)").fetchall()}
     recipe_select = "recipe" if "recipe" in product_columns else "NULL AS recipe"
     calories_select = "total_calories" if "total_calories" in product_columns else "0 AS total_calories"
+    cooking_time_select = "cooking_time" if "cooking_time" in product_columns else "NULL AS cooking_time"
     rows = conn.execute(
         "SELECT id, item_id, price, img_path, type, type_name, name_en AS name, description_en AS description, "
-        f"short_description_en AS short_description, composition, {recipe_select}, {calories_select} FROM products WHERE availability = 1"
+        f"short_description_en AS short_description, composition, {recipe_select}, {calories_select}, {cooking_time_select} FROM products WHERE availability = 1"
     ).fetchall()
     out = {}
     for r in rows:
@@ -235,6 +236,8 @@ def product_list_as_menu_dict(conn: sqlite3.Connection) -> dict:
             d["total_calories"] = int(d.get("total_calories") or 0)
         except Exception:
             d["total_calories"] = 0
+        ct = d.get("cooking_time")
+        d["cooking_time"] = int(ct) if ct is not None else None
         out[item_id] = d
     return out
 
@@ -245,6 +248,7 @@ def product_update(conn: sqlite3.Connection, product_id: int, **kwargs) -> None:
         "price", "img_path", "availability", "access_level", "type", "type_name",
         "name_en", "name_am", "name_ru", "description_en", "description_am", "description_ru",
         "short_description_en", "short_description_am", "short_description_ru", "composition",
+        "cooking_time",
     }
     now = _now()
     updates = ["updated_at = ?"]
@@ -834,3 +838,29 @@ def _apply_seeded_quantities(entries: list[dict]) -> None:
             1 for row in entries
             if float(row.get("quantity") or 0) >= float(row.get("overstock_threshold") or 0)
         )
+
+
+# ---------- User Preferences ----------
+
+def user_get_preferences(conn: sqlite3.Connection, user_id: int) -> str:
+    row = conn.execute("SELECT preferences FROM users WHERE id = ?", (user_id,)).fetchone()
+    return str(row["preferences"] or "") if row else ""
+
+
+def user_set_preferences(conn: sqlite3.Connection, user_id: int, preferences: str) -> None:
+    conn.execute("UPDATE users SET preferences = ?, updated_at = ? WHERE id = ?",
+                 (preferences, _now(), user_id))
+    conn.commit()
+
+
+def popularity_summary(conn: sqlite3.Connection, limit: int = 10) -> list[dict]:
+    """Top products by order count for AI context."""
+    rows = conn.execute("""
+        SELECT p.item_id, p.name_en AS name, SUM(oi.count) AS total_orders
+        FROM order_items oi
+        JOIN products p ON p.id = oi.product_id
+        GROUP BY oi.product_id
+        ORDER BY total_orders DESC
+        LIMIT ?
+    """, (limit,)).fetchall()
+    return [dict(zip(r.keys(), r)) for r in rows]

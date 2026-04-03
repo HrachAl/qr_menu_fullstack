@@ -1,5 +1,5 @@
 import { Outlet, NavLink } from 'react-router-dom';
-import { Bell, Boxes, ChevronRight, LayoutDashboard, LogOut, Menu, Package, ShoppingCart, Users, BarChart3, X } from 'lucide-react';
+import { Bell, Boxes, ChevronRight, LayoutDashboard, LogOut, Menu, MessageCircle, Package, ShoppingCart, Users, BarChart3, X } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
@@ -11,6 +11,7 @@ const navItems = [
   { to: '/admin/inventory', label: 'Inventory', icon: Boxes },
   { to: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { to: '/admin/statistics', label: 'Statistics', icon: BarChart3 },
+  { to: '/admin/chat-analytics', label: 'Chat Analytics', icon: MessageCircle },
 ];
 
 export default function Layout() {

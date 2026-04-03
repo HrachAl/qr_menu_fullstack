@@ -8,6 +8,7 @@ import Products from './pages/Products';
 import Orders from './pages/Orders';
 import Statistics from './pages/Statistics';
 import Inventory from './pages/Inventory';
+import ChatAnalytics from './pages/ChatAnalytics';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -26,6 +27,7 @@ function AppRoutes() {
         <Route path="inventory" element={<Inventory />} />
         <Route path="orders" element={<Orders />} />
         <Route path="statistics" element={<Statistics />} />
+        <Route path="chat-analytics" element={<ChatAnalytics />} />
       </Route>
       <Route path="/" element={<Navigate to="/admin" replace />} />
       <Route path="*" element={<Navigate to="/admin" replace />} />

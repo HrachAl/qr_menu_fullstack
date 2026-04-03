@@ -15,7 +15,20 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 @router.get("/me")
 def get_me(user=Depends(get_current_user)):
     """Current user info for customer UI (fullname, email)."""
-    return {"fullname": user.get("fullname") or "", "email": user.get("email") or ""}
+    return {"fullname": user.get("fullname") or "", "email": user.get("email") or "", "preferences": user.get("preferences") or ""}
+
+
+@router.get("/preferences")
+def get_preferences(user=Depends(get_current_user), conn: sqlite3.Connection = Depends(get_db)):
+    prefs = repositories.user_get_preferences(conn, user["id"])
+    return {"preferences": prefs}
+
+
+@router.put("/preferences")
+def set_preferences(data: dict, user=Depends(get_current_user), conn: sqlite3.Connection = Depends(get_db)):
+    prefs = str(data.get("preferences", "")).strip()
+    repositories.user_set_preferences(conn, user["id"], prefs)
+    return {"preferences": prefs}
 
 
 @router.post("/login", response_model=Token)

@@ -1,9 +1,9 @@
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Query, Request, UploadFile, File, Form, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
-from services.ai_service import ChatBot
+from services.ai_service import ChatBot, MODEL_NAME, client, STREAM_MARKER
 import uvicorn
 import logging
 import json
@@ -35,6 +35,7 @@ async def lifespan(app: FastAPI):
     conn = get_connection()
     try:
         app.state.menu = repositories.product_list_as_menu_dict(conn)
+        app.state.popularity = repositories.popularity_summary(conn)
         seeded_inventory = repositories.seed_inventory(conn)
         if seeded_inventory:
             logger.info("Seeded inventory with %s items", seeded_inventory)
@@ -51,6 +52,12 @@ async def lifespan(app: FastAPI):
             logger.info("Created default superadmin user")
     finally:
         conn.close()
+    # Cleanup old chat sessions on startup
+    try:
+        result = ChatBot.cleanup_old_sessions()
+        logger.info("Chat memory cleanup on startup: %s", result)
+    except Exception as e:
+        logger.warning("Chat cleanup failed: %s", e)
     yield
     sessions.clear()
     logger.info("Application shutting down")
@@ -64,10 +71,6 @@ app.include_router(admin.router)
 app.include_router(orders.router)
 app.include_router(menu.router)
 
-app.mount("/admin_panel", StaticFiles(directory=str(ADMIN_PANEL_DIR), html=True), name="admin")
-app.mount("/build", StaticFiles(directory=str(BUILD_DIR), html=True), name="main")
-app.mount("/new_menu", StaticFiles(directory=str(NEW_MENU_DIR), html=True), name="new_menu")
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -76,12 +79,26 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.mount("/admin_panel", StaticFiles(directory=str(ADMIN_PANEL_DIR), html=True), name="admin")
+app.mount("/build", StaticFiles(directory=str(BUILD_DIR), html=True), name="main")
+app.mount("/new_menu", StaticFiles(directory=str(NEW_MENU_DIR), html=True), name="new_menu")
+
 orders = {}
 
 
 @app.get("/")
 async def info():
     return "Welcome to the AI Chatbot API! version 07.05, count to 0 for simillar items: test: /admin_panel"
+
+@app.get("/api/image/{filename:path}", include_in_schema=False)
+async def get_image(filename: str):
+    """Serve menu images with CORS headers (for canvas share card)."""
+    safe = Path(filename).name
+    fpath = NEW_MENU_DIR / safe
+    if not fpath.exists():
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"error": "not found"}, status_code=404)
+    return FileResponse(str(fpath), headers={"Access-Control-Allow-Origin": "*"})
 
 @app.get("/admin_panel", include_in_schema=False)
 async def admin_index():
@@ -97,6 +114,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
     chatbot: ChatBot | None = None
     active_session_id = "default_session"
+    customer_id: int | None = None
 
     while True:
         try:
@@ -108,15 +126,51 @@ async def websocket_endpoint(websocket: WebSocket):
             lang = parsed.get("lang", "am")
             prompt_language = str(lang).lower()
 
+            # Extract customer_id from token (every message until found)
+            token = parsed.get("token")
+            if token and customer_id is None:
+                from auth.service import decode_access_token
+                payload_tok = decode_access_token(token)
+                if payload_tok:
+                    customer_id = payload_tok.get("sub")
+                    logger.info("Extracted customer_id=%s from token", customer_id)
+
             if not chatbot:
                 menu = getattr(app.state, "menu", {})
+                popularity = getattr(app.state, "popularity", [])
+                # Load user dietary preferences
+                user_prefs = ""
+                if customer_id:
+                    try:
+                        from db.database import get_connection as _gc
+                        from db import repositories as _repo
+                        _c = _gc()
+                        user_prefs = _repo.user_get_preferences(_c, int(customer_id))
+                        _c.close()
+                    except Exception:
+                        pass
                 chatbot = ChatBot(
                     websocket,
                     prompt_language=prompt_language,
                     menu=menu,
                     session_id=session_id,
+                    customer_id=customer_id,
+                    popularity=popularity,
+                    user_preferences=user_prefs,
                 )
                 active_session_id = session_id
+            elif customer_id and not chatbot.customer_id:
+                # Token arrived after chatbot was already created — update it
+                chatbot.customer_id = customer_id
+                try:
+                    from db.database import get_connection as _gc
+                    from db import repositories as _repo
+                    _c = _gc()
+                    chatbot.user_preferences = _repo.user_get_preferences(_c, int(customer_id))
+                    _c.close()
+                except Exception:
+                    pass
+                logger.info("Updated chatbot with customer_id=%s", customer_id)
 
             payload = {
                 "message": message,
@@ -133,6 +187,80 @@ async def websocket_endpoint(websocket: WebSocket):
         except Exception as e:
             print("Error:", e)
             await websocket.send_json({"error": str(e)})
+
+@app.post("/chat/image")
+async def chat_image(
+    request: Request,
+    file: UploadFile = File(...),
+    message: str = Form("What is this? Do you have something similar?"),
+    session_id: str = Form("default_session"),
+    lang: str = Form("en"),
+    token: str = Form(""),
+):
+    """Analyze an uploaded food image and compare to menu."""
+    from services.ai_service import ChatBot as _CB
+    from auth.service import decode_access_token
+    customer_id = None
+    user_prefs = ""
+    if token:
+        payload_tok = decode_access_token(token)
+        if payload_tok:
+            customer_id = payload_tok.get("sub")
+            try:
+                from db.database import get_connection as _gc
+                from db import repositories as _repo
+                _c = _gc()
+                user_prefs = _repo.user_get_preferences(_c, int(customer_id))
+                _c.close()
+            except Exception:
+                pass
+    image_bytes = await file.read()
+    mime = file.content_type or "image/jpeg"
+    menu = getattr(request.app.state, "menu", {})
+    popularity = getattr(request.app.state, "popularity", [])
+    chatbot = _CB(
+        None, prompt_language=lang, menu=menu, session_id=session_id,
+        customer_id=customer_id, popularity=popularity, user_preferences=user_prefs,
+    )
+    try:
+        from google.genai import types as _types
+        persona = chatbot._default_persona()
+        sys_instruction = chatbot._system_instruction(persona)
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=[
+                _types.Content(parts=[
+                    _types.Part.from_text(text=message),
+                    _types.Part.from_bytes(data=image_bytes, mime_type=mime),
+                ], role="user"),
+            ],
+            config=_types.GenerateContentConfig(
+                system_instruction=sys_instruction,
+                temperature=0.4,
+            ),
+        )
+        text = response.text or ""
+        # Parse structured response
+        if STREAM_MARKER in text:
+            parts = text.split(STREAM_MARKER, 1)
+            response_text = parts[0].strip()
+            try:
+                json_data = json.loads(parts[1].strip())
+            except Exception:
+                json_data = {}
+        else:
+            response_text = text.strip()
+            json_data = {}
+        return {
+            "response": response_text,
+            "options": json_data.get("options", []),
+            "options_description": json_data.get("options_description", ""),
+            "suggestions": json_data.get("suggestions", []),
+        }
+    except Exception as e:
+        logger.exception("Image chat error")
+        return {"response": f"Error analyzing image: {str(e)}", "options": [], "options_description": "", "suggestions": []}
+
 
 @app.post("/entry-log")
 async def log_entry(entry: EntryLog):
@@ -151,12 +279,11 @@ async def log_chat_history(chat_history: ChatHistory):
 
 @app.post("/chat/reset")
 async def reset_chat(session_id: str):
-    from services.ai_service import CHAT_MEMORY_DIR, ChatBot
+    from services.ai_service import ChatBot
     safe_id = ChatBot._sanitize_session_id(session_id)
-    memory_file = CHAT_MEMORY_DIR / f"{safe_id}.txt"
-    if memory_file.exists():
-        memory_file.unlink()
-    logger.info(f"Chat memory reset for session: {safe_id}")
+    # Don't delete the old file — keep it for analytics.
+    # Frontend already generates a new session_id, so the old file is just archived.
+    logger.info(f"Chat reset requested, old session archived: {safe_id}")
     return {"status": "ok", "session_id": safe_id}
 
 @app.get("/recommend/time", response_model=List[Recommendation])
