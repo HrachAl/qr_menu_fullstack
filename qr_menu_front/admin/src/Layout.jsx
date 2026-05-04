@@ -1,8 +1,8 @@
-import { Outlet, NavLink } from 'react-router-dom';
-import { Bell, Boxes, ChevronRight, LayoutDashboard, LogOut, Menu, MessageCircle, Package, ShoppingCart, Users, BarChart3, X } from 'lucide-react';
-import { useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Bell, Boxes, ChefHat, ChevronRight, ClipboardCheck, LayoutDashboard, LogOut, Menu, MessageCircle, Package, ShoppingCart, Users, BarChart3, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from './AuthContext';
+import { api } from './api';
 
 const navItems = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
@@ -10,6 +10,8 @@ const navItems = [
   { to: '/admin/products', label: 'Products', icon: Package },
   { to: '/admin/inventory', label: 'Inventory', icon: Boxes },
   { to: '/admin/orders', label: 'Orders', icon: ShoppingCart },
+  { to: '/admin/chef', label: 'Chef Panel', icon: ChefHat, capability: 'chefPanel' },
+  { to: '/admin/inventory-adjustments', label: 'Inventory Adjustments', icon: ClipboardCheck, capability: 'inventoryAdjustments' },
   { to: '/admin/statistics', label: 'Statistics', icon: BarChart3 },
   { to: '/admin/chat-analytics', label: 'Chat Analytics', icon: MessageCircle },
 ];
@@ -17,7 +19,42 @@ const navItems = [
 export default function Layout() {
   const { logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [featureAccess, setFeatureAccess] = useState({
+    chefPanel: true,
+    inventoryAdjustments: true,
+  });
   const location = useLocation();
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function detectFeatureAccess() {
+      const [chefResult, inventoryResult] = await Promise.allSettled([
+        api('/chef/active-orders?limit=1'),
+        api('/admin/inventory-adjustments?limit=1'),
+      ]);
+
+      if (cancelled) return;
+
+      setFeatureAccess({
+        chefPanel: chefResult.status === 'fulfilled',
+        inventoryAdjustments: inventoryResult.status === 'fulfilled',
+      });
+    }
+
+    detectFeatureAccess();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const visibleNavItems = useMemo(
+    () => navItems.filter((item) => {
+      if (!item.capability) return true;
+      return Boolean(featureAccess[item.capability]);
+    }),
+    [featureAccess]
+  );
 
   const pageTitle = useMemo(() => {
     const current = navItems.find((item) => {
@@ -77,7 +114,7 @@ export default function Layout() {
         </div>
 
         <nav className="space-y-1">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink

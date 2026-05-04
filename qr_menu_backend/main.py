@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI, Query, Request, UploadFile, File, Form, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -12,6 +13,7 @@ from typing import Dict, List
 from contextlib import asynccontextmanager
 from models import EntryLog, ButtonRequests, ChatHistory, Recommendation, GPT_Message
 from datetime import datetime
+from services.inventory_adjustment_tasks import run_inventory_adjustment_auto_approval
 
 logging.basicConfig(
     level=logging.INFO,
@@ -58,18 +60,42 @@ async def lifespan(app: FastAPI):
         logger.info("Chat memory cleanup on startup: %s", result)
     except Exception as e:
         logger.warning("Chat cleanup failed: %s", e)
+
+    stop_event = asyncio.Event()
+    auto_approve_task = asyncio.create_task(
+        run_inventory_adjustment_auto_approval(stop_event)
+    )
+    app.state.inventory_adjustment_stop_event = stop_event
+    app.state.inventory_adjustment_task = auto_approve_task
+    logger.info("Inventory adjustment auto-approve task started")
+
     yield
+
+    stop_event = getattr(app.state, "inventory_adjustment_stop_event", None)
+    task = getattr(app.state, "inventory_adjustment_task", None)
+    if stop_event is not None:
+        stop_event.set()
+    if task is not None:
+        try:
+            await task
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            logger.warning("Inventory adjustment auto-approve task stopped with error: %s", e)
+
     sessions.clear()
     logger.info("Application shutting down")
 
 app = FastAPI(lifespan=lifespan)
 
-from routers import auth, admin, orders, menu
+from routers import auth, admin, orders, menu, chef
 
 app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(orders.router)
 app.include_router(menu.router)
+app.include_router(chef.router)
+app.include_router(chef.admin_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -132,7 +158,10 @@ async def websocket_endpoint(websocket: WebSocket):
                 from auth.service import decode_access_token
                 payload_tok = decode_access_token(token)
                 if payload_tok:
-                    customer_id = payload_tok.get("sub")
+                    try:
+                        customer_id = int(payload_tok.get("sub"))
+                    except (TypeError, ValueError):
+                        customer_id = None
                     logger.info("Extracted customer_id=%s from token", customer_id)
 
             if not chatbot:
@@ -172,16 +201,29 @@ async def websocket_endpoint(websocket: WebSocket):
                     pass
                 logger.info("Updated chatbot with customer_id=%s", customer_id)
 
+            active_session_id = session_id
+            ChatBot.register_live_connection(
+                session_id=active_session_id,
+                connection=websocket,
+                customer_id=customer_id,
+            )
+
             payload = {
                 "message": message,
                 "language": prompt_language,
                 "time": datetime.now().strftime("%H:%M"),
                 "session_id": session_id,
+                "order_id": parsed.get("order_id"),
             }
             await chatbot.ask(json.dumps(payload), return_only_response=True)
 
         except WebSocketDisconnect:
             print("Chat client disconnected.")
+            ChatBot.unregister_live_connection(
+                session_id=active_session_id,
+                customer_id=customer_id,
+                connection=websocket,
+            )
             break
 
         except Exception as e:

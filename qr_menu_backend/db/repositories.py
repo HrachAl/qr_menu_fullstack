@@ -317,6 +317,266 @@ def order_update_status(conn: sqlite3.Connection, order_id: int, status: str) ->
     conn.commit()
 
 
+def order_latest_active_for_user(conn: sqlite3.Connection, user_id: int) -> Optional[dict]:
+    row = conn.execute(
+        """
+        SELECT *
+        FROM orders
+        WHERE user_id = ?
+          AND status IN ('created', 'confirmed')
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+        """,
+        (user_id,),
+    ).fetchone()
+    return _row_to_dict(row) if row else None
+
+
+def chef_list_active_orders(conn: sqlite3.Connection, limit: int = 100) -> list[dict]:
+    rows = conn.execute(
+        "SELECT * FROM orders WHERE status IN ('created', 'confirmed') ORDER BY created_at ASC LIMIT ?",
+        (limit,),
+    ).fetchall()
+    out = []
+    for row in rows:
+        order = _row_to_dict(row)
+        order_id = order["id"]
+        out.append(
+            {
+                "order": order,
+                "items": order_items_by_order_id(conn, order_id),
+                "pending_ai_messages": ai_chef_messages_by_order_id(conn, order_id, status="pending_chef"),
+                "kitchen_notes": ai_chef_messages_by_order_id(conn, order_id, status="delivered_to_customer"),
+                "inventory_adjustment_requests": inventory_adjustment_requests_by_order_id(conn, order_id),
+            }
+        )
+    return out
+
+
+# ---------- Inventory adjustment requests ----------
+
+def inventory_adjustment_request_get_by_id(conn: sqlite3.Connection, request_id: int) -> Optional[dict]:
+    row = conn.execute(
+        """
+        SELECT iar.*, ii.name AS ingredient_name, o.status AS order_status
+        FROM inventory_adjustment_requests iar
+        LEFT JOIN inventory_items ii ON ii.id = iar.ingredient_id
+        LEFT JOIN orders o ON o.id = iar.order_id
+        WHERE iar.id = ?
+        """,
+        (request_id,),
+    ).fetchone()
+    return _row_to_dict(row) if row else None
+
+
+def inventory_adjustment_requests_by_order_id(
+    conn: sqlite3.Connection,
+    order_id: int,
+    status: Optional[str] = None,
+) -> list[dict]:
+    q = (
+        "SELECT iar.*, ii.name AS ingredient_name "
+        "FROM inventory_adjustment_requests iar "
+        "LEFT JOIN inventory_items ii ON ii.id = iar.ingredient_id "
+        "WHERE iar.order_id = ?"
+    )
+    params = [order_id]
+    if status:
+        q += " AND iar.status = ?"
+        params.append(status)
+    q += " ORDER BY iar.created_at DESC, iar.id DESC"
+    rows = conn.execute(q, params).fetchall()
+    return [_row_to_dict(r) for r in rows]
+
+
+def inventory_adjustment_request_list(
+    conn: sqlite3.Connection,
+    status: Optional[str] = None,
+    limit: int = 100,
+    offset: int = 0,
+) -> list[dict]:
+    q = (
+        "SELECT iar.*, ii.name AS ingredient_name, o.status AS order_status "
+        "FROM inventory_adjustment_requests iar "
+        "LEFT JOIN inventory_items ii ON ii.id = iar.ingredient_id "
+        "LEFT JOIN orders o ON o.id = iar.order_id "
+        "WHERE 1=1"
+    )
+    params = []
+    if status:
+        q += " AND iar.status = ?"
+        params.append(status)
+    q += " ORDER BY iar.created_at DESC, iar.id DESC LIMIT ? OFFSET ?"
+    params.extend([limit, offset])
+    rows = conn.execute(q, params).fetchall()
+    return [_row_to_dict(r) for r in rows]
+
+
+def inventory_adjustment_request_create(
+    conn: sqlite3.Connection,
+    order_id: int,
+    ingredient_id: int,
+) -> dict:
+    now = _now()
+    cur = conn.execute(
+        """
+        INSERT INTO inventory_adjustment_requests (
+            order_id,
+            ingredient_id,
+            status,
+            created_at,
+            updated_at
+        ) VALUES (?, ?, 'pending', ?, ?)
+        """,
+        (order_id, ingredient_id, now, now),
+    )
+    conn.commit()
+    return inventory_adjustment_request_get_by_id(conn, cur.lastrowid) or {}
+
+
+def inventory_adjustment_request_set_status(
+    conn: sqlite3.Connection,
+    request_id: int,
+    status: str,
+) -> Optional[dict]:
+    existing = inventory_adjustment_request_get_by_id(conn, request_id)
+    if not existing:
+        return None
+    now = _now()
+    conn.execute(
+        "UPDATE inventory_adjustment_requests SET status = ?, updated_at = ? WHERE id = ?",
+        (status, now, request_id),
+    )
+    conn.commit()
+    return inventory_adjustment_request_get_by_id(conn, request_id)
+
+
+def inventory_adjustment_auto_approve_expired(
+    conn: sqlite3.Connection,
+    older_than_minutes: int = 10,
+) -> int:
+    minutes = max(1, int(older_than_minutes))
+    cutoff_expr = f"-{minutes} minutes"
+    now = _now()
+    before = conn.total_changes
+    conn.execute(
+        """
+        UPDATE inventory_adjustment_requests
+        SET status = 'auto-approved', updated_at = ?
+        WHERE status = 'pending'
+          AND datetime(replace(replace(created_at, 'T', ' '), 'Z', '')) <= datetime('now', ?)
+        """,
+        (now, cutoff_expr),
+    )
+    conn.commit()
+    return conn.total_changes - before
+
+
+# ---------- AI chef messages ----------
+
+def ai_chef_message_get_by_id(conn: sqlite3.Connection, message_id: int) -> Optional[dict]:
+    row = conn.execute("SELECT * FROM ai_chef_messages WHERE id = ?", (message_id,)).fetchone()
+    return _row_to_dict(row) if row else None
+
+
+def ai_chef_message_get_enriched(conn: sqlite3.Connection, message_id: int) -> Optional[dict]:
+    row = conn.execute(
+        """
+        SELECT m.*, o.user_id AS order_user_id, o.status AS order_status
+        FROM ai_chef_messages m
+        LEFT JOIN orders o ON o.id = m.order_id
+        WHERE m.id = ?
+        """,
+        (message_id,),
+    ).fetchone()
+    return _row_to_dict(row) if row else None
+
+
+def ai_chef_message_create(
+    conn: sqlite3.Connection,
+    order_id: int,
+    complex_request_text: str,
+    status: str = "pending_chef",
+    chef_reply_text: Optional[str] = None,
+    ai_filtered_reply: Optional[str] = None,
+) -> dict:
+    cur = conn.execute(
+        """
+        INSERT INTO ai_chef_messages (
+            order_id,
+            complex_request_text,
+            chef_reply_text,
+            ai_filtered_reply,
+            status
+        ) VALUES (?, ?, ?, ?, ?)
+        """,
+        (
+            order_id,
+            complex_request_text,
+            chef_reply_text,
+            ai_filtered_reply,
+            status,
+        ),
+    )
+    conn.commit()
+    return ai_chef_message_get_by_id(conn, cur.lastrowid) or {}
+
+
+def ai_chef_messages_by_order_id(
+    conn: sqlite3.Connection,
+    order_id: int,
+    status: Optional[str] = None,
+) -> list[dict]:
+    q = "SELECT * FROM ai_chef_messages WHERE order_id = ?"
+    params = [order_id]
+    if status:
+        q += " AND status = ?"
+        params.append(status)
+    q += " ORDER BY id DESC"
+    rows = conn.execute(q, params).fetchall()
+    return [_row_to_dict(r) for r in rows]
+
+
+def ai_chef_message_set_chef_reply(
+    conn: sqlite3.Connection,
+    message_id: int,
+    chef_reply_text: str,
+) -> Optional[dict]:
+    existing = ai_chef_message_get_by_id(conn, message_id)
+    if not existing:
+        return None
+    conn.execute(
+        """
+        UPDATE ai_chef_messages
+        SET chef_reply_text = ?, status = 'replied_by_chef'
+        WHERE id = ?
+        """,
+        (chef_reply_text, message_id),
+    )
+    conn.commit()
+    return ai_chef_message_get_by_id(conn, message_id)
+
+
+def ai_chef_message_set_filtered_reply(
+    conn: sqlite3.Connection,
+    message_id: int,
+    ai_filtered_reply: str,
+) -> Optional[dict]:
+    existing = ai_chef_message_get_by_id(conn, message_id)
+    if not existing:
+        return None
+    conn.execute(
+        """
+        UPDATE ai_chef_messages
+        SET ai_filtered_reply = ?, status = 'delivered_to_customer'
+        WHERE id = ?
+        """,
+        (ai_filtered_reply, message_id),
+    )
+    conn.commit()
+    return ai_chef_message_get_by_id(conn, message_id)
+
+
 # ---------- Order items ----------
 
 def order_items_add(conn: sqlite3.Connection, order_id: int, product_id: int, count: int) -> int:

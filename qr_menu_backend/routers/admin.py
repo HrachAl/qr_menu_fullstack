@@ -286,7 +286,9 @@ def admin_delete_product(product_id: int, conn: sqlite3.Connection = Depends(get
 
 # ---------- Inventory ----------
 @router.get("/inventory", response_model=list[InventoryItemResponse])
-def admin_list_inventory(conn: sqlite3.Connection = Depends(get_db), user=Depends(require_admin)):
+def admin_list_inventory(conn: sqlite3.Connection = Depends(get_db), user=Depends(get_current_user)):
+    if user.get("access_level") not in ("admin", "superadmin", "chef"):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required")
     items = repositories.inventory_list(conn)
     return [_normalize_inventory_response_payload(i) for i in items]
 

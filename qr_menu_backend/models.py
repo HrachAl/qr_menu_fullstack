@@ -376,3 +376,26 @@ class InventoryAdjustRequest(BaseModel):
         if not text:
             raise ValueError("Reason is required")
         return text
+
+
+# ----- Chef workflow -----
+class ChefInventoryAdjustmentCreate(BaseModel):
+    order_id: int
+    ingredient_id: int
+
+
+class ChefReplyAiRequest(BaseModel):
+    ai_chef_message_id: int
+    chef_reply_text: str
+
+    @field_validator("chef_reply_text", mode="before")
+    @classmethod
+    def _strip_chef_reply(cls, value: Any):
+        text = str(value or "").strip()
+        if not text:
+            raise ValueError("chef_reply_text is required")
+        return text
+
+
+class InventoryAdjustmentApproveRejectRequest(BaseModel):
+    decision: Literal["approve", "reject"]

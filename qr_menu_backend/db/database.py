@@ -29,7 +29,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
             updated_at TEXT NOT NULL,
             fullname TEXT NOT NULL,
             password TEXT NOT NULL,
-            access_level TEXT NOT NULL CHECK(access_level IN ('user', 'vip_user', 'admin', 'superadmin')),
+            access_level TEXT NOT NULL CHECK(access_level IN ('user', 'vip_user', 'admin', 'superadmin', 'chef')),
             email TEXT UNIQUE
         );
         CREATE INDEX IF NOT EXISTS idx_users_access_level ON users(access_level);
@@ -114,6 +114,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
     _migrate_products_schema(conn)
     _migrate_users_schema(conn)
     _migrate_inventory_schema(conn)
+    _migrate_chef_workflows_schema(conn)
     conn.commit()
 
 
@@ -147,6 +148,34 @@ def _migrate_users_schema(conn: sqlite3.Connection) -> None:
         except sqlite3.OperationalError:
             pass
 
+    users_table_sql_row = conn.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name='users'"
+    ).fetchone()
+    users_table_sql = str(users_table_sql_row[0] if users_table_sql_row and users_table_sql_row[0] else "").lower()
+    if "'chef'" not in users_table_sql:
+        conn.executescript("""
+            ALTER TABLE users RENAME TO users_old;
+
+            CREATE TABLE users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                fullname TEXT NOT NULL,
+                password TEXT NOT NULL,
+                access_level TEXT NOT NULL CHECK(access_level IN ('user', 'vip_user', 'admin', 'superadmin', 'chef')),
+                email TEXT UNIQUE,
+                preferences TEXT DEFAULT ''
+            );
+            CREATE INDEX IF NOT EXISTS idx_users_access_level ON users(access_level);
+            CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+            INSERT INTO users (id, created_at, updated_at, fullname, password, access_level, email, preferences)
+            SELECT id, created_at, updated_at, fullname, password, access_level, email, COALESCE(preferences, '')
+            FROM users_old;
+
+            DROP TABLE users_old;
+        """)
+
 
 def _migrate_inventory_schema(conn: sqlite3.Connection) -> None:
     """Ensure new inventory columns exist in older DB files."""
@@ -179,6 +208,42 @@ def _migrate_inventory_schema(conn: sqlite3.Connection) -> None:
             conn.execute("ALTER TABLE inventory_items ADD COLUMN fat_per_unit REAL NOT NULL DEFAULT 0")
         except sqlite3.OperationalError:
             pass
+
+
+def _migrate_chef_workflows_schema(conn: sqlite3.Connection) -> None:
+    """Create chef workflow tables for inventory adjustments and AI-mediated messages."""
+    conn.executescript("""
+        CREATE TABLE IF NOT EXISTS inventory_adjustment_requests (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+            ingredient_id INTEGER NOT NULL REFERENCES inventory_items(id),
+            status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'auto-approved', 'rejected')),
+            created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now')),
+            updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%SZ', 'now'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_inventory_adjustment_requests_order_id
+            ON inventory_adjustment_requests(order_id);
+        CREATE INDEX IF NOT EXISTS idx_inventory_adjustment_requests_ingredient_id
+            ON inventory_adjustment_requests(ingredient_id);
+        CREATE INDEX IF NOT EXISTS idx_inventory_adjustment_requests_status
+            ON inventory_adjustment_requests(status);
+        CREATE INDEX IF NOT EXISTS idx_inventory_adjustment_requests_created_at
+            ON inventory_adjustment_requests(created_at);
+
+        CREATE TABLE IF NOT EXISTS ai_chef_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+            complex_request_text TEXT NOT NULL,
+            chef_reply_text TEXT,
+            ai_filtered_reply TEXT,
+            status TEXT NOT NULL DEFAULT 'pending_chef'
+                CHECK(status IN ('pending_chef', 'replied_by_chef', 'delivered_to_customer'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_ai_chef_messages_order_id
+            ON ai_chef_messages(order_id);
+        CREATE INDEX IF NOT EXISTS idx_ai_chef_messages_status
+            ON ai_chef_messages(status);
+    """)
 
 
 def init_db(db_path: str | None = None) -> None:

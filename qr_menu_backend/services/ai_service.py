@@ -31,6 +31,14 @@ PERSONA_MIN = 0
 PERSONA_MAX = 10
 DAILY_MESSAGE_LIMIT = 500
 STREAM_MARKER = "<<<JSON>>>"
+MODIFICATION_NONE = "NONE"
+MODIFICATION_SIMPLE = "SIMPLE"
+MODIFICATION_COMPLEX = "COMPLEX"
+CHEF_HOLDING_MESSAGE = "I am checking with the chef right now..."
+CHEF_REPLY_REWRITE_SYSTEM_PROMPT = (
+    "You are a polite restaurant assistant. Rewrite the following raw message from the chef to the customer. "
+    "Filter out any harsh, informal, or unprofessional language. Make it extremely hospitable and professional."
+)
 
 
 def _build_client() -> Optional[Any]:
@@ -49,6 +57,10 @@ SESSION_MAX_PER_USER = 50
 
 
 class ChatBot:
+    _active_session_connections: Dict[str, Any] = {}
+    _active_customer_connections: Dict[int, Any] = {}
+    _connections_lock = threading.Lock()
+
     def __init__(
         self,
         connection: Any,
@@ -69,6 +81,67 @@ class ChatBot:
         self.memory_file_path = self._build_memory_file_path(self.session_id)
         self.user_message_times: List[str] = []
         self.menu_by_id = self._normalize_menu(self.menu)
+
+    @classmethod
+    def register_live_connection(
+        cls,
+        session_id: str,
+        connection: Any,
+        customer_id: Optional[int] = None,
+    ) -> None:
+        safe_session_id = cls._sanitize_session_id(session_id)
+        with cls._connections_lock:
+            cls._active_session_connections[safe_session_id] = connection
+            if customer_id is not None:
+                try:
+                    customer_key = int(customer_id)
+                except (TypeError, ValueError):
+                    customer_key = None
+                if customer_key is not None:
+                    cls._active_customer_connections[customer_key] = connection
+
+    @classmethod
+    def unregister_live_connection(
+        cls,
+        session_id: Optional[str] = None,
+        customer_id: Optional[int] = None,
+        connection: Any = None,
+    ) -> None:
+        with cls._connections_lock:
+            if session_id is not None:
+                safe_session_id = cls._sanitize_session_id(session_id)
+                existing = cls._active_session_connections.get(safe_session_id)
+                if existing is not None and (connection is None or existing is connection):
+                    cls._active_session_connections.pop(safe_session_id, None)
+            if customer_id is not None:
+                try:
+                    customer_key = int(customer_id)
+                except (TypeError, ValueError):
+                    customer_key = None
+                if customer_key is not None:
+                    existing = cls._active_customer_connections.get(customer_key)
+                    if existing is not None and (connection is None or existing is connection):
+                        cls._active_customer_connections.pop(customer_key, None)
+
+    @classmethod
+    async def push_message_to_customer(cls, customer_id: int, payload: Dict[str, Any]) -> bool:
+        try:
+            customer_key = int(customer_id)
+        except (TypeError, ValueError):
+            return False
+
+        with cls._connections_lock:
+            connection = cls._active_customer_connections.get(customer_key)
+        if connection is None:
+            return False
+
+        try:
+            await connection.send_json(payload)
+            return True
+        except Exception:
+            logger.exception("Failed to push message to live customer connection", extra={"customer_id": customer_key})
+            cls.unregister_live_connection(customer_id=customer_key, connection=connection)
+            return False
 
     @staticmethod
     def _sanitize_session_id(session_id: Optional[str]) -> str:
@@ -169,6 +242,12 @@ class ChatBot:
             "Time Handling: Current time is for internal context only. DO NOT state the time to the user unless asked.\n"
             "RECIPE TRANSPARENCY RULE: If asked about ingredients, list them with precise quantities.\n"
             "COOKING TIME RULE: If a menu item has cooking_time (minutes), mention it naturally when recommending (e.g. 'ready in ~15 min').\n"
+            "FOOD MODIFICATION CLASSIFICATION RULES:\n"
+            " - If the user requests changing a dish (remove/add ingredient, cooking style tweak, seasoning change), classify it.\n"
+            " - SIMPLE: one clear, low-risk change (examples: 'no salt', 'without meat', 'extra sauce').\n"
+            " - COMPLEX: multiple constraints, unclear execution, or conflicting preparation details (example: 'double boiled meat but no potatoes').\n"
+            " - If the message is not a modification request at all, set modification_classification to NONE.\n"
+            " - If modification_classification is COMPLEX, PART 1 must ONLY be a short holding message that you are checking with the chef now. Do NOT provide a final decision.\n"
             f"{self._popularity_context()}"
             f"{self._preferences_context()}"
             "STRICT FIELD ROLES:\n"
@@ -186,9 +265,10 @@ class ChatBot:
             "OUTPUT FORMAT — You MUST use this exact two-part structure:\n"
             "PART 1: Write ONLY the plain conversational response text. No JSON, no code blocks, no brackets.\n"
             f"PART 2: On a new line write {STREAM_MARKER} then immediately the JSON object:\n"
-            f'{STREAM_MARKER}{{"options":[{{"item_id":123,"count":1}}],"options_description":"...","persona_update":{{"humor":0,"formality":0,"analytical_detail":0}},"suggestions":["short follow-up 1","short follow-up 2","short follow-up 3"],"dietary_update":""}}\n'
+            f'{STREAM_MARKER}{{"options":[{{"item_id":123,"count":1}}],"options_description":"...","persona_update":{{"humor":0,"formality":0,"analytical_detail":0}},"suggestions":["short follow-up 1","short follow-up 2","short follow-up 3"],"dietary_update":"","modification_classification":"NONE"}}\n'
             "suggestions: 3 short follow-up questions in the SAME language as the user. Max 6 words each. Make them contextually relevant.\n"
             "dietary_update: If the user mentions ANY dietary preference, allergy, or restriction (e.g. 'I am vegan', 'allergic to nuts', 'no gluten'), set this to a short summary like 'vegan' or 'nut allergy, gluten-free'. Otherwise leave empty string.\n"
+            "modification_classification: MUST be exactly one of NONE, SIMPLE, COMPLEX.\n"
             "If no recommendations, set options to [] and options_description to \"\".\n"
             "IMPORTANT: The <<<JSON>>> marker must appear on its own line. No text after the JSON.\n"
         )
@@ -216,6 +296,13 @@ class ChatBot:
             except (TypeError, ValueError):
                 out[key] = 0
         return out
+
+    @staticmethod
+    def _normalize_modification_classification(value: Any) -> str:
+        text = str(value or "").strip().upper()
+        if text in {MODIFICATION_SIMPLE, MODIFICATION_COMPLEX}:
+            return text
+        return MODIFICATION_NONE
 
     @staticmethod
     def _normalize_message_list(messages: Any) -> List[Dict[str, str]]:
@@ -340,6 +427,7 @@ class ChatBot:
         persona_update: Dict[str, int] = {"humor": 0, "formality": 0, "analytical_detail": 0}
         suggestions: List[str] = []
         dietary_update = ""
+        modification_classification = MODIFICATION_NONE
 
         if json_raw:
             try:
@@ -352,6 +440,9 @@ class ChatBot:
                     if isinstance(raw_suggestions, list):
                         suggestions = [str(s).strip() for s in raw_suggestions if str(s).strip()][:4]
                     dietary_update = str(parsed.get("dietary_update", "") or "").strip()
+                    modification_classification = self._normalize_modification_classification(
+                        parsed.get("modification_classification")
+                    )
                     # Fallback if text_part is empty but JSON has response field
                     if not text_part:
                         text_part = str(parsed.get("response", "") or "").strip()
@@ -367,6 +458,7 @@ class ChatBot:
             "persona_update": persona_update,
             "suggestions": suggestions,
             "dietary_update": dietary_update,
+            "modification_classification": modification_classification,
             "_raw_text": accumulated,
         }
 
@@ -473,10 +565,150 @@ class ChatBot:
         text = getattr(response, "text", None)
         return str(text or "").strip()
 
+    def _resolve_target_order_id(self, explicit_order_id: Optional[int]) -> Optional[int]:
+        try:
+            from db.database import get_connection
+            from db import repositories as repo
+            db_conn = get_connection()
+            try:
+                if explicit_order_id is not None:
+                    order = repo.order_get_by_id(db_conn, int(explicit_order_id))
+                    if order:
+                        return int(order["id"])
+                if self.customer_id is not None:
+                    active = repo.order_latest_active_for_user(db_conn, int(self.customer_id))
+                    if active:
+                        return int(active["id"])
+            finally:
+                db_conn.close()
+        except Exception:
+            logger.exception("Failed to resolve target order id for modification routing")
+        return None
+
+    def _persist_modification_record(
+        self,
+        order_id: int,
+        request_text: str,
+        classification: str,
+        customer_reply: str,
+    ) -> Optional[dict]:
+        try:
+            from db.database import get_connection
+            from db import repositories as repo
+            db_conn = get_connection()
+            try:
+                if classification == MODIFICATION_SIMPLE:
+                    return repo.ai_chef_message_create(
+                        db_conn,
+                        order_id=order_id,
+                        complex_request_text=request_text,
+                        status="delivered_to_customer",
+                        chef_reply_text="AUTO_APPROVED_SIMPLE",
+                        ai_filtered_reply=customer_reply,
+                    )
+                if classification == MODIFICATION_COMPLEX:
+                    return repo.ai_chef_message_create(
+                        db_conn,
+                        order_id=order_id,
+                        complex_request_text=request_text,
+                        status="pending_chef",
+                        chef_reply_text=None,
+                        ai_filtered_reply=None,
+                    )
+            finally:
+                db_conn.close()
+        except Exception:
+            logger.exception("Failed to persist modification routing record")
+        return None
+
+    @classmethod
+    def rewrite_chef_reply_for_customer(
+        cls,
+        customer_request_text: str,
+        chef_reply_text: str,
+    ) -> str:
+        cleaned_raw = str(chef_reply_text or "").strip()
+        if not cleaned_raw:
+            return ""
+
+        if client is None or types is None:
+            return cleaned_raw
+
+        prompt = (
+            "Customer request:\n"
+            f"{str(customer_request_text or '').strip()}\n\n"
+            "Raw chef reply:\n"
+            f"{cleaned_raw}\n\n"
+            "Return only the rewritten customer-facing message."
+        )
+
+        response = client.models.generate_content(
+            model=MODEL_NAME,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=CHEF_REPLY_REWRITE_SYSTEM_PROMPT,
+                temperature=0.2,
+            ),
+        )
+        rewritten = str(getattr(response, "text", "") or "").strip()
+        return rewritten or cleaned_raw
+
+    @classmethod
+    async def process_chef_reply_delivery(cls, ai_chef_message_id: int) -> Dict[str, Any]:
+        from db.database import get_connection
+        from db import repositories as repo
+
+        db_conn = get_connection()
+        try:
+            record = repo.ai_chef_message_get_enriched(db_conn, ai_chef_message_id)
+            if not record:
+                raise ValueError("AI chef message not found")
+            chef_reply_text = str(record.get("chef_reply_text", "") or "").strip()
+            if not chef_reply_text:
+                raise ValueError("Chef reply text is empty")
+
+            filtered_reply = await asyncio.to_thread(
+                cls.rewrite_chef_reply_for_customer,
+                str(record.get("complex_request_text", "") or ""),
+                chef_reply_text,
+            )
+            updated = repo.ai_chef_message_set_filtered_reply(
+                db_conn,
+                ai_chef_message_id,
+                filtered_reply,
+            )
+            if not updated:
+                raise ValueError("Failed to update AI chef message as delivered")
+
+            customer_id = record.get("order_user_id")
+        finally:
+            db_conn.close()
+
+        delivered_live = False
+        if customer_id is not None:
+            delivered_live = await cls.push_message_to_customer(
+                int(customer_id),
+                {
+                    "response": filtered_reply,
+                    "message": filtered_reply,
+                    "from_chef": True,
+                    "ai_chef_message_id": ai_chef_message_id,
+                    "streaming_done": True,
+                },
+            )
+
+        return {
+            "ai_chef_message_id": ai_chef_message_id,
+            "ai_filtered_reply": filtered_reply,
+            "status": "delivered_to_customer",
+            "delivered_live": delivered_live,
+        }
+
     async def ask(self, query: str, return_only_response: bool = False) -> Optional[GPT_Message]:
         try:
             user_input = query
             current_time = datetime.now().strftime("%H:%M")
+            requested_order_id: Optional[int] = None
 
             try:
                 payload_input = json.loads(query)
@@ -492,6 +724,12 @@ class ChatBot:
                         if next_session_id != self.session_id:
                             self.session_id = next_session_id
                             self.memory_file_path = self._build_memory_file_path(self.session_id)
+                    raw_order_id = payload_input.get("order_id")
+                    if raw_order_id is not None:
+                        try:
+                            requested_order_id = int(raw_order_id)
+                        except (TypeError, ValueError):
+                            requested_order_id = None
             except json.JSONDecodeError:
                 pass
 
@@ -528,6 +766,9 @@ class ChatBot:
             suggestions = response_payload.get("suggestions", [])
             dietary_update = str(response_payload.get("dietary_update", "") or "").strip()
             persona_update = self._normalize_persona_update(response_payload.get("persona_update"))
+            modification_classification = self._normalize_modification_classification(
+                response_payload.get("modification_classification")
+            )
 
             # Save dietary preferences to DB if detected and user is logged in
             if dietary_update and self.customer_id:
@@ -551,6 +792,28 @@ class ChatBot:
                 "formality": max(PERSONA_MIN, min(PERSONA_MAX, int(persona.get("formality", 5)) + int(persona_update.get("formality", 0)))),
                 "analytical_detail": max(PERSONA_MIN, min(PERSONA_MAX, int(persona.get("analytical_detail", 5)) + int(persona_update.get("analytical_detail", 0)))),
             }
+
+            if modification_classification in {MODIFICATION_SIMPLE, MODIFICATION_COMPLEX} and user_input.strip():
+                target_order_id = self._resolve_target_order_id(requested_order_id)
+                if target_order_id is not None:
+                    if modification_classification == MODIFICATION_SIMPLE and not response_text:
+                        response_text = "Your request has been noted and approved."
+                    persisted = self._persist_modification_record(
+                        order_id=target_order_id,
+                        request_text=user_input.strip(),
+                        classification=modification_classification,
+                        customer_reply=response_text,
+                    )
+                    if persisted and modification_classification == MODIFICATION_COMPLEX:
+                        response_text = CHEF_HOLDING_MESSAGE
+                        options = None
+                        options_description = ""
+                        suggestions = []
+                else:
+                    logger.info(
+                        "Detected %s modification but no active order was found; skipping DB routing",
+                        modification_classification,
+                    )
 
             model_text = response_text
             if options_description:

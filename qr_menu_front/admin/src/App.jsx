@@ -9,6 +9,8 @@ import Orders from './pages/Orders';
 import Statistics from './pages/Statistics';
 import Inventory from './pages/Inventory';
 import ChatAnalytics from './pages/ChatAnalytics';
+import ChefDashboard from './pages/ChefDashboard';
+import InventoryAdjustments from './pages/InventoryAdjustments';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
@@ -26,6 +28,8 @@ function AppRoutes() {
         <Route path="products" element={<Products />} />
         <Route path="inventory" element={<Inventory />} />
         <Route path="orders" element={<Orders />} />
+        <Route path="chef" element={<ChefDashboard />} />
+        <Route path="inventory-adjustments" element={<InventoryAdjustments />} />
         <Route path="statistics" element={<Statistics />} />
         <Route path="chat-analytics" element={<ChatAnalytics />} />
       </Route>

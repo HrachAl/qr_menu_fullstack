@@ -142,6 +142,7 @@ export default function Users() {
               >
                 <option value="user">user</option>
                 <option value="vip_user">vip_user</option>
+                <option value="chef">chef</option>
                 <option value="admin">admin</option>
                 <option value="superadmin">superadmin</option>
               </select>
