@@ -1720,6 +1720,17 @@ main .checkBox .check.active {
   padding: 5px 15px 5px 10px;
   border-radius: 10px 10px 10px 0px;
 }
+.chatBox .Chat .message.received.from-chef .messageBox {
+  border: 1px solid var(--accent);
+  background: rgba(212, 105, 59, 0.12);
+}
+.chatBox .Chat .message.received.from-chef .chef-label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
 .chatBox .Chat .message.received .messageBox p {
   color: var(--text-primary);
 }

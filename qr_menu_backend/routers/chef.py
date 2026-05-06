@@ -9,7 +9,9 @@ from db import repositories
 from models import (
     ChefInventoryAdjustmentCreate,
     ChefReplyAiRequest,
+    ChefDirectMessageRequest,
     InventoryAdjustmentApproveRejectRequest,
+    OrderStatusUpdate,
 )
 from services.ai_service import ChatBot
 
@@ -36,6 +38,38 @@ def chef_active_orders(
     return repositories.chef_list_active_orders(conn, limit=limit)
 
 
+@router.patch("/orders/{order_id}/status")
+async def chef_update_order_status(
+    order_id: int,
+    data: OrderStatusUpdate,
+    conn: sqlite3.Connection = Depends(get_db),
+    user=Depends(require_chef_panel_access),
+):
+    allowed = {"pending", "preparing", "completed"}
+    if data.status not in allowed:
+        raise HTTPException(status_code=400, detail="Invalid status")
+    order = repositories.order_get_by_id(conn, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    repositories.order_update_status(conn, order_id, data.status)
+
+    delivered_live = False
+    customer_id = order.get("user_id")
+    if customer_id is not None:
+        payload = {
+            "message": f"Order #{order_id} status: {data.status}",
+            "response": f"Order #{order_id} status: {data.status}",
+            "from_chef": True,
+            "order_id": order_id,
+            "order_status": data.status,
+            "streaming_done": True,
+        }
+        delivered_live = await ChatBot.push_message_to_customer(int(customer_id), payload)
+
+    return {"id": order_id, "status": data.status, "delivered_live": delivered_live}
+
+
 @router.post("/chef/inventory-adjust")
 def chef_inventory_adjust(
     data: ChefInventoryAdjustmentCreate,
@@ -52,6 +86,32 @@ def chef_inventory_adjust(
         order_id=data.order_id,
         ingredient_id=data.ingredient_id,
     )
+
+
+@router.post("/chef/orders/{order_id}/message")
+async def chef_send_message(
+    order_id: int,
+    data: ChefDirectMessageRequest,
+    conn: sqlite3.Connection = Depends(get_db),
+    user=Depends(require_chef_panel_access),
+):
+    order = repositories.order_get_by_id(conn, order_id)
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    customer_id = order.get("user_id")
+    if customer_id is None:
+        raise HTTPException(status_code=400, detail="Order has no customer to message")
+
+    payload = {
+        "message": data.message,
+        "response": data.message,
+        "from_chef": True,
+        "order_id": order_id,
+        "streaming_done": True,
+    }
+    delivered_live = await ChatBot.push_message_to_customer(int(customer_id), payload)
+    return {"order_id": order_id, "delivered_live": delivered_live}
 
 
 @router.post("/chef/reply-ai")

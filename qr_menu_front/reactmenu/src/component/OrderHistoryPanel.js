@@ -9,28 +9,49 @@ export default function OrderHistoryPanel({ show, onClose }) {
 
   useEffect(() => {
     if (!show) return;
-    setError("");
-    setLoading(true);
     const token = localStorage.getItem("customer_token");
     if (!token) {
       setList([]);
-      setLoading(false);
       return;
     }
-    fetch(`${API_BASE}/api/my-orders`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    })
-      .then((res) => {
-        if (res.status === 401) {
-          localStorage.removeItem("customer_token");
-          return [];
-        }
-        return res.ok ? res.json() : Promise.reject(new Error(res.statusText));
+
+    let cancelled = false;
+    const load = (withLoading = false) => {
+      if (withLoading) {
+        setError("");
+        setLoading(true);
+      }
+      fetch(`${API_BASE}/api/my-orders`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: "no-store",
       })
-      .then((data) => setList(Array.isArray(data) ? data : []))
-      .catch((e) => setError(e?.message || "Failed to load"))
-      .finally(() => setLoading(false));
+        .then((res) => {
+          if (res.status === 401) {
+            localStorage.removeItem("customer_token");
+            return [];
+          }
+          return res.ok ? res.json() : Promise.reject(new Error(res.statusText));
+        })
+        .then((data) => {
+          if (cancelled) return;
+          setList(Array.isArray(data) ? data : []);
+        })
+        .catch((e) => {
+          if (cancelled) return;
+          setError(e?.message || "Failed to load");
+        })
+        .finally(() => {
+          if (cancelled || !withLoading) return;
+          setLoading(false);
+        });
+    };
+
+    load(true);
+    const id = window.setInterval(() => load(false), 5000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
   }, [show]);
 
   if (!show) return null;

@@ -67,7 +67,7 @@ def init_schema(conn: sqlite3.Connection) -> None:
             user_id INTEGER NULL REFERENCES users(id),
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL,
-            status TEXT NOT NULL CHECK(status IN ('created', 'confirmed', 'completed')),
+            status TEXT NOT NULL CHECK(status IN ('pending', 'preparing', 'completed')),
             price INTEGER NOT NULL,
             completed_at TEXT NULL
         );
@@ -244,6 +244,8 @@ def _migrate_chef_workflows_schema(conn: sqlite3.Connection) -> None:
         CREATE INDEX IF NOT EXISTS idx_ai_chef_messages_status
             ON ai_chef_messages(status);
     """)
+
+
 
 
 def init_db(db_path: str | None = None) -> None:

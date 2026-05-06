@@ -408,7 +408,7 @@ def admin_get_order(order_id: int, conn: sqlite3.Connection = Depends(get_db), u
 
 @router.patch("/orders/{order_id}/status")
 def admin_update_order_status(order_id: int, data: OrderStatusUpdate, conn: sqlite3.Connection = Depends(get_db), user=Depends(require_admin)):
-    if data.status not in ("created", "confirmed", "completed"):
+    if data.status not in ("pending", "preparing", "completed"):
         raise HTTPException(status_code=400, detail="Invalid status")
     o = repositories.order_get_by_id(conn, order_id)
     if not o:

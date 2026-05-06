@@ -617,8 +617,9 @@ export default function Draq({setSelectedProduct, setShowProduct, show}) {
                             const isLast = index === messages.length - 1;
                             return (
                             <div className="smallBox" key={index}>
-                                <div className={`message ${msg.type}`}>
+                                <div className={`message ${msg.type}${msg.fromChef ? ' from-chef' : ''}`}>
                                     <div className="messageBox">
+                                        {msg.fromChef && <span className="chef-label">Message from Chef</span>}
                                         {msg.imagePreview && <img src={msg.imagePreview} alt="" className="sent-image-preview" />}
                                         {msg.text && <p>{msg.text}</p>}
                                         <small>{msg.time}</small>

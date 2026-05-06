@@ -6,6 +6,8 @@ const INPUT_CLASS =
   'w-full rounded-xl border border-slate-700 bg-slate-950 px-3.5 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/40';
 
 const badgeByStatus = {
+  pending: 'bg-amber-500/15 text-amber-300 ring-amber-500/30',
+  preparing: 'bg-sky-500/15 text-sky-300 ring-sky-500/30',
   created: 'bg-amber-500/15 text-amber-300 ring-amber-500/30',
   confirmed: 'bg-sky-500/15 text-sky-300 ring-sky-500/30',
   completed: 'bg-emerald-500/15 text-emerald-300 ring-emerald-500/30',
@@ -15,6 +17,12 @@ const badgeByStatus = {
   rejected: 'bg-rose-500/15 text-rose-300 ring-rose-500/30',
   'auto-approved': 'bg-cyan-500/15 text-cyan-300 ring-cyan-500/30',
 };
+
+const QUICK_REPLIES = [
+  'Will be ready in 5 minutes.',
+  'We are out of that ingredient.',
+  'Confirmed, making it now!',
+];
 
 function StatusBadge({ status }) {
   return (
@@ -43,8 +51,11 @@ export default function ChefDashboard() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [submittingAdjustment, setSubmittingAdjustment] = useState(false);
+  const [statusUpdatingOrderId, setStatusUpdatingOrderId] = useState(null);
+  const [sendingOrderId, setSendingOrderId] = useState(null);
   const [replyingMessageId, setReplyingMessageId] = useState(null);
   const [replyDrafts, setReplyDrafts] = useState({});
+  const [directDrafts, setDirectDrafts] = useState({});
   const [adjustModal, setAdjustModal] = useState({
     open: false,
     orderId: '',
@@ -75,8 +86,10 @@ export default function ChefDashboard() {
 
   useEffect(() => {
     const id = window.setInterval(() => {
-      loadChefData();
-    }, 20000);
+      if (document.visibilityState === 'visible') {
+        loadChefData();
+      }
+    }, 5000);
     return () => window.clearInterval(id);
   }, []);
 
@@ -178,6 +191,40 @@ export default function ChefDashboard() {
     }
   }
 
+  async function updateOrderStatus(orderId, status) {
+    setStatusUpdatingOrderId(orderId);
+    setError('');
+    try {
+      await api(`/orders/${orderId}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ status }),
+      });
+      await loadChefData();
+    } catch (err) {
+      setError(err?.message || 'Failed to update order status');
+    } finally {
+      setStatusUpdatingOrderId(null);
+    }
+  }
+
+  async function sendChefMessage(orderId, text) {
+    const message = String(text || '').trim();
+    if (!message) return;
+    setSendingOrderId(orderId);
+    setError('');
+    try {
+      await api(`/chef/orders/${orderId}/message`, {
+        method: 'POST',
+        body: JSON.stringify({ message }),
+      });
+      setDirectDrafts((prev) => ({ ...prev, [orderId]: '' }));
+    } catch (err) {
+      setError(err?.message || 'Failed to send message');
+    } finally {
+      setSendingOrderId(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -232,6 +279,7 @@ export default function ChefDashboard() {
                 ? entry.inventory_adjustment_requests
                 : [];
               const kitchenNotes = Array.isArray(entry.kitchen_notes) ? entry.kitchen_notes : [];
+              const isGuestOrder = order.user_id == null;
 
               return (
                 <article key={order.id} className="rounded-2xl border border-slate-800 bg-slate-900/80 p-5">
@@ -242,6 +290,26 @@ export default function ChefDashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <StatusBadge status={order.status} />
+                      {order.status === 'pending' && (
+                        <button
+                          type="button"
+                          disabled={statusUpdatingOrderId === order.id}
+                          onClick={() => updateOrderStatus(order.id, 'preparing')}
+                          className="inline-flex items-center rounded-lg bg-amber-500/20 px-3 py-2 text-xs font-semibold text-amber-200 transition hover:bg-amber-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Start Preparing
+                        </button>
+                      )}
+                      {order.status === 'preparing' && (
+                        <button
+                          type="button"
+                          disabled={statusUpdatingOrderId === order.id}
+                          onClick={() => updateOrderStatus(order.id, 'completed')}
+                          className="inline-flex items-center rounded-lg bg-emerald-500/20 px-3 py-2 text-xs font-semibold text-emerald-200 transition hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Mark as Done
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => openAdjustmentModal(order.id)}
@@ -282,6 +350,51 @@ export default function ChefDashboard() {
                         )}
                       </tbody>
                     </table>
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/60 p-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <label className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        Message to customer
+                      </label>
+                      {isGuestOrder && (
+                        <span className="text-xs font-semibold text-amber-300">
+                          Guest order — no customer to message
+                        </span>
+                      )}
+                    </div>
+                    <input
+                      value={directDrafts[order.id] || ''}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setDirectDrafts((prev) => ({ ...prev, [order.id]: value }));
+                      }}
+                      placeholder={isGuestOrder ? 'Guest order' : 'Type a direct message...'}
+                      disabled={isGuestOrder}
+                      className={`${INPUT_CLASS} disabled:cursor-not-allowed disabled:opacity-60`}
+                    />
+                    <button
+                      type="button"
+                      disabled={isGuestOrder || sendingOrderId === order.id}
+                      onClick={() => sendChefMessage(order.id, directDrafts[order.id])}
+                      className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      <Send size={15} />
+                      {sendingOrderId === order.id ? 'Sending...' : 'Send Message'}
+                    </button>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {QUICK_REPLIES.map((text) => (
+                        <button
+                          key={text}
+                          type="button"
+                          disabled={isGuestOrder}
+                          onClick={() => sendChefMessage(order.id, text)}
+                          className="rounded-full border border-slate-700 bg-slate-900 px-3 py-1 text-xs text-slate-200 transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          {text}
+                        </button>
+                      ))}
+                    </div>
                   </div>
 
                   {(adjustmentRequests.length > 0 || kitchenNotes.length > 0) && (

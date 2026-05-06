@@ -421,6 +421,19 @@ class ChatBot:
             text_part = ""
             json_raw = accumulated.strip()
 
+        json_clean = json_raw
+        if json_clean.startswith("```"):
+            lines = json_clean.splitlines()
+            if len(lines) > 1:
+                lines = lines[1:]
+                if lines and lines[-1].strip().startswith("```"):
+                    lines = lines[:-1]
+                json_clean = "\n".join(lines).strip()
+            else:
+                json_clean = json_clean.strip("`").strip()
+                if json_clean.lower().startswith("json"):
+                    json_clean = json_clean[4:].strip()
+
         # Parse JSON part
         options: List[Dict[str, Any]] = []
         options_description = ""
@@ -429,9 +442,9 @@ class ChatBot:
         dietary_update = ""
         modification_classification = MODIFICATION_NONE
 
-        if json_raw:
+        if json_clean:
             try:
-                parsed = json.loads(json_raw)
+                parsed = json.loads(json_clean)
                 if isinstance(parsed, dict):
                     options = self._normalize_options(parsed.get("options", []))
                     options_description = str(parsed.get("options_description", "") or "").strip()
@@ -572,9 +585,14 @@ class ChatBot:
             db_conn = get_connection()
             try:
                 if explicit_order_id is not None:
-                    order = repo.order_get_by_id(db_conn, int(explicit_order_id))
-                    if order:
-                        return int(order["id"])
+                    try:
+                        explicit_id = int(explicit_order_id)
+                    except (TypeError, ValueError):
+                        explicit_id = None
+                    if explicit_id is not None:
+                        order = repo.order_get_by_id(db_conn, explicit_id)
+                        if order:
+                            return int(order["id"])
                 if self.customer_id is not None:
                     active = repo.order_latest_active_for_user(db_conn, int(self.customer_id))
                     if active:

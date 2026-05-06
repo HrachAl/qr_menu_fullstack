@@ -31,21 +31,34 @@ def create_order(data: OrderCreate, conn: sqlite3.Connection = Depends(get_db), 
     user_id = user["id"] if user else None
     if not data.items:
         raise HTTPException(status_code=400, detail="At least one item required")
-    total = 0
-    resolved = []
-    for it in data.items:
-        product_id = it.product_id
-        if product_id is None and it.item_id is not None:
-            product_id = repositories.product_get_id_by_item_id(conn, it.item_id)
-        if product_id is None:
-            raise HTTPException(status_code=400, detail=f"Unknown product/item_id for count {it.count}")
-        p = repositories.product_get_by_id(conn, product_id)
-        if not p:
-            raise HTTPException(status_code=400, detail=f"Product {product_id} not found")
-        total += p["price"] * it.count
-        resolved.append((product_id, it.count))
-    order_id = repositories.order_create(conn, price=total, user_id=user_id)
-    for product_id, count in resolved:
-        repositories.order_items_add(conn, order_id, product_id, count)
-    o = repositories.order_get_by_id(conn, order_id)
-    return o
+    try:
+        total = 0
+        resolved = []
+        for it in data.items:
+            product_id = it.product_id
+            if product_id is None and it.item_id is not None:
+                product_id = repositories.product_get_id_by_item_id(conn, it.item_id)
+                if product_id is None:
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Product not found for item_id: {it.item_id}",
+                    )
+            if product_id is None:
+                raise HTTPException(status_code=400, detail=f"Unknown product/item_id for count {it.count}")
+            p = repositories.product_get_by_id(conn, product_id)
+            if not p:
+                raise HTTPException(status_code=400, detail=f"Product {product_id} not found")
+            total += p["price"] * it.count
+            resolved.append((product_id, it.count))
+        order_id = repositories.order_create(conn, price=total, user_id=user_id)
+        for product_id, count in resolved:
+            repositories.order_items_add(conn, order_id, product_id, count)
+        conn.commit()
+        o = repositories.order_get_by_id(conn, order_id)
+        return o
+    except HTTPException:
+        conn.rollback()
+        raise
+    except Exception as exc:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to create order: {exc}") from exc

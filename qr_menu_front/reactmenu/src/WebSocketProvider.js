@@ -184,6 +184,7 @@ export const WebSocketFormProvider = ({ children }) => {
           }
 
           const responseText = String(data.response ?? data.message ?? "").trim();
+          const fromChef = data.from_chef === true;
           const options = data.options;
           const options_description = typeof data.options_description === "string" ? data.options_description : "";
 
@@ -199,6 +200,7 @@ export const WebSocketFormProvider = ({ children }) => {
                 time,
                 menuItem: Array.isArray(options) ? options : [],
                 options_description,
+                fromChef,
               }];
             });
             if (Array.isArray(options)) setMenuItems(options);
@@ -211,6 +213,7 @@ export const WebSocketFormProvider = ({ children }) => {
         messagesArray.forEach((message) => {
           const { response, message: fallbackMessage, options, options_description } = message;
           const responseText = String(response ?? fallbackMessage ?? "").trim();
+          const fromChef = message?.from_chef === true;
           if (!responseText) return;
           const id = Date.now() + Math.random();
           const time = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -223,6 +226,7 @@ export const WebSocketFormProvider = ({ children }) => {
               time,
               menuItem: Array.isArray(options) ? options : [],
               options_description: typeof options_description === "string" ? options_description : "",
+              fromChef,
             }];
           });
           if (Array.isArray(options)) setMenuItems(options);

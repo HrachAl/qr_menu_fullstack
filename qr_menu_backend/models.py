@@ -397,5 +397,17 @@ class ChefReplyAiRequest(BaseModel):
         return text
 
 
+class ChefDirectMessageRequest(BaseModel):
+    message: str
+
+    @field_validator("message", mode="before")
+    @classmethod
+    def _strip_message(cls, value: Any):
+        text = str(value or "").strip()
+        if not text:
+            raise ValueError("message is required")
+        return text
+
+
 class InventoryAdjustmentApproveRejectRequest(BaseModel):
     decision: Literal["approve", "reject"]

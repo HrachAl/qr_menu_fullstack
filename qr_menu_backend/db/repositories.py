@@ -271,13 +271,12 @@ def product_delete(conn: sqlite3.Connection, product_id: int) -> None:
 
 # ---------- Orders ----------
 
-def order_create(conn: sqlite3.Connection, price: int, user_id: Optional[int] = None, status: str = "created") -> int:
+def order_create(conn: sqlite3.Connection, price: int, user_id: Optional[int] = None, status: str = "pending") -> int:
     now = _now()
     cur = conn.execute(
         "INSERT INTO orders (user_id, created_at, updated_at, status, price, completed_at) VALUES (?, ?, ?, ?, ?, ?)",
         (user_id, now, now, status, price, None),
     )
-    conn.commit()
     return cur.lastrowid
 
 
@@ -323,7 +322,7 @@ def order_latest_active_for_user(conn: sqlite3.Connection, user_id: int) -> Opti
         SELECT *
         FROM orders
         WHERE user_id = ?
-          AND status IN ('created', 'confirmed')
+          AND status IN ('pending', 'preparing')
         ORDER BY created_at DESC, id DESC
         LIMIT 1
         """,
@@ -334,7 +333,7 @@ def order_latest_active_for_user(conn: sqlite3.Connection, user_id: int) -> Opti
 
 def chef_list_active_orders(conn: sqlite3.Connection, limit: int = 100) -> list[dict]:
     rows = conn.execute(
-        "SELECT * FROM orders WHERE status IN ('created', 'confirmed') ORDER BY created_at ASC LIMIT ?",
+        "SELECT * FROM orders WHERE status IN ('pending', 'preparing') ORDER BY created_at ASC LIMIT ?",
         (limit,),
     ).fetchall()
     out = []
@@ -584,7 +583,6 @@ def order_items_add(conn: sqlite3.Connection, order_id: int, product_id: int, co
         "INSERT INTO order_items (order_id, product_id, count) VALUES (?, ?, ?)",
         (order_id, product_id, count),
     )
-    conn.commit()
     return cur.lastrowid
 
 
